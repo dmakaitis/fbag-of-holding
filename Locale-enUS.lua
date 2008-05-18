@@ -16,6 +16,8 @@ L["Wearing"] = true;
 L["Soulbound"] = true;
 L["Quest Item"] = true;
 
+L["FuBar Hint"] = "Hint: Left click to open all view. Right click to configure. (Menu to open and create views in development - for now create new views in the configuration 'Test Commands' section)";
+
 -- Standard Filter Names
 
 L["Bag Index"] = true;

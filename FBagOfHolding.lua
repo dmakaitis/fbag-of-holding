@@ -194,7 +194,6 @@ function FBoH.ProcessTooltip(tooltip, name, link)
 end
 
 function FBoH:ShowConfig()
-	self:Print("Showing config window");
 	AceConfig:SetDefaultSize(L["FBoH"], 500, 550)
 	AceConfig:Open(L["FBoH"], configFrame)
 end
@@ -212,7 +211,7 @@ end
 function FBoH:CmdScan()
 	self:ScanContainer();
 end
-
+--[[
 function FBoH:CmdShowBags()
 	for k, v in pairs(self.bagViews) do
 		self:Print(L["Bag View"] .. ": " .. k);
@@ -225,7 +224,37 @@ function FBoH:CmdShowBags()
 		end
 	end	
 end
+]]
+function FBoH:CmdCreateNewView()
+	local newView = {
+		tabs = {
+			{
+				name = "New View",
+				filter = {
+					name = "Character",
+				},
+			},
+		},
+	};
+	
+	table.insert(self.db.profile.viewDefs, newView);
+	table.insert(self.bagViews, FBoH_ViewModel(newView));
 
+	if FBoH_TabModel.defaultTab then
+		FBoH_TabModel.defaultTab.filterCache = nil;
+	end
+
+	self:RenumberViewIDs();	
+
+	local view = self.bagViews[#(self.bagViews)];
+	
+	view:Show();
+
+	FBoH_Configure:SetModel(view);
+	FBoH_Configure:Show();
+end
+
+--[[
 function FBoH:CmdDock()
 	if #(self.bagViews) < 1 then
 		self:Print("No views available for docking");
@@ -250,7 +279,7 @@ function FBoH:CmdUndock()
 
 	self:UndockView(sourceBag, sourceTab);
 end
-
+]]
 function FBoH:GetGridScale()
 	return self.db.profile.gridScale;
 end
@@ -268,7 +297,6 @@ end
 --*****************************************************************************
 
 function FBoH:OnFuBarClick()
-	self:Print("FuBar Button Clicked");
 	for k, v in pairs(self.bagViews) do
 		v:Show();
 	end
@@ -318,6 +346,10 @@ function FBoH:OnUpdateFuBarTooltip()
 	local r,g,b = Crayon:GetThresholdColor(bfree / btotal);
 	GameTooltip:AddDoubleLine(L["Bank"] .. ": ", numbers, 1, 1, 1, r, g, b);
 	
+	GameTooltip:AddLine(" ");
+	
+	GameTooltip:AddLine(L["FuBar Hint"], 0, 1, 0, 1);
+	
     -- tablet:SetHint(L["Hint"])
     -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
 end
@@ -334,11 +366,11 @@ end
 
 function FBoH:DockView(sourceView, targetView, targetTab)
 	if sourceView == targetView then
-		self:Print("Can not dock view " .. sourceView .. " into itself!");
+--		self:Print("Can not dock view " .. sourceView .. " into itself!");
 		return;
 	end
 	
-	self:Print("Docking view " .. sourceView .. " into view " .. targetView .. " after tab " .. targetTab);
+--	self:Print("Docking view " .. sourceView .. " into view " .. targetView .. " after tab " .. targetTab);
 	
 	FBoH_Configure:Hide();
 	
@@ -357,21 +389,21 @@ function FBoH:DockView(sourceView, targetView, targetTab)
 	for i = 1, targetTab do
 		table.insert(newTabs, newView.viewDef.tabs[i]);
 		table.insert(newTabData, newView.tabData[i]);
-		self:Print("Added tab " .. tabCount .. " from target view");
+--		self:Print("Added tab " .. tabCount .. " from target view");
 		tabCount = tabCount + 1;
 	end
 	
 	for i, t in ipairs(oldView.viewDef.tabs) do
 		table.insert(newTabs, t);
 		table.insert(newTabData, oldView.tabData[i]);
-		self:Print("Added tab " .. tabCount .. " from source view");
+--		self:Print("Added tab " .. tabCount .. " from source view");
 		tabCount = tabCount + 1;
 	end
 	
 	for i = targetTab + 1, #(newView.viewDef.tabs) do
 		table.insert(newTabs, newView.viewDef.tabs[i]);
 		table.insert(newTabData, newView.tabData[i]);
-		self:Print("Added tab " .. tabCount .. " from target view");
+--		self:Print("Added tab " .. tabCount .. " from target view");
 		tabCount = tabCount + 1;
 	end
 	
@@ -390,7 +422,7 @@ function FBoH:DockView(sourceView, targetView, targetTab)
 end
 
 function FBoH:UndockView(sourceView, sourceTab)
-	self:Print("Undocking tab " .. sourceTab .. " from the view " .. sourceView);
+--	self:Print("Undocking tab " .. sourceTab .. " from the view " .. sourceView);
 
 	FBoH_Configure:Hide();
 	
@@ -399,7 +431,7 @@ function FBoH:UndockView(sourceView, sourceTab)
 	local tabData = table.remove(self.bagViews[sourceView].tabData, sourceTab);
 	self.bagViews[sourceView]:SelectTab(1);
 	
-	self:Print(#(self.db.profile.viewDefs[sourceView].tabs) .. " tabs remaining in source view");
+--	self:Print(#(self.db.profile.viewDefs[sourceView].tabs) .. " tabs remaining in source view");
 	
 	-- Create a new bag
 	local newViewDef = {
@@ -830,39 +862,3 @@ end
 
 
 FBoH:RegisterFilter(notFilter);
-
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
-
-local FBoH_options = { 
-    name = L["Feithar's Bag of Holding"],
-    handler = FBoH,
-	type = 'group',
-    args = {
-		scan = {
-			type = 'execute',
-			desc = 'Scan inventory',
-			name = 'Scan Inventory',
-			func = 'CmdScan'
-		},
-		purge = {
-			type = 'execute',
-			desc = 'Purge all data',
-			name = 'Purge Item Data',
-			func = 'CmdPurge'
-		},
-		show = {
-			type = 'execute',
-			desc = 'toggle display',
-			name = 'Open Bags',
-			func = 'OnFuBarClick'
-		},
-		bags = {
-			type = 'execute',
-			desc = 'display default bag items',
-			name = 'List Bag Contents',
-			func = 'CmdShowBags'
-		}
-	}
-}

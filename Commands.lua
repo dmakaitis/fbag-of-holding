@@ -26,29 +26,17 @@ local options = {
 					name = 'Purge Item Data',
 					func = 'CmdPurge'
 				},
-				show = {
-					type = 'execute',
-					desc = 'toggle display',
-					name = 'Open Bags',
-					func = 'OnFuBarClick'
-				},
 				bags = {
 					type = 'execute',
 					desc = 'display default bag items',
 					name = 'List Bag Contents',
 					func = 'CmdShowBags'
 				},
-				dock = {
+				create = {
 					type = 'execute',
-					desc = 'dock the test bags',
-					name = 'Dock Test Bags',
-					func = 'CmdDock'
-				},
-				undock = {
-					type = 'execute',
-					desc = 'undock the test bags',
-					name = 'Undock Test Bags',
-					func = 'CmdUndock'
+					desc = 'create new bag view',
+					name = 'Create New View',
+					func = 'CmdCreateNewView',
 				},
 			}
 		},
