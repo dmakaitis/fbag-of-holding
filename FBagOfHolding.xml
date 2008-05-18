@@ -1,0 +1,15 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+<Script file="FOO.lua"/>
+
+<Script file="FItemDB.lua"/>
+
+<Script file="TabModel.lua"/>
+<Script file="ViewModel.lua"/>
+
+<Script file="FBagOfHolding.lua"/>
+<Script file="Commands.lua"/>
+
+<Script file="StandardFilters.lua"/>
+
+</Ui>

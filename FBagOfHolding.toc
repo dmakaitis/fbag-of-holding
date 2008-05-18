@@ -1,0 +1,19 @@
+## Interface: 20400
+## Author: Feithar
+## Title: Feithar's Bag of Holding
+## Version: 0.1
+## SavedVariables: FBoH_Items, FBoH_DB
+## SavedVariablesPerCharacter: FBoH_DBPC
+## X-Category: Inventory
+## OptionalDeps: Ace3, FuBar, LibCrayon-3.0
+## X-Embeds: Ace3, LibCrayon-3.0
+## Notes: Inventory and bank organizer.
+  
+embeds.xml
+
+Locale-enUS.lua
+
+FBagOfHolding.xml
+
+FBoH_Templates.xml
+FBoH_Configure.xml
