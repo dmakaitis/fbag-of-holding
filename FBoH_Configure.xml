@@ -270,16 +270,35 @@
 						this:HighlightText();
 					</OnEditFocusGained>
 					<OnTextChanged>
-						local parent = self:GetParent();
-						local text = self:GetText();
-						if text == "" then text = nil end;
-						parent.filter.arg = text;
-						parent:UpdateView();
-						parent:SetFilter();
+						if self:IsShown() then
+							local parent = self:GetParent();
+							local text = self:GetText();
+							if text == "" then text = nil end;
+							parent.filter.arg = text;
+							parent:UpdateView();
+							parent:SetFilter();
+						end
 					</OnTextChanged>
 				</Scripts>
 			</EditBox>
-			<Button name="$parent_NotButton" inherits="UIPanelButtonTemplate" text="Not" >
+			<Button name="$parent_ArgBtn" inherits="UIPanelButtonTemplate" text="btn">
+				<Size>
+					<AbsDimension x="158" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="RIGHT">
+						<Offset>
+							<AbsDimension x="-8" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self:DoClick();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parent_NotButton" inherits="UIPanelButtonTemplate" text="Not">
 				<Size>
 					<AbsDimension x="40" y="22"/>
 				</Size>
@@ -329,6 +348,7 @@
 			<OnLoad>
 				self.fontString = _G[self:GetName() .. "_Text"];
 				self.argEdit = _G[self:GetName() .. "_ArgEdit"];
+				self.argButton = _G[self:GetName() .. "_ArgBtn"];
 				self.notButton = _G[self:GetName() .. "_NotButton"];
 				self.insertTop = _G[self:GetName() .. "_InsertTop"];
 				self.insertBottom = _G[self:GetName() .. "_InsertBottom"];
@@ -339,6 +359,8 @@
 				self.UpdateView = FBoH_FilterButton_UpdateView;
 				self.DoUpdate = FBoH_FilterButton_DoUpdate;
 				self.ReceiveDrag = FBoH_FilterButton_ReceiveDrag;
+
+				self.argButton.DoClick = FBoH_FilterButtonArgBtn_DoClick;
 				
 				self.backgroundTexture:SetVertexColor(0.5, 0.8, 1.0, 0.6);
 

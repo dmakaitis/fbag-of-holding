@@ -1,4 +1,5 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
+local Dewdrop = AceLibrary("Dewdrop-2.0");
 
 FBOH_CONFIG_TITLE = L["Configure Bag View"];
 FBOH_CONFIG_FILTERS = L["Filters"];
@@ -388,6 +389,16 @@ function FBoH_GroupTemplate_UpdateView(self)
 	self:GetParent():UpdateView();
 end
 
+local function GetOptionName(options, value)
+	for _, v in ipairs(options) do		
+		if v.value == value then
+			return v.name
+		end
+	end
+	
+	return "---";
+end
+
 function FBoH_FilterButton_SetFilter(self, filter, parentID, index)
 	if filter then
 		self.parentID = parentID;
@@ -395,8 +406,23 @@ function FBoH_FilterButton_SetFilter(self, filter, parentID, index)
 	end
 	self.filter = filter or self.filter;
 	
-	self.fontString:SetText(self.filter.name);
-	self.argEdit:SetText(self.filter.arg or "");
+	self.fontString:SetText(self.filter.desc or self.filter.name);
+	
+	local getOptions = FBoH:GetFilter(self.filter.name).getOptions;
+	if getOptions then
+		self.argEdit:Hide();
+		self.argButton:Show();
+		self.filterOptions = getOptions();
+		
+		local opt = GetOptionName(self.filterOptions, self.filter.arg);
+		self.argButton:SetText(opt);
+	else
+		self.argEdit:Show();
+		self.argButton:Hide();
+		self.filterOptions = nil;
+		
+		self.argEdit:SetText(self.filter.arg or "");
+	end
 	
 	if self.filter.isNot then
 		self.notButton:SetText("Not");
@@ -435,7 +461,13 @@ function FBoH_FilterButton_DoUpdate(self)
 					self.insertGroup:Hide();
 			
 					self.fontString:Show();
-					self.argEdit:Show();
+					if self.filterOptions then
+						self.argEdit:Hide();
+						self.argButton:Show();
+					else
+						self.argEdit:Show();
+						self.argButton:Hide();
+					end
 					self.notButton:Show();
 				else
 					dragData.insert = "group above";
@@ -446,6 +478,7 @@ function FBoH_FilterButton_DoUpdate(self)
 			
 					self.fontString:Hide();
 					self.argEdit:Hide();
+					self.argButton:Hide();
 					self.notButton:Hide();
 				end
 			else
@@ -459,7 +492,13 @@ function FBoH_FilterButton_DoUpdate(self)
 					self.insertGroup:Hide();
 			
 					self.fontString:Show();
-					self.argEdit:Show();
+					if self.filterOptions then
+						self.argEdit:Hide();
+						self.argButton:Show();
+					else
+						self.argEdit:Show();
+						self.argButton:Hide();
+					end
 					self.notButton:Show();
 				else
 					dragData.insert = "group below";
@@ -470,6 +509,7 @@ function FBoH_FilterButton_DoUpdate(self)
 			
 					self.fontString:Hide();
 					self.argEdit:Hide();
+					self.argButton:Hide();
 					self.notButton:Hide();
 				end
 			end
@@ -480,7 +520,13 @@ function FBoH_FilterButton_DoUpdate(self)
 		self.insertGroup:Hide();
 		
 		self.fontString:Show();
-		self.argEdit:Show();
+		if self.filterOptions then
+			self.argEdit:Hide();
+			self.argButton:Show();
+		else
+			self.argEdit:Show();
+			self.argButton:Hide();
+		end
 		self.notButton:Show();
 	end
 end
@@ -535,4 +581,29 @@ function FBoH_FilterButton_ReceiveDrag(self, dragData)
 	else
 		FBoH:Print("Unknown drag source type for filter button: " .. tostring(dragData.source.type));
 	end
+end
+
+function FBoH_FilterButtonArgBtn_SetValue(self, value)
+	local parent = self:GetParent();
+	parent.filter.arg = value;
+	parent:UpdateView();
+	parent:SetFilter();
+	Dewdrop:Close();
+end
+
+function FBoH_FilterButtonArgBtn_DoClick(self)
+	FBoH:Print("Clicked filter button");
+	
+	local options = self:GetParent().filterOptions;
+	
+	Dewdrop:Open(self, 'children', function()
+		for _, v in ipairs(options) do
+			Dewdrop:AddLine(
+				'text', v.name or v.value,
+				'func', FBoH_FilterButtonArgBtn_SetValue,
+				'arg1', self,
+				'arg2', v.value
+			);
+		end
+	end);
 end

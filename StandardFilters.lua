@@ -100,6 +100,30 @@ function bagType.filter(itemProps, btype)
 	if itemProps.bagType == btype then return true end;
 	return false;
 end
+function bagType.getOptions()
+	return {
+		{
+			name = L["Bags"],
+			value = "Bags";
+		},
+		{
+			name = L["Bank"],
+			value = "Bank";
+		},
+		{
+			name = L["Keyring"],
+			value = "Keyring";
+		},
+		{
+			name = L["Wearing"],
+			value = "Wearing";
+		},
+		{
+			name = L["Mailbox"],
+			value = "Mailbox";
+		},
+	};
+end
 FBoH:RegisterFilter(bagType);
 
 -------------------------------------------------------------------------------
@@ -115,6 +139,38 @@ function quality.filter(itemProps, quality)
 	quality = tonumber(quality) or 0;
 	if itemProps.detail.rarity == quality then return true end;
 	return false;
+end
+function quality.getOptions()
+	return {
+		{
+			name = L["Poor"],
+			value = 0;
+		},
+		{
+			name = L["Common"],
+			value = 1;
+		},
+		{
+			name = L["Uncommon"],
+			value = 2;
+		},
+		{
+			name = L["Rare"],
+			value = 3;
+		},
+		{
+			name = L["Epic"],
+			value = 4;
+		},
+		{
+			name = L["Legendary"],
+			value = 5;
+		},
+		{
+			name = L["Artifact"],
+			value = 6;
+		},
+	};
 end
 FBoH:RegisterFilter(quality);
 
@@ -136,5 +192,17 @@ function soulbound.filter(itemProps, bound)
 	if bound and itemProps.soulbound then return true end;
 	if bound or itemProps.soulbound then return false end;
 	return true;
+end
+function soulbound.getOptions()
+	return {
+		{
+			name = L["Soulbound"],
+			value = true;
+		},
+		{
+			name = L["Not Soulbound"],
+			value = nil;
+		},
+	};
 end
 FBoH:RegisterFilter(soulbound);

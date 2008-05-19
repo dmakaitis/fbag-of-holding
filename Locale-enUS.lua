@@ -18,13 +18,23 @@ L["Quest Item"] = true;
 
 L["FuBar Hint"] = "Hint: Left click to open all view. Right click to configure. (Menu to open and create views in development - for now create new views in the configuration 'Test Commands' section)";
 
--- Standard Filter Names
+-- Standard Filters
 
 L["Bag Index"] = true;
 L["Bag Type"] = true;
 L["Character"] = true;
 L["Item Name"] = true;
 L["Quality"] = true;
+
+L["Not Soulbound"] = true;
+
+L["Poor"] = true;
+L["Common"] = true;
+L["Uncommon"] = true;
+L["Rare"] = true;
+L["Epic"] = true;
+L["Legendary"] = true;
+L["Artifact"] = true;
 
 -- FBoH Configuration
 
