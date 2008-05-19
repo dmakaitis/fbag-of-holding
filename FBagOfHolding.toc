@@ -7,7 +7,7 @@
 ## X-Category: Inventory
 ## OptionalDeps: Ace3, FuBar, LibCrayon-3.0
 ## X-Embeds: Ace3, LibCrayon-3.0
-## Notes: Inventory and bank organizer.
+## Notes: Inventory and bank organizer. *** STILL IN DEVELOPMENT ***
   
 embeds.xml
 
