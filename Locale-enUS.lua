@@ -20,6 +20,9 @@ L["FuBar Hint"] = "Hint: Left click to open all view. Right click to configure. 
 
 -- Standard Filters
 
+L["Current Character"] = true;
+L["Current Realm"] = true;
+
 L["Bag Index"] = true;
 L["Bag Type"] = true;
 L["Character"] = true;
@@ -50,6 +53,13 @@ L["Right"] = true;
 L["Display"] = true;
 L["Grid Scale"] = "Icon Scale";
 L["Grid Scale Desc"] = "Scales the size of item icons in the icon view";
+
+-- View Menu
+
+L["View as List"] = true;
+L["Configure View"] = true;
+L["Create New View"] = true;
+L["Delete View"] = true;
 
 -- View Configure frames
 

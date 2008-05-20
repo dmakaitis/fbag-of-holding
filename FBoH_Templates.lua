@@ -1,3 +1,6 @@
+local Dewdrop = AceLibrary("Dewdrop-2.0");
+local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
+
 FBoH_QualityColors = {
 	{157/255, 157/255, 157/255},
 	{255/255, 255/255, 255/255},
@@ -906,4 +909,43 @@ function FBoH_ViewTabTemplate_UpdateTabModel(self, model)
 	else
 		self.dockRegion:SetPoint("BOTTOMRIGHT", self.tabModel.viewModel.view, "TOPRIGHT");
 	end
+end
+
+function FBoH_ViewTabTemplate_OpenMenu(self)
+	Dewdrop:Open(self, 'children', function()
+		Dewdrop:AddLine(
+			'text', L["View as List"],
+			'checked', self.tabModel.tabDef.viewAsList,
+			'func', function()
+				self.tabModel:ToggleList();
+				Dewdrop:Close();
+			end
+		);
+		Dewdrop:AddLine(
+			'text', L["Configure View"] .. ": " .. self:GetText(),
+			'func', function()
+				FBoH_Configure:SetModel(self.tabModel.viewModel);
+				FBoH_Configure:Show();
+				Dewdrop:Close();
+			end
+		);
+		Dewdrop:AddSeparator();
+		Dewdrop:AddLine(
+			'text', L["Create New View"],
+			'func', function()
+				Dewdrop:Close();
+				FBoH:CreateNewView();
+			end
+		);
+		if self.tabModel.tabDef.filter ~= "default" then
+			Dewdrop:AddLine(
+				'text', L["Delete View"] .. ": " .. self:GetText(),
+				'textR', 1, 'textG', 0.2, 'textB', 0.2,
+				'func', function()
+					Dewdrop:Close();
+					FBoH:DeleteViewTab(self.tabModel);
+				end
+			);
+		end
+	end);
 end

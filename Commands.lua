@@ -36,7 +36,7 @@ local options = {
 					type = 'execute',
 					desc = 'create new bag view',
 					name = 'Create New View',
-					func = 'CmdCreateNewView',
+					func = 'CreateNewView',
 				},
 			}
 		},

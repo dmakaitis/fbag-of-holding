@@ -42,6 +42,12 @@ function FBoH_ViewModel.prototype:GetTab(tabIndex)
 	return self.tabData[tabIndex], self.viewDef.tabs[tabIndex];
 end
 
+function FBoH_ViewModel.prototype:HideAllTabs()
+	for i, t in ipairs(self.tabData) do
+		t:Hide();
+	end
+end
+
 function FBoH_ViewModel.prototype:SelectTab(tabIndex)
 	if tabIndex then
 		self.topRow = 1;

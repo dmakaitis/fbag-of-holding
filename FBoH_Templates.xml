@@ -122,7 +122,8 @@
 		<Scripts>
 			<OnLoad>
 				self.UpdateTabModel = FBoH_ViewTabTemplate_UpdateTabModel;
-
+				self.OpenMenu = FBoH_ViewTabTemplate_OpenMenu;
+				
 				self.dockRegion = FBoH_GetChildObjectByID(self, 1);
 				
 				self:RegisterForClicks("LeftButtonDown", "LeftButtonUp", "RightButtonUp");
@@ -131,6 +132,9 @@
 			<OnClick>
 				PlaySound("UChatScrollButton");
 				self.tabModel.viewModel:SelectTab(self.tabModel.tabIndex);
+				if arg1 == "RightButton" then
+					self:OpenMenu()
+				end
 			</OnClick>
 			<OnEnter>
 				GameTooltip_AddNewbieTip("Bag View Options", 1.0, 1.0, 1.0, NEWBIE_TOOLTIP_CHATOPTIONS, 1);
@@ -591,7 +595,11 @@
 			</maxResize>
 		</ResizeBounds>
 		<Anchors>
-			<Anchor point="CENTER"/>
+			<Anchor point="TOPLEFT">
+				<Offset>
+					<AbsDimension x="150" y="-150"/>
+				</Offset>
+			</Anchor>
 		</Anchors>
 		<Layers>
 			<Layer level="ARTWORK">

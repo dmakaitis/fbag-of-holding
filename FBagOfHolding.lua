@@ -225,35 +225,6 @@ function FBoH:CmdShowBags()
 	end	
 end
 ]]
-function FBoH:CmdCreateNewView()
-	local newView = {
-		tabs = {
-			{
-				name = "New View",
-				filter = {
-					name = "Character",
-				},
-			},
-		},
-	};
-	
-	table.insert(self.db.profile.viewDefs, newView);
-	table.insert(self.bagViews, FBoH_ViewModel(newView));
-
-	if FBoH_TabModel.defaultTab then
-		FBoH_TabModel.defaultTab.filterCache = nil;
-	end
-
-	self:RenumberViewIDs();	
-
-	local view = self.bagViews[#(self.bagViews)];
-	
-	view:Show();
-
-	FBoH_Configure:SetModel(view);
-	FBoH_Configure:Show();
-end
-
 --[[
 function FBoH:CmdDock()
 	if #(self.bagViews) < 1 then
@@ -352,6 +323,86 @@ function FBoH:OnUpdateFuBarTooltip()
 	
     -- tablet:SetHint(L["Hint"])
     -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
+end
+
+--*****************************************************************************
+-- Creating/Deleting Views
+--*****************************************************************************
+
+function FBoH:CreateNewView()
+	local newView = {
+		tabs = {
+			{
+				name = "New View",
+				filter = {
+					name = "Character",
+				},
+			},
+		},
+	};
+	
+	table.insert(self.db.profile.viewDefs, newView);
+	table.insert(self.bagViews, FBoH_ViewModel(newView));
+
+	if FBoH_TabModel.defaultTab then
+		FBoH_TabModel.defaultTab.filterCache = nil;
+	end
+
+	self:RenumberViewIDs();	
+
+	local view = self.bagViews[#(self.bagViews)];
+	
+	view:Show();
+
+	FBoH_Configure:SetModel(view);
+	FBoH_Configure:Show();
+end
+
+function FBoH:DeleteViewTab(tabModel)
+	if tabModel.tabDef.filter == "default" then
+		FBoH:Print("Can not delete the default view!");
+		return;
+	end
+	
+	FBoH:Print("Deleting tab: " .. tabModel.tabDef.name);
+	
+	tabModel.tabDef.DELETE_THIS_TAB = true;
+	
+	local delViewID, delTabID, delTabCount = nil, nil;
+	local delView = nil;
+	
+	for vi, view in ipairs(self.bagViews) do
+		for ti, tab in ipairs(view.tabData) do
+			if tab.tabDef.DELETE_THIS_TAB then
+				delView = view;
+				delViewID = vi;
+				delTabID = ti;
+				delTabCount = #(view.tabData);
+				tab.tabDef.DELETE_THIS_TAB = nil;
+			end
+		end
+	end
+	
+	FBoH:Print("   Tab " .. delTabID .. " from view " .. delViewID .. " (with " .. delTabCount .. " tabs)");
+	
+	if delTabCount == 1 then
+		table.remove(self.bagViews, delViewID);
+		table.remove(self.db.profile.viewDefs, delViewID);
+		
+		delView:Hide();
+		delView.viewDef = nil;
+		delView.tabDef = nil;
+	else
+--		local tabDef = table.remove(self.bagViews[sourceView].viewDef.tabs, sourceTab);
+--		local tabData = table.remove(self.bagViews[sourceView].tabData, sourceTab);
+--		self.bagViews[sourceView]:SelectTab(1);
+		delView:HideAllTabs();
+		table.remove(delView.viewDef.tabs, delTabID);
+		table.remove(delView.tabData, delTabID);
+		delView:SelectTab(1);
+	end
+
+	self:RenumberViewIDs();
 end
 
 --*****************************************************************************
