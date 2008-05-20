@@ -5,8 +5,8 @@
 ## SavedVariables: FBoH_Items, FBoH_DB
 ## SavedVariablesPerCharacter: FBoH_DBPC
 ## X-Category: Inventory
-## OptionalDeps: Ace3, FuBar, LibCrayon-3.0
-## X-Embeds: Ace3, LibCrayon-3.0
+## OptionalDeps: Ace2, DewdropLib, Ace3, FuBar, LibCrayon-3.0
+## X-Embeds: Ace2, DewdropLib, Ace3, LibCrayon-3.0
 ## Notes: Inventory and bank organizer. *** STILL IN DEVELOPMENT ***
   
 embeds.xml

@@ -5,6 +5,8 @@ Author(s): Feithar
 Description:
 -------------------------------------------------------------------------------]]
 
+local Dewdrop = AceLibrary("Dewdrop-2.0");
+
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
 local defaults = {
@@ -267,15 +269,70 @@ end
 -- FuBar Functions
 --*****************************************************************************
 
+local function ShowView(bagIndex, tabIndex)
+	local view = FBoH.bagViews[bagIndex];
+	view:Show();
+	view:SelectTab(tabIndex);
+end
+
 function FBoH:OnFuBarClick()
-	for k, v in pairs(self.bagViews) do
-		v:Show();
-	end
+	GameTooltip:Hide();
 	
---	local bag = self.bagViews[1];
---	if bag then
---		if bag:IsShown() then bag:Hide() else bag:Show() end;
---	end
+	Dewdrop:Open(self:GetFrame(),
+		'children', function()
+			Dewdrop:AddLine(
+				'text', L["Feithar's Bag of Holding"],
+				'textR', 1, 'textG', 1, 'textB', 0,
+				'notClickable', true,
+				'notCheckable', true
+			);
+			Dewdrop:AddSeparator();
+			
+			for vi, v in ipairs(self.bagViews) do
+				for ti, t in ipairs(v.viewDef.tabs) do
+					Dewdrop:AddLine(
+						'text', t.name,
+						'func', ShowView,
+						'arg1', vi, 'arg2', ti,
+						'closeWhenClicked', true
+					);
+				end
+				Dewdrop:AddSeparator();
+			end
+			
+			Dewdrop:AddLine(
+				'text', L["Open All Views"],
+				'func', function()
+					for _, v in ipairs(FBoH.bagViews) do
+						v:Show();
+					end
+				end
+			);
+			Dewdrop:AddSeparator();
+			
+			Dewdrop:AddLine(
+				'text', L["Create New View"],
+				'textR', 1, 'textG', 0.8, 'textB', 0.2,
+				'func', function()
+					FBoH:CreateNewView();
+				end
+			);
+		end,
+		'point', function(frame)
+			local x, y = frame:GetCenter()
+			local leftRight
+			if x < GetScreenWidth() / 2 then
+				leftRight = "LEFT"
+			else
+				leftRight = "RIGHT"
+			end
+			if y < GetScreenHeight() / 2 then
+				return "BOTTOM" .. leftRight, "TOP" .. leftRight
+			else
+				return "TOP" .. leftRight, "BOTTOM" .. leftRight
+			end
+		end
+	);
 end
 
 function FBoH:OnUpdateFuBarText()
@@ -393,12 +450,8 @@ function FBoH:DeleteViewTab(tabModel)
 		delView.viewDef = nil;
 		delView.tabDef = nil;
 	else
---		local tabDef = table.remove(self.bagViews[sourceView].viewDef.tabs, sourceTab);
---		local tabData = table.remove(self.bagViews[sourceView].tabData, sourceTab);
---		self.bagViews[sourceView]:SelectTab(1);
-		delView:HideAllTabs();
 		table.remove(delView.viewDef.tabs, delTabID);
-		table.remove(delView.tabData, delTabID);
+		table.remove(delView.tabData, delTabID):Hide();
 		delView:SelectTab(1);
 	end
 

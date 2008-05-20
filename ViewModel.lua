@@ -42,12 +42,6 @@ function FBoH_ViewModel.prototype:GetTab(tabIndex)
 	return self.tabData[tabIndex], self.viewDef.tabs[tabIndex];
 end
 
-function FBoH_ViewModel.prototype:HideAllTabs()
-	for i, t in ipairs(self.tabData) do
-		t:Hide();
-	end
-end
-
 function FBoH_ViewModel.prototype:SelectTab(tabIndex)
 	if tabIndex then
 		self.topRow = 1;
@@ -63,10 +57,6 @@ function FBoH_ViewModel.prototype:SelectTab(tabIndex)
 		local tabData = self.tabData[i];
 
 		tabData.button:ClearAllPoints();
---		if t.filter == "default" then
---			FBoH_ViewModel.defaultView = self;
---			FBoH_ViewModel.defaultTab = i;
---		end
 	end
 	
 	-- Ensure tabs are hidden or displayed, as needed
@@ -82,32 +72,10 @@ function FBoH_ViewModel.prototype:SelectTab(tabIndex)
 			t:Hide();
 		end
 	end
+	
+	self:UpdateBag();
+end
 
---	self.bagDef = self.viewDef.tabs[tabIndex];
---	self.tab = self.tabButtons[tabIndex];
-	
---	filter = self.bagDef.filter or "default";
---	if filter == "default" then
---		FBoH_ViewModel.defaultBag = self;
---	end
---	self.bagDef.filter = filter;
-	
---	self.filterCache[self.viewDef.activeTab] = nil;
---	self.allFilterCache = nil;
---	if FBoH_ViewModel.defaultView then
---		FBoH_ViewModel.defaultView.filterCache[FBoH_ViewModel.defaultTab] = nil;
---	end
-	
-	self:UpdateBag();
-end
---[[
-function FBoH_ViewModel.prototype:SetFilter(filter)
-	self.bagDef.filter = filter or self.bagDef.filter;
-	self.filterCache = nil;
-	self.allFilterCache = nil;
-	self:UpdateBag();
-end
-]]
 function FBoH_ViewModel.prototype:GetFilter(tabIndex)
 	tabIndex = tabIndex or self.viewDef.activeTab;
 --	FBoH:Print("Getting filter for tab " .. tabIndex);

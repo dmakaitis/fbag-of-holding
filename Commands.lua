@@ -28,15 +28,9 @@ local options = {
 				},
 				bags = {
 					type = 'execute',
-					desc = 'display default bag items',
+					desc = 'list items contained in each bag view',
 					name = 'List Bag Contents',
 					func = 'CmdShowBags'
-				},
-				create = {
-					type = 'execute',
-					desc = 'create new bag view',
-					name = 'Create New View',
-					func = 'CreateNewView',
 				},
 			}
 		},
