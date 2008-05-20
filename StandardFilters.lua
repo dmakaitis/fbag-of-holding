@@ -42,7 +42,20 @@ function character.filter(itemProps, character)
 	
 	return true;
 end
-
+function character.getOptions()
+	local rVal = {
+		{
+			name = L["Current Character"];
+			value = nil;
+		},
+		{
+			name = L["Current Realm"];
+			value = ".*";
+		},
+	};
+	
+	return rVal;
+end
 FBoH:RegisterFilter(character);
 
 -------------------------------------------------------------------------------
