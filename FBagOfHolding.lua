@@ -844,6 +844,13 @@ end
 
 function FBoH.Sort_Items(a, b)
 	-- Sort by realm and character, just in case
+	-- Current character always comes first.
+	local chr = UnitName("player");
+	if a.realm == b.realm then
+		if (a.character == chr) and (b.character ~= chr) then return true end;
+		if (a.character ~= chr) and (b.character == chr) then return false end;
+	end
+	
 	if a.realm < b.realm then return true end;
 	if a.realm > b.realm then return false end;
 	if a.character < b.character then return true end;

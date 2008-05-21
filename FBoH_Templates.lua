@@ -88,6 +88,37 @@ function FBoH_ColumnTemplate_SetColumnAttributes(column, attributes)
 	column:GetHeader():SetText(arributes.name or "Untitled");
 end
 
+function FBoH_AltItemButton_DoEnter(self)
+	local x;
+	x = self:GetRight();
+	if ( x >= ( GetScreenWidth() / 2 ) ) then
+		GameTooltip:SetOwner(self, "ANCHOR_LEFT");
+	else
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+	end
+	
+	GameTooltip:SetHyperlink(self.item.itemLink);
+	
+	local alt = self.item.character;
+	if self.item.realm ~= GetRealmName() then
+		alt = alt .. " (" .. self.item.realm .. ")";
+	end
+	local line = nil;
+	if self.item.bagType == "Bags" then
+		line = L["Item in "] .. alt .. L["'s bags"];
+	elseif self.item.bagType == "Bank" then
+		line = L["Item in "] .. alt .. L["'s bank"];
+	else
+		line = L["Item on "] .. alt;
+	end
+	
+	GameTooltip:AddLine(" ");
+	GameTooltip:AddLine(line, 1, 1, 0);
+	GameTooltip:Show();
+	
+	CursorUpdate();	
+end
+
 function FBoH_BankItemButton_DoClick(self, button)
 	if FBoH:IsBankOpen() == false then return end;
 
@@ -109,7 +140,7 @@ function FBoH_BankItemButton_DoEnter(self)
 	
 	GameTooltip:SetHyperlink(self.item.itemLink);
 	GameTooltip:AddLine(" ");
-	GameTooltip:AddLine("Item in bank", 1, 0, 0);
+	GameTooltip:AddLine(L["Item in bank"], 1, 0, 0);
 	GameTooltip:Show();
 	
 	CursorUpdate();	
@@ -460,46 +491,52 @@ function FBoH_GridTemplate_ResizeGrid(self)
 	
 	local row, item = 0, 0;
 	local itemIndex = 1;
-	local lastBagType = nil;
+	local lastBagType, lastChr, lastRlm = nil;
+	local chr = UnitName("player");
+	local rlm = GetRealmName();
 	
 	while self.items[itemIndex] do
 		local bagType = self.items[itemIndex].bagType;
 		
 		if bagType ~= lastBagType then
-			if model:IsBagTypeVisible(lastBagType) then
-				if (lastBagType ~= "Bank") or (FBoH:IsBankOpen() == true) then
-					local empty = emptySlots[lastBagType];
-					if empty then
-						for _, v in ipairs(empty) do
-							local newEmpty = {};
-							
-							newEmpty.isEmpty = true;
-							newEmpty.bagType = lastBagType;
-							newEmpty.bagIndex = v.firstBagID;
-							newEmpty.slotIndex = v.firstSlotID;
-							newEmpty.itemCount = v.slotCount;
-							newEmpty.restrictionCode = v.restrictionCode;
-							
-							self.rowData[row] = self.rowData[row] or {};
-							self.rowData[row][item] = newEmpty;
-							
-							item = item + 1;
-							if item > self.gridWidth then
-								row = row + 1;
-								item = 1;
+			if (chr == lastChr) and (rlm == lastRlm) then
+				if model:IsBagTypeVisible(lastBagType) then
+					if (lastBagType ~= "Bank") or (FBoH:IsBankOpen() == true) then
+						local empty = emptySlots[lastBagType];
+						if empty then
+							for _, v in ipairs(empty) do
+								local newEmpty = {};
+								
+								newEmpty.isEmpty = true;
+								newEmpty.bagType = lastBagType;
+								newEmpty.bagIndex = v.firstBagID;
+								newEmpty.slotIndex = v.firstSlotID;
+								newEmpty.itemCount = v.slotCount;
+								newEmpty.restrictionCode = v.restrictionCode;
+								
+								self.rowData[row] = self.rowData[row] or {};
+								self.rowData[row][item] = newEmpty;
+								
+								item = item + 1;
+								if item > self.gridWidth then
+									row = row + 1;
+									item = 1;
+								end
 							end
 						end
 					end
 				end
 			end
-			
+
 			if item ~= 1 then
 				row = row + 1;
 				item = 1;
 			end
 			lastBagType = bagType;
 		end
-			
+		lastChr = self.items[itemIndex].character;
+		lastRlm = self.items[itemIndex].realm;
+		
 		if model:IsBagTypeVisible(bagType) then
 			self.rowData[row] = self.rowData[row] or {};
 			self.rowData[row][item] = itemIndex;
@@ -569,6 +606,43 @@ end
 
 function FBoH_GridTemplate_OnVerticalScroll()
 	FBOH_SCROLL_GRID:DoVerticalScroll();
+end
+
+FBoH_GridAltItemButtonID = 1;
+
+function FBoH_GridItemButton_GetAltItemFrame(self)
+	if self.altItemFrame == nil then
+		local name = "FBoH_GridAltItemButton_" .. FBoH_GridAltItemButtonID;
+		FBoH_GridAltItemButtonID = FBoH_GridAltItemButtonID + 1;
+	
+		local aFrame = CreateFrame("Button", name, self, "FBoH_AltItemButton");
+		aFrame:SetPoint("TOPLEFT");
+		aFrame:SetPoint("BOTTOMRIGHT");
+
+		aFrame.tex = _G[name .. "IconTexture"];
+		aFrame.tex:SetPoint("TOPLEFT", aFrame);
+		aFrame.tex:SetPoint("BOTTOMRIGHT", aFrame);
+		
+		aFrame.normal_tex = aFrame:GetNormalTexture();
+		aFrame.normal_tex:SetTexture("Interface\\Buttons\\UI-ActionButton-Border")
+		aFrame.normal_tex:SetBlendMode("ADD")
+		aFrame.normal_tex:SetAlpha(0.65)
+		aFrame.normal_tex:SetPoint("CENTER", aFrame, "CENTER", 1, 0)
+		aFrame.normal_tex:Show()
+		
+		aFrame:Show();
+		
+		aFrame.highlight = CreateFrame("Model", name .. "Highlighter", aFrame)
+		aFrame.highlight:Hide()
+		aFrame.highlight:SetModel("Interface\Buttons\UI-AutoCastButton.mdx")
+		aFrame.highlight:SetModelScale(1.2)
+		aFrame.highlight:SetAllPoints()
+		aFrame.highlight:SetSequence(0)
+		aFrame.highlight:SetSequenceTime(0, 0)
+
+		self.altItemFrame = aFrame;
+	end
+	return self.altItemFrame;
 end
 
 FBoH_GridBankItemButtonID = 1;
@@ -697,6 +771,32 @@ function FBoH_FBoH_GridItemButton_HideChildren(self)
 	end
 end
 
+function FBoH_GridItemButton_SetAltItem(aFrame, item)
+	aFrame.item = item;
+	
+	local itemCount = item.itemCount;
+	local quality, texture = nil, nil;
+	if item.detail then
+		quality, texture = item.detail.rarity, item.detail.texture;
+	end
+	if (quality == nil) or (texture == nil) then
+		local _, _, q, _, _, _, _, _, _, t = GetItemInfo(item.itemLink)
+		quality = quality or q;
+		texture = texture or t;
+	end
+
+	SetItemButtonTexture(aFrame, texture);
+	SetItemButtonCount(aFrame, itemCount);
+	aFrame.hasItem = nil;
+	
+	if (quality == nil) or (quality < 0) then quality = 0 end
+	local r = FBoH_QualityColors[quality + 1]
+	
+	aFrame.normal_tex:SetVertexColor(r[1], r[2], r[3])
+	aFrame.normal_tex:SetAlpha(0.5)
+	aFrame.tex:SetAlpha(0.5);
+end
+
 function FBoH_GridItemButton_SetBankItem(bFrame, item)
 	local bagID, slotID = FBoH:GetItemBagAndSlotIDs(item);
 	
@@ -811,6 +911,9 @@ end
 function FBoH_GridItemButton_SetItem(self, item)
 	self:HideChildren();
 
+	local chr = UnitName("player");
+	local rlm = GetRealmName();
+	
 	if item then
 		if item.isEmpty == true then
 			local eFrame = self:GetEmptyItemFrame();
@@ -819,6 +922,13 @@ function FBoH_GridItemButton_SetItem(self, item)
 			FBoH_GridItemButton_SetEmptyItem(eFrame, item);
 			
 			eFrame:Show();
+		elseif (chr ~= item.character) or (rlm ~= item.realm) then
+			local aFrame = self:GetAltItemFrame();
+			if aFrame == nil then return end;
+			
+			FBoH_GridItemButton_SetAltItem(aFrame, item);
+			
+			aFrame:Show();
 		elseif item.bagType == "Bags" then
 			local cFrame = self:GetContainerItemFrame();
 			if cFrame == nil then return end;

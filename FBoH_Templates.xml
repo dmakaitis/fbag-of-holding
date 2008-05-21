@@ -276,6 +276,7 @@
 				self.GetBankItemFrame = FBoH_GridItemButton_GetBankItemFrame;
 				self.GetContainerItemFrame = FBoH_GridItemButton_GetContainerItemFrame;
 				self.GetEmptyItemFrame = FBoH_GridItemButton_GetEmptyItemFrame;
+				self.GetAltItemFrame = FBoH_GridItemButton_GetAltItemFrame;
 			</OnLoad>
 		</Scripts>
 	</Button>
@@ -312,6 +313,33 @@
             </OnDragStart>
             <OnReceiveDrag>
 				self:DoClick("LeftButton");
+            </OnReceiveDrag>
+		</Scripts>		
+	</Button>
+	
+	<Button name="FBoH_AltItemButton" inherits="ItemButtonTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self.DoEnter = FBoH_AltItemButton_DoEnter;
+
+				self:RegisterForDrag("LeftButton");
+				self:RegisterForClicks("LeftButtonUp","RightButtonUp");
+			</OnLoad>
+			<OnEnter>
+				self:DoEnter();
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+				ResetCursor();
+			</OnLeave>
+			<OnClick>
+				return;
+			</OnClick>
+            <OnDragStart>
+				return;
+            </OnDragStart>
+            <OnReceiveDrag>
+				return;
             </OnReceiveDrag>
 		</Scripts>		
 	</Button>

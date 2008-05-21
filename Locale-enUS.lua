@@ -73,6 +73,14 @@ L["Display"] = true;
 L["Grid Scale"] = "Icon Scale";
 L["Grid Scale Desc"] = "Scales the size of item icons in the icon view";
 
+-- Views
+
+L["Item in bank"] = true;
+L["Item on "] = true;
+L["Item in "] = true;
+L["'s bank"] = true;
+L["'s bags"] = true;
+
 -- View Menu
 
 L["Open All Views"] = true;
