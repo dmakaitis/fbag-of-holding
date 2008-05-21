@@ -770,7 +770,6 @@ end
 function FBoH:DoScanInventory()
 	for id, _ in pairs(self.inventorySlots) do
 		local iLink = GetInventoryItemLink("player", id);
-
 --[[
 		FBoH_ItemTooltip:ClearLines();
 		FBoH_ItemTooltip:SetInventoryItem("player", BankButtonIDToInvSlotID(id, nil))
@@ -781,8 +780,7 @@ function FBoH:DoScanInventory()
 				soulbound = true;
 			end
 		end
-]]
-		
+]]		
 		self.items:SetItem("Wearing", 1, id, iLink, 1, soulbound);
 	end
 	
@@ -886,11 +884,11 @@ function FBoH.Sort_Items(a, b)
 end
 
 --*****************************************************************************
--- Item Filters.
+-- Item Properties.
 --*****************************************************************************
 
-function FBoH:RegisterFilter(filter)
-	self.filters[filter.name] = filter;
+function FBoH:RegisterProperty(property)
+	self.filters[property.name] = property;
 	
 	for k, v in pairs(self.bagViews) do
 		v:SetFilter()
@@ -936,7 +934,7 @@ function andFilter.filter(itemProps, filters)
 	return true;
 end
 
-FBoH:RegisterFilter(andFilter);
+FBoH:RegisterProperty(andFilter);
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -955,7 +953,7 @@ function orFilter.filter(itemProps, filters)
 	return false;
 end
 
-FBoH:RegisterFilter(orFilter);
+FBoH:RegisterProperty(orFilter);
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -974,4 +972,23 @@ function notFilter.filter(itemProps, filter)
 end
 
 
-FBoH:RegisterFilter(notFilter);
+FBoH:RegisterProperty(notFilter);
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+local itemKeyProperty = {};
+
+itemKeyProperty.name = "Item Key";
+itemKeyProperty.internal = true;
+function itemKeyProperty.filter(itemProps, key)
+	if itemProps.itemKey == key then
+		return true;
+	else
+		return false;
+	end
+end
+
+FBoH:RegisterProperty(itemKeyProperty);
+

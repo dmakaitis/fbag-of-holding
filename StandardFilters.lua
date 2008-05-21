@@ -4,24 +4,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-local itemKey = {};
-
-itemKey.name = "Item Key";
-itemKey.internal = true;
-function itemKey.filter(itemProps, key)
-	if itemProps.itemKey == key then
-		return true;
-	else
-		return false;
-	end
-end
-
-FBoH:RegisterFilter(itemKey);
-
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
-
 local character = {};
 
 character.name = "Character";
@@ -56,7 +38,7 @@ function character.getOptions()
 	
 	return rVal;
 end
-FBoH:RegisterFilter(character);
+FBoH:RegisterProperty(character);
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -83,7 +65,7 @@ function itemName.filter(itemProps, name)
 	return false;
 end
 
-FBoH:RegisterFilter(itemName);
+FBoH:RegisterProperty(itemName);
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -98,7 +80,7 @@ function bagIndex.filter(itemProps, bagIndex)
 	if itemProps.bagIndex == bagIndex then return true end;
 	return false;
 end
-FBoH:RegisterFilter(bagIndex);
+FBoH:RegisterProperty(bagIndex);
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -137,7 +119,7 @@ function bagType.getOptions()
 		},
 	};
 end
-FBoH:RegisterFilter(bagType);
+FBoH:RegisterProperty(bagType);
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -185,7 +167,7 @@ function quality.getOptions()
 		},
 	};
 end
-FBoH:RegisterFilter(quality);
+FBoH:RegisterProperty(quality);
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -218,7 +200,7 @@ function soulbound.getOptions()
 		},
 	};
 end
-FBoH:RegisterFilter(soulbound);
+FBoH:RegisterProperty(soulbound);
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -275,7 +257,7 @@ function itemType.getOptions()
 		},
 	};
 end
-FBoH:RegisterFilter(itemType);
+FBoH:RegisterProperty(itemType);
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -399,5 +381,5 @@ function equipSlot.getOptions()
 		},
 	};
 end
-FBoH:RegisterFilter(equipSlot);
+FBoH:RegisterProperty(equipSlot);
 
