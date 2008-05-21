@@ -39,6 +39,25 @@ L["Epic"] = true;
 L["Legendary"] = true;
 L["Artifact"] = true;
 
+L["Item Type"] = true;
+-- The following values need to match the values returned by Blizzard's GetItemType function:
+	L["Armor"] = true;
+	L["Consumable"] = true;
+	L["Container"] = true;
+	L["Gem"] = true;
+	L["Key"] = true;
+	L["Miscellaneous"] = true;
+	L["Reagent"] = true;
+	L["Recipe"] = true;
+	L["Projectile"] = true;
+	L["Quest"] = true;
+	L["Quiver"] = true;
+	L["Trade Goods"] = true;
+	L["Weapon"] = true;
+	
+L["Equip Slot"] = true;
+L["Not Equipable"] = true;
+
 -- FBoH Configuration
 
 L["FuBar options"] = true;

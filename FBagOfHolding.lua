@@ -275,6 +275,21 @@ local function ShowView(bagIndex, tabIndex)
 	view:SelectTab(tabIndex);
 end
 
+function FBoH.DewdropMenuPoint(frame)
+	local x, y = frame:GetCenter()
+	local leftRight
+	if x < GetScreenWidth() / 2 then
+		leftRight = "LEFT"
+	else
+		leftRight = "RIGHT"
+	end
+	if y < GetScreenHeight() / 2 then
+		return "BOTTOM" .. leftRight, "TOP" .. leftRight
+	else
+		return "TOP" .. leftRight, "BOTTOM" .. leftRight
+	end
+end
+	
 function FBoH:OnFuBarClick()
 	GameTooltip:Hide();
 	
@@ -318,20 +333,7 @@ function FBoH:OnFuBarClick()
 				end
 			);
 		end,
-		'point', function(frame)
-			local x, y = frame:GetCenter()
-			local leftRight
-			if x < GetScreenWidth() / 2 then
-				leftRight = "LEFT"
-			else
-				leftRight = "RIGHT"
-			end
-			if y < GetScreenHeight() / 2 then
-				return "BOTTOM" .. leftRight, "TOP" .. leftRight
-			else
-				return "TOP" .. leftRight, "BOTTOM" .. leftRight
-			end
-		end
+		'point', FBoH.DewdropMenuPoint
 	);
 end
 
@@ -421,7 +423,7 @@ function FBoH:DeleteViewTab(tabModel)
 		return;
 	end
 	
-	FBoH:Print("Deleting tab: " .. tabModel.tabDef.name);
+--	FBoH:Print("Deleting tab: " .. tabModel.tabDef.name);
 	
 	tabModel.tabDef.DELETE_THIS_TAB = true;
 	
@@ -440,7 +442,7 @@ function FBoH:DeleteViewTab(tabModel)
 		end
 	end
 	
-	FBoH:Print("   Tab " .. delTabID .. " from view " .. delViewID .. " (with " .. delTabCount .. " tabs)");
+--	FBoH:Print("   Tab " .. delTabID .. " from view " .. delViewID .. " (with " .. delTabCount .. " tabs)");
 	
 	if delTabCount == 1 then
 		table.remove(self.bagViews, delViewID);

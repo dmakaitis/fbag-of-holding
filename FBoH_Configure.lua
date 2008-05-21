@@ -392,11 +392,11 @@ end
 local function GetOptionName(options, value)
 	for _, v in ipairs(options) do		
 		if v.value == value then
-			return v.name
+			return v.name or v.value;
 		end
 	end
 	
-	return "---";
+	return value or "---";
 end
 
 function FBoH_FilterButton_SetFilter(self, filter, parentID, index)
@@ -537,6 +537,12 @@ function FBoH_FilterButton_ReceiveDrag(self, dragData)
 			name = dragData.source.property;
 		};
 		
+		local f = FBoH:GetFilter(newFilter.name);
+		if f.getOptions then
+			local opts = f.getOptions();
+			newFilter.arg = opts[1].value;
+		end
+		
 		if dragData.insert == "above" then
 			self:GetParent():InsertFilter(newFilter, self.parentID, self.parentIndex);
 		elseif dragData.insert == "below" then
@@ -592,18 +598,19 @@ function FBoH_FilterButtonArgBtn_SetValue(self, value)
 end
 
 function FBoH_FilterButtonArgBtn_DoClick(self)
-	FBoH:Print("Clicked filter button");
-	
 	local options = self:GetParent().filterOptions;
 	
-	Dewdrop:Open(self, 'children', function()
-		for _, v in ipairs(options) do
-			Dewdrop:AddLine(
-				'text', v.name or v.value,
-				'func', FBoH_FilterButtonArgBtn_SetValue,
-				'arg1', self,
-				'arg2', v.value
-			);
-		end
-	end);
+	Dewdrop:Open(self, 
+		'children', function()
+			for _, v in ipairs(options) do
+				Dewdrop:AddLine(
+					'text', v.name or v.value,
+					'func', FBoH_FilterButtonArgBtn_SetValue,
+					'arg1', self,
+					'arg2', v.value
+				);
+			end
+		end,
+		'point', FBoH.DewdropMenuPoint
+	);
 end

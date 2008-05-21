@@ -219,3 +219,185 @@ function soulbound.getOptions()
 	};
 end
 FBoH:RegisterFilter(soulbound);
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+local itemType = {};
+
+itemType.name = "Item Type";
+itemType.desc = L["Item Type"];
+function itemType.filter(itemProps, itemType)
+	if not itemProps.detail then return false end;
+	if itemType == itemProps.detail.type then return true else return false end;
+end
+function itemType.getOptions()
+	return {
+		{
+			value = L["Armor"];
+		},
+		{
+			value = L["Consumable"];
+		},
+		{
+			value = L["Container"];
+		},
+		{
+			value = L["Gem"];
+		},
+		{
+			value = L["Key"];
+		},
+		{
+			value = L["Miscellaneous"];
+		},
+		{
+			value = L["Reagent"];
+		},
+		{
+			value = L["Recipe"];
+		},
+		{
+			value = L["Projectile"];
+		},
+		{
+			value = L["Quest"];
+		},
+		{
+			value = L["Quiver"];
+		},
+		{
+			value = L["Trade Goods"];
+		},
+		{
+			value = L["Weapon"];
+		},
+	};
+end
+FBoH:RegisterFilter(itemType);
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+local equipSlot = {};
+
+equipSlot.name = "Equip Slot";
+equipSlot.desc = L["Equip Slot"];
+function equipSlot.filter(itemProps, slot)
+	local slots = { strsplit("|", slot or "") };
+	for _, v in ipairs(slots) do
+		if v == itemProps.detail.equiploc then return true end;
+	end
+	return false;
+end
+function equipSlot.getOptions()
+	return {
+		{
+			name = L["Not Equipable"],
+		},
+		{
+			value = "INVTYPE_AMMO",
+			name = _G["INVTYPE_AMMO"];
+		},
+		{
+			value = "INVTYPE_HEAD",
+			name = _G["INVTYPE_HEAD"];
+		},
+		{
+			value = "INVTYPE_NECK",
+			name = _G["INVTYPE_NECK"];
+		},
+		{
+			value = "INVTYPE_SHOULDER",
+			name = _G["INVTYPE_SHOULDER"];
+		},
+		{
+			value = "INVTYPE_BODY",
+			name = _G["INVTYPE_BODY"];
+		},
+		{
+			value = "INVTYPE_CHEST|INVTYPE_ROBE",
+			name = _G["INVTYPE_CHEST"];
+		},
+		{
+			value = "INVTYPE_WAIST",
+			name = _G["INVTYPE_WAIST"];
+		},
+		{
+			value = "INVTYPE_LEGS",
+			name = _G["INVTYPE_LEGS"];
+		},
+		{
+			value = "INVTYPE_FEET",
+			name = _G["INVTYPE_FEET"];
+		},
+		{
+			value = "INVTYPE_WRIST",
+			name = _G["INVTYPE_WRIST"];
+		},
+		{
+			value = "INVTYPE_HAND",
+			name = _G["INVTYPE_HAND"];
+		},
+		{
+			value = "INVTYPE_FINGER",
+			name = _G["INVTYPE_FINGER"];
+		},
+		{
+			value = "INVTYPE_TRINKET",
+			name = _G["INVTYPE_TRINKET"];
+		},
+		{
+			value = "INVTYPE_CLOAK",
+			name = _G["INVTYPE_CLOAK"];
+		},
+		{
+			value = "INVTYPE_WEAPON",
+			name = _G["INVTYPE_WEAPON"];
+		},
+		{
+			value = "INVTYPE_2HWEAPON",
+			name = _G["INVTYPE_2HWEAPON"];
+		},
+		{
+			value = "INVTYPE_WEAPONMAINHAND",
+			name = _G["INVTYPE_WEAPONMAINHAND"];
+		},
+		{
+			value = "INVTYPE_WEAPONOFFHAND|INVTYPE_SHIELD",
+			name = _G["INVTYPE_WEAPONOFFHAND"];
+		},
+		{
+			value = "INVTYPE_HOLDABLE",
+			name = _G["INVTYPE_HOLDABLE"];
+		},
+		{
+			value = "INVTYPE_RANGED|INVTYPE_RANGEDRIGHT",
+			name = _G["INVTYPE_RANGED"];
+		},
+		{
+			value = "INVTYPE_THROWN",
+			name = _G["INVTYPE_THROWN"];
+		},
+		{
+			value = "INVTYPE_RELIC",
+			name = _G["INVTYPE_RELIC"];
+		},
+		{
+			value = "INVTYPE_TABARD",
+			name = _G["INVTYPE_TABARD"];
+		},
+		{
+			value = "INVTYPE_BAG",
+			name = _G["INVTYPE_BAG"];
+		},
+		{
+			value = "INVTYPE_QUIVER",
+			name = _G["INVTYPE_QUIVER"];
+		},
+	};
+end
+FBoH:RegisterFilter(equipSlot);
+
