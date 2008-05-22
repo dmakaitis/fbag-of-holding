@@ -22,6 +22,7 @@ L["FuBar Hint"] = "Hint: Left click to open all view. Right click to configure."
 
 L["Current Character"] = true;
 L["Current Realm"] = true;
+L[" (All)"] = true;
 
 L["Bag Index"] = true;
 L["Bag Type"] = true;

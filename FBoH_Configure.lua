@@ -389,14 +389,25 @@ function FBoH_GroupTemplate_UpdateView(self)
 	self:GetParent():UpdateView();
 end
 
-local function GetOptionName(options, value)
-	for _, v in ipairs(options) do		
-		if v.value == value then
-			return v.name or v.value;
+local function GetOptionNameHelper(options, value)
+	if type(options) ~= "table" then return nil end;
+	
+	for _, v in ipairs(options) do
+		if type(v.value) == "table" then
+			local rVal = GetOptionNameHelper(v.value, value);
+			if rVal then return rVal end;
+		else
+			if v.value == value then
+				return v.name or v.value;
+			end
 		end
 	end
 	
-	return value or "---";
+	return nil;
+end
+
+local function GetOptionName(options, value)
+	return GetOptionNameHelper(options, value) or "---";
 end
 
 function FBoH_FilterButton_SetFilter(self, filter, parentID, index)
@@ -597,19 +608,37 @@ function FBoH_FilterButtonArgBtn_SetValue(self, value)
 	Dewdrop:Close();
 end
 
+local function BuildDewdropMenuTable(self, options)
+	local rVal = {};
+	
+	if type(options) ~= "table" then return rVal end;
+	
+	for _, v in ipairs(options) do
+		local newEntry = {};
+		newEntry.text = v.name or v.value;
+		
+		if type(v.value) == "table" then
+			newEntry.hasArrow = true;
+			newEntry.subMenu = BuildDewdropMenuTable(self, v.value);
+		else
+			newEntry.func = FBoH_FilterButtonArgBtn_SetValue;
+			newEntry.arg1 = self;
+			newEntry.arg2 = v.value;
+		end
+		
+		table.insert(rVal, newEntry);
+	end
+	
+	return rVal;
+end
+
 function FBoH_FilterButtonArgBtn_DoClick(self)
 	local options = self:GetParent().filterOptions;
+	local menu = BuildDewdropMenuTable(self, options);
 	
 	Dewdrop:Open(self, 
 		'children', function()
-			for _, v in ipairs(options) do
-				Dewdrop:AddLine(
-					'text', v.name or v.value,
-					'func', FBoH_FilterButtonArgBtn_SetValue,
-					'arg1', self,
-					'arg2', v.value
-				);
-			end
+			Dewdrop:FeedTable(menu);
 		end,
 		'point', FBoH.DewdropMenuPoint
 	);

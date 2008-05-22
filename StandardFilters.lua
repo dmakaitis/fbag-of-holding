@@ -35,6 +35,43 @@ function character.getOptions()
 			value = ".*";
 		},
 	};
+
+	if FBoH.items and FBoH.items.items and FBoH.items.items.realms then
+		local items = FBoH.items.items;
+		local realms = {};
+		for k, _ in pairs(items.realms) do
+			table.insert(realms, k);
+		end
+		table.sort(realms);
+		
+		for _, r in ipairs(realms) do
+			local subMenu = {
+				{
+					name = r .. L[" (All)"];
+					value = r .. ".*";
+				},
+			};
+			
+			local realmChars = items.realms[r].characters;
+			local chars = {};
+			for k, _ in pairs(realmChars) do
+				table.insert(chars, k);
+			end
+			table.sort(chars);
+			
+			for _, c in ipairs(chars) do
+				table.insert(subMenu, {
+					name = c .. " (" .. r .. ")";
+					value = r .. "." .. c;
+				});
+			end
+			
+			table.insert(rVal, {
+				name = r,
+				value = subMenu,
+			});
+		end
+	end
 	
 	return rVal;
 end
