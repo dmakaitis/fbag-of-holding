@@ -957,7 +957,20 @@ function FBoH:RegisterProperty(property)
 end
 
 function FBoH:GetFilter(filterName)
-	return self.filters[filterName];
+	local rVal = self.filters[filterName];
+
+	if rVal == nil then
+		rVal = {
+			name = filterName,
+			desc = L["Undefined"],
+			undefined = true;
+		};
+	end
+	if rVal.filter == nil then
+		rVal.filter = function() return false end;
+	end
+	
+	return rVal;
 end
 
 function FBoH:GetFilters(allFilters)

@@ -204,7 +204,7 @@ function FBoH_ConfigureFiltersWellTemplate_DoVerticalScroll(self)
 		return;
 	end
 	
-	local maxEntries = #(parent.filterSettings.rows) + 1;
+	local maxEntries = #(parent.filterSettings.rows);
 	
 	FauxScrollFrame_Update(self, maxEntries, visibleEntries, self.rowHeight);
 	local offset = FauxScrollFrame_GetOffset(self) or 0;
@@ -417,9 +417,11 @@ function FBoH_FilterButton_SetFilter(self, filter, parentID, index)
 	end
 	self.filter = filter or self.filter;
 	
-	self.fontString:SetText(self.filter.desc or self.filter.name);
+	local filterDef = FBoH:GetFilter(self.filter.name);
 	
-	local getOptions = FBoH:GetFilter(self.filter.name).getOptions;
+	self.fontString:SetText(filterDef.desc or filterDef.name);
+	
+	local getOptions = filterDef.getOptions;
 	if getOptions then
 		self.argEdit:Hide();
 		self.argButton:Show();
@@ -433,6 +435,12 @@ function FBoH_FilterButton_SetFilter(self, filter, parentID, index)
 		self.filterOptions = nil;
 		
 		self.argEdit:SetText(self.filter.arg or "");
+		
+		if filterDef.undefined then
+			self.argEdit:EnableKeyboard(false);
+		else
+			self.argEdit:EnableKeyboard(true);
+		end
 	end
 	
 	if self.filter.isNot then
@@ -595,8 +603,6 @@ function FBoH_FilterButton_ReceiveDrag(self, dragData)
 			else
 				FBoH:Print("Unknown insert location after drag to filter button: " .. tostring(dragData.insert));
 			end			
-		else
-			FBoH:Print("Moved self to self - nothing to do");
 		end
 	else
 		FBoH:Print("Unknown drag source type for filter button: " .. tostring(dragData.source.type));
