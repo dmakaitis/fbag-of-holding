@@ -188,10 +188,14 @@ function FBoH_ItemDB:GetEmptySlots(bagType, bagID, character, realm)
 												entry.slotCount = 0;
 												entry.firstBagID = bagIndex;
 												entry.firstSlotID = nil;
-												for index = 1, size.total do
-													if bag.content[index] == nil then
-														entry.firstSlotID = entry.firstSlotID or index;
+												if bag.content then
+													for index = 1, size.total do
+														if bag.content[index] == nil then
+															entry.firstSlotID = entry.firstSlotID or index;
+														end
 													end
+												else
+													entry.firstSlotID = 1;
 												end
 											end
 											

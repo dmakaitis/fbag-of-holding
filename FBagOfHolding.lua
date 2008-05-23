@@ -63,8 +63,14 @@ end
 function FBoH:OnInitialize()
 	self.items = FBoH_ItemDB;
 
-	self.db = LibStub("AceDB-3.0"):New("FBoH_DB", defaults, "Default")
+	self.db = LibStub("AceDB-3.0"):New("FBoH_DB", defaults)
 	
+	self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
+	self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
+	self.db.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
+	
+	self.configOptions.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+
 	-- Create the FuBarPlugin bits.
 	self:SetFuBarOption("GameTooltip", true);
 --	self:SetFuBarOption("hasNoColor", true)
@@ -142,7 +148,40 @@ function FBoH:OnEnable()
 	self:ScanContainer(0);	-- Because WoW doesn't update the main bag when the player logs in...
 	self:ScanInventory();
 	
-	self.db.profile.viewDefs = self.db.profile.viewDefs or defaultViewDefinitions;
+	self:OnProfileChanged();
+end
+
+function FBoH:OnDisable()
+	self:UnhookAll();
+	TipHooker:Unhook(self.ProcessTooltip, "item")
+end
+
+-- Simple shallow copy for copying defaults
+local function copyTable(src, dest)
+	if type(dest) ~= "table" then dest = {} end
+	if type(src) == "table" then
+		for k,v in pairs(src) do
+			if type(v) == "table" then
+				-- try to index the key first so that the metatable creates the defaults, if set, and use that table
+				v = copyTable(v, dest[k])
+			end
+			dest[k] = v
+		end
+	end
+	return dest
+end
+
+function FBoH:OnProfileChanged()
+	-- First, if we have existing bag views, hide them all
+	if self.bagViews then
+		for _, v in pairs(self.bagViews) do
+			v:Hide();
+		end
+	end
+	
+	FBoH_Configure:Hide();
+	
+	self.db.profile.viewDefs = self.db.profile.viewDefs or copyTable(defaultViewDefinitions);
 --	self.db.profile.viewDefs = defaultViewDefinitions;
 	self.bagViews = {};
 	
@@ -154,11 +193,6 @@ function FBoH:OnEnable()
 		end
 	end
 	self:RenumberViewIDs();
-end
-
-function FBoH:OnDisable()
-	self:UnhookAll();
-	TipHooker:Unhook(self.ProcessTooltip, "item")
 end
 
 function FBoH.ProcessTooltip(tooltip, name, link)
