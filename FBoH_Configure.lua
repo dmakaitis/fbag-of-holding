@@ -551,6 +551,9 @@ function FBoH_FilterButton_ReceiveDrag(self, dragData)
 		local f = FBoH:GetFilter(newFilter.name);
 		if f.getOptions then
 			local opts = f.getOptions();
+			while type(opts[1].value) == "table" do
+				opts = opts[1].value;
+			end
 			newFilter.arg = opts[1].value;
 		end
 		

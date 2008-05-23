@@ -11,7 +11,15 @@ local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
 local defaults = {
 	profile = {
-		["gridScale"] = 1.0,
+		gridScale = 1.0,
+		hookOpenAllBags = true;
+		hookToggleBackpack = true;
+		hookToggleBags = {
+			"default",
+			"default",
+			"default",
+			"default",
+		},
 	},
 };
 
@@ -22,43 +30,6 @@ local defaultViewDefinitions = {
 			{
 				name = L["Main Bag"],
 				filter = "default"
-			},
-			{
-				name = "Eggs",
-				filter = {
-					name = "And",
-					arg = {
-						{
-							name = "Character",
-						},
-						{
-							name = "Item Name",
-							arg = "egg",
-						},
-					},
-				},
-				viewAsList = true;
-			},
-		},
-	},
-	{
-		activeTab = 1;
-		tabs = {
-			{
-				name = "Test",
-				filter = {
-					name = "And",
-					arg = {
-						{
-							name = "Character",
-						},
-						{
-							name = "Item Name",
-							arg = "shard",
-						},
-					},
-				},
-				viewAsList = true;
 			},
 		},
 	},
@@ -71,6 +42,7 @@ local AceConfig = LibStub("AceConfigDialog-3.0");
 FBoH = LibStub("AceAddon-3.0"):NewAddon("Feithar's Bag of Holding",
 										"AceConsole-3.0",
 										"AceEvent-3.0",
+										"AceHook-3.0",
 										"AceTimer-3.0",
 										"LibFuBarPlugin-Mod-3.0");
 
@@ -162,6 +134,11 @@ function FBoH:OnEnable()
 	
 	TipHooker:Hook(self.ProcessTooltip, "item")
 
+	self:RawHook("OpenAllBags", true);
+	self:Hook("CloseAllBags", true);
+	self:RawHook("ToggleBackpack", true);
+	self:RawHook("ToggleBag", true);
+	
 	self:ScanContainer(0);	-- Because WoW doesn't update the main bag when the player logs in...
 	self:ScanInventory();
 	
@@ -180,6 +157,7 @@ function FBoH:OnEnable()
 end
 
 function FBoH:OnDisable()
+	self:UnhookAll();
 	TipHooker:Unhook(self.ProcessTooltip, "item")
 end
 
@@ -458,6 +436,88 @@ function FBoH:DeleteViewTab(tabModel)
 	end
 
 	self:RenumberViewIDs();
+end
+
+function FBoH:OpenAllBags()
+	if self.db.profile.hookOpenAllBags then
+		local showBags = false;
+		for _, v in ipairs(self.bagViews) do
+			if not v:IsShown() then
+				showBags = true;
+			end
+		end
+		
+		for _, v in ipairs(self.bagViews) do
+			if showBags then
+				v:Show();
+			else
+				v:Hide();
+			end
+		end	
+	else
+		local close, back, toggle = self.db.profile.hookCloseAllBags, self.db.profile.hookToggleBackpack, self.db.profile.hookToggleBags;
+		self.db.profile.hookCloseAllBags, self.db.profile.hookToggleBackpack, self.db.profile.hookToggleBags = false, false, {};
+		self.hooks.OpenAllBags()
+		self.db.profile.hookCloseAllBags, self.db.profile.hookToggleBackpack, self.db.profile.hookToggleBags = close, back, toggle;
+	end
+end
+
+function FBoH:CloseAllBags()
+	for _, v in ipairs(self.bagViews) do
+		v:Hide();
+	end
+end
+
+function FBoH:ToggleBackpack()
+	if self.db.profile.hookToggleBackpack then
+		for _, v in ipairs(self.bagViews) do
+			for i, t in ipairs(v.viewDef.tabs) do
+				if t.filter == "default" then
+					if v:IsShown() then
+						if v.viewDef.activeTab == i then
+							v:Hide();
+						else
+							v:SelectTab(i);
+						end
+					else
+						v:SelectTab(i);
+						v:Show();
+					end
+				end
+			end
+		end
+	else
+		self.hooks.ToggleBackpack()
+	end
+end
+
+function FBoH:ToggleBag(id, force)
+	if self.db.profile.hookToggleBags and self.db.profile.hookToggleBags[id] then
+		local tabID = self.db.profile.hookToggleBags[id];
+		if tabID == "default" then
+			if not FBoH_TabModel.defaultTab then return end;
+			tabID = FBoH_TabModel.defaultTab.id;
+		end
+		
+		for _, v in ipairs(self.bagViews) do
+			for i, t in ipairs(v.tabData) do
+				if t.id == tabID then
+					if v:IsShown() then
+						if v.viewDef.activeTab == i then
+							v:Hide();
+						else
+							v:SelectTab(i);
+						end
+					else
+						v:SelectTab(i);
+						v:Show();
+					end
+				end
+			end
+		end
+	else
+		self.hooks.ToggleBag(id, force);
+	end
 end
 
 --*****************************************************************************
