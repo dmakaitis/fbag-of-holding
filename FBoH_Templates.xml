@@ -272,7 +272,7 @@
 		<Scripts>
 			<OnLoad>
 				self.SetItem = FBoH_GridItemButton_SetItem;
-				self.HideChildren = FBoH_FBoH_GridItemButton_HideChildren;
+				self.HideChildren = FBoH_GridItemButton_HideChildren;
 				self.GetBankItemFrame = FBoH_GridItemButton_GetBankItemFrame;
 				self.GetContainerItemFrame = FBoH_GridItemButton_GetContainerItemFrame;
 				self.GetEmptyItemFrame = FBoH_GridItemButton_GetEmptyItemFrame;
@@ -631,11 +631,11 @@
 		</Anchors>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString inherits="GameFontNormal" text="Search:">
+				<FontString name="$parent_SearchLabel" inherits="GameFontNormal" text="Search:">
 					<Anchors>
-						<Anchor point="RIGHT" relativePoint="TOPRIGHT">
+						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="-190" y="-18"/>
+								<AbsDimension x="8" y="-11"/>
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -643,46 +643,16 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button name="$parent_ViewButton" inherits="UIPanelButtonTemplate" text="View">
-				<Size>
-					<AbsDimension x="60" y="22"/>
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset>
-							<AbsDimension x="6" y="-6"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						self:GetParent().viewModel:ToggleList();
-					</OnClick>
-				</Scripts>
-			</Button>
-			<Button name="$parent_ConfigButton" inherits="UIPanelButtonTemplate" text="Configure" id="3">
-				<Size>
-					<AbsDimension x="80" y="22"/>
-				</Size>
-				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parent_ViewButton">
-						<Offset>
-							<AbsDimension x="2" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						FBoH_Configure:SetModel(self:GetParent().viewModel);
-						FBoH_Configure:Show();
-					</OnClick>
-				</Scripts>
-			</Button>
 			<EditBox name="$parent_SearchEdit" autoFocus="false" inherits="InputBoxTemplate" id="2">
 				<Size>
 					<AbsDimension x="150" y="16"/>
 				</Size>
 				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_SearchLabel" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="8" y="2"/>
+						</Offset>
+					</Anchor>
 					<Anchor point="TOPRIGHT">
 						<Offset>
 							<AbsDimension x="-30" y="-9"/>

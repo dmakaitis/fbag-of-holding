@@ -179,6 +179,10 @@ function FBoH:ShowConfig()
 end
 FBoH.OpenMenu = FBoH.ShowConfig -- for FuBar
 
+function FBoH:CanViewAsList()
+	return self.canViewAsList;
+end
+
 --*****************************************************************************
 -- Commands
 --*****************************************************************************

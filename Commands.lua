@@ -32,6 +32,17 @@ local options = {
 					name = 'List Bag Contents',
 					func = 'CmdShowBags'
 				},
+				viewAsList = {
+					type = "toggle",
+					name = "Allow View As List",
+					desc = "Turn the ability to view as a list on and off.",
+					get = function(info)
+						return FBoH.canViewAsList;
+					end,
+					set = function(info, v)
+						FBoH.canViewAsList = v;
+					end
+				},
 			}
 		},
 		fubar = {

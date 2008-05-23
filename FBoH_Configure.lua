@@ -625,6 +625,7 @@ local function BuildDewdropMenuTable(self, options)
 	for _, v in ipairs(options) do
 		local newEntry = {};
 		newEntry.text = v.name or v.value;
+		newEntry.notCheckable = true;
 		
 		if type(v.value) == "table" then
 			newEntry.hasArrow = true;

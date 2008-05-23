@@ -764,7 +764,7 @@ function FBoH_GridItemButton_GetContainerItemFrame(self)
 	return self.containerItemFrame;
 end
 
-function FBoH_FBoH_GridItemButton_HideChildren(self)
+function FBoH_GridItemButton_HideChildren(self)
 	local children = { self:GetChildren() };
 	for _, v in pairs(children) do
 		v:Hide();
@@ -1022,40 +1022,47 @@ function FBoH_ViewTabTemplate_UpdateTabModel(self, model)
 end
 
 function FBoH_ViewTabTemplate_OpenMenu(self)
-	Dewdrop:Open(self, 'children', function()
-		Dewdrop:AddLine(
-			'text', L["View as List"],
-			'checked', self.tabModel.tabDef.viewAsList,
-			'func', function()
-				self.tabModel:ToggleList();
-				Dewdrop:Close();
-			end
-		);
-		Dewdrop:AddLine(
-			'text', L["Configure View"] .. ": " .. self:GetText(),
-			'func', function()
-				FBoH_Configure:SetModel(self.tabModel.viewModel);
-				FBoH_Configure:Show();
-				Dewdrop:Close();
-			end
-		);
-		Dewdrop:AddSeparator();
-		Dewdrop:AddLine(
-			'text', L["Create New View"],
-			'func', function()
-				Dewdrop:Close();
-				FBoH:CreateNewView();
-			end
-		);
-		if self.tabModel.tabDef.filter ~= "default" then
+	local disabled = true;
+	if FBoH:CanViewAsList() then disabled = nil end;
+	
+	Dewdrop:Open(self, 
+		'children', function()
 			Dewdrop:AddLine(
-				'text', L["Delete View"] .. ": " .. self:GetText(),
-				'textR', 1, 'textG', 0.2, 'textB', 0.2,
+				'text', L["View as List"],
+				'checked', self.tabModel.tabDef.viewAsList,
 				'func', function()
+					self.tabModel:ToggleList();
 					Dewdrop:Close();
-					FBoH:DeleteViewTab(self.tabModel);
+				end,
+				'disabled', disabled
+			);
+			Dewdrop:AddLine(
+				'text', L["Configure View"] .. ": " .. self:GetText(),
+				'func', function()
+					FBoH_Configure:SetModel(self.tabModel.viewModel);
+					FBoH_Configure:Show();
+					Dewdrop:Close();
 				end
 			);
-		end
-	end);
+			Dewdrop:AddSeparator();
+			Dewdrop:AddLine(
+				'text', L["Create New View"],
+				'func', function()
+					Dewdrop:Close();
+					FBoH:CreateNewView();
+				end
+			);
+			if self.tabModel.tabDef.filter ~= "default" then
+				Dewdrop:AddLine(
+					'text', L["Delete View"] .. ": " .. self:GetText(),
+					'textR', 1, 'textG', 0.2, 'textB', 0.2,
+					'func', function()
+						Dewdrop:Close();
+						FBoH:DeleteViewTab(self.tabModel);
+					end
+				);
+			end
+		end,
+		'point', FBoH.DewdropMenuPoint
+	);
 end

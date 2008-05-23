@@ -17,7 +17,7 @@ L["Wearing"] = true;
 L["Soulbound"] = true;
 L["Quest Item"] = true;
 
-L["FuBar Hint"] = "Hint: Left click to open all view. Right click to configure.";
+L["FuBar Hint"] = "Hint: Left click to open view menu. Right click to configure.";
 
 -- Standard Filters
 
