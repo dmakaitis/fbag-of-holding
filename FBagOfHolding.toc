@@ -8,7 +8,7 @@
 ## OptionalDeps: Ace2, DewdropLib, Ace3, FuBar, LibCrayon-3.0
 ## X-Embeds: Ace2, DewdropLib, Ace3, LibCrayon-3.0
 ## X-Credits: Inspired by Antiarc's SanityBags.
-## X=AceForum: 13670
+## X-AceForum: 13670
 ## Notes: Inventory and bank organizer.
   
 embeds.xml
