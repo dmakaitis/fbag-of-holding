@@ -309,7 +309,12 @@ end
 function FBoH:OnFuBarClick()
 	GameTooltip:Hide();
 	
-	Dewdrop:Open(self:GetFrame(),
+	local fubarFrame = self:GetFrame();
+	if self:IsFuBarMinimapAttached() then
+		fubarFrame = Minimap;
+	end
+	
+	Dewdrop:Open(fubarFrame,
 		'children', function()
 			Dewdrop:AddLine(
 				'text', L["Feithar's Bag of Holding"],
