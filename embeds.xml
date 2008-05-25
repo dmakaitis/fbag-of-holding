@@ -17,7 +17,6 @@
 
 <Include file="Libs\LibCrayon-3.0\lib.xml"/>
 <Include file="Libs\LibFuBarPlugin-3.0\lib.xml"/>
-<Script file="Libs\LibTipHooker-3.0\LibTipHooker-3.0.lua"/>
 
 <Script file="Libs\Dewdrop-2.0\Dewdrop-2.0.lua"/>
 

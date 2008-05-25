@@ -12,6 +12,8 @@
 ## Notes: Inventory and bank organizer.
   
 embeds.xml
+Libs\LibTipHooker-3.0\LibTipHooker-3.0.lua
+Libs\LibFuBarPlugin-Mod-3.0\lib.xml
 
 Locale-enUS.lua
 
