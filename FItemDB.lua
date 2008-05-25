@@ -1,5 +1,6 @@
 FBOH_ITEMS_DB_VERSION = "0.01.00";
 
+FBoH_Items = FBoH_Items or {};
 FBoH_ItemDB = {};
 
 --[[
@@ -268,7 +269,6 @@ function FBoH_ItemDB:GetItemKey(itemLink)
 end
 
 function FBoH_ItemDB:Purge()
-	FBoH:Debug("Purging item database");
 	FBoH_Items = {};
 	FBoH_Items.version = FBOH_ITEMS_DB_VERSION;
 	self.items = FBoH_Items;
