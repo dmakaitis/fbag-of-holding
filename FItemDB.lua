@@ -1,4 +1,4 @@
-FBOH_ITEMS_DB_VERSION = "0.01.00";
+FBOH_ITEMS_DB_VERSION = "0.02.00";
 
 FBoH_Items = FBoH_Items or {};
 FBoH_ItemDB = {};
@@ -46,7 +46,6 @@ items = {
 function FBoH_ItemDB:AreSameItem(oldItem, newItem)
 	if oldItem then
 		if newItem then
-			if not oldItem.detail then return false end;
 			if oldItem.link ~= newItem.link then return false end;
 			if oldItem.count ~= newItem.count then return false end;
 			if oldItem.soulbound ~= newItem.soulbound then return false end;
@@ -66,9 +65,38 @@ end
 function FBoH_ItemDB:CheckVersion()
 	self.items = self.items or FBoH_Items;
 	self.items.version = self.items.version or "purge";
+	
 	if self.items.version ~= FBOH_ITEMS_DB_VERSION then
 		FBoH:Print("Updating item database: " .. self.items.version .. " -> " .. FBOH_ITEMS_DB_VERSION);
-		self:Purge();
+		if self.items.version == "purge" then
+			self:Purge();
+			return;
+		end
+		if self.items.version == "0.01.00" then
+			self.items.details = {};
+			local details = self.items.details;
+			-- Go through and transfer all item details...
+			if self.items.realms then
+				for _, r in pairs(self.items.realms) do
+					if r.characters then
+						for _, c in pairs(r.characters) do
+							for _, t in pairs(c) do
+								for _, b in pairs(t) do
+									if b.content then
+										for _, i in pairs(b.content) do
+											details[i.key] = i.detail;
+											i.detail = nil;
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+			
+			self.items.version = "0.02.00";
+		end
 	end
 end
 
@@ -77,6 +105,8 @@ function FBoH_ItemDB:FindItems(filter, filterArg)
 	
 	local realms = self.items.realms;
 	if realms == nil then return rTable end;
+	
+	self.items.details = self.items.details or {};
 	
 	for rName, rData in pairs(realms) do
 		if rData.characters then
@@ -94,7 +124,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg)
 									itemLink = sData.link;
 									itemKey = sData.key;
 									itemCount = sData.count;
-									detail = sData.detail or {};
+									detail = self.items.details[sData.key] or {};
 									soulbound = sData.soulbound;
 								}
 								if filter(itemProps, filterArg) then
@@ -287,11 +317,15 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 		}
 		newItem.soulbound = soulbound;
 		
-		local d = {};
-		
-		d.name, _, d.rarity, d.level, d.minlevel, d.type, d.subtype, d.stackcount, d.equiploc, d.texture = GetItemInfo(itemLink);
-		
-		newItem.detail = d;
+		self.items.details = self.items.details or {};
+		if self.items.details[newItem.key] == nil then
+			local d = {};
+			
+			d.name, _, d.rarity, d.level, d.minlevel, d.type, d.subtype, d.stackcount, d.equiploc, d.texture = GetItemInfo(itemLink);
+			if d.name then
+				self.items.details[newItem.key] = d;
+			end
+		end
 	end;
 	
 	local oldItem = self:GetItem(bagType, bagID, slotID, character, realm)
