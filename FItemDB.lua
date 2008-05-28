@@ -174,7 +174,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg)
 			end
 		end
 	end
-
+--[[
 	local charName = UnitName("player");
 	local charRealm = GetRealmName();
 	local charGuild = GetGuildInfo("player");
@@ -207,7 +207,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg)
 			end
 		end
 	end
-	
+]]	
 	return rTable;
 end
 
