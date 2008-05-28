@@ -1,4 +1,4 @@
-FBOH_ITEMS_DB_VERSION = "0.02.00";
+FBOH_ITEMS_DB_VERSION = "0.03.00";
 
 FBoH_Items = FBoH_Items or {};
 FBoH_ItemDB = {};
@@ -73,6 +73,7 @@ function FBoH_ItemDB:CheckVersion()
 			return;
 		end
 		if self.items.version == "0.01.00" then
+			-- Move all item details out of the inventory section and into the details section.
 			self.items.details = {};
 			local details = self.items.details;
 			-- Go through and transfer all item details...
@@ -94,8 +95,41 @@ function FBoH_ItemDB:CheckVersion()
 					end
 				end
 			end
-			
 			self.items.version = "0.02.00";
+		end
+		if self.items.version == "0.02.00" then
+			-- Move the item link out of the inventory section and into the details section.
+			-- Update item keys to use new format
+			-- Wipe the guild bank data (since nobody should have anything there yet except me since it hasn't been published yet).
+			local oldDetails = self.items.details;
+			self.items.details = {};
+			local details = self.items.details;
+			if self.items.realms then
+				for _, r in pairs(self.items.realms) do
+					r.guilds = nil;
+					if r.characters then
+						for _, c in pairs(r.characters) do
+							for _, t in pairs(c) do
+								for _, b in pairs(t) do
+									if b.content then
+										for _, i in pairs(b.content) do
+											local oldKey = i.key;
+											local newKey = self:GetItemKey(i.link);
+											details[newKey] = oldDetails[i.key];
+											if details[newKey] then
+												details[newKey].link = i.link;
+											end
+											i.link = nil;
+											i.key = newKey;
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end			
+			self.items.version = "0.03.00";
 		end
 	end
 end
@@ -121,16 +155,52 @@ function FBoH_ItemDB:FindItems(filter, filterArg)
 									bagType = bType;
 									bagIndex = bID;
 									slotIndex = sID;
-									itemLink = sData.link;
 									itemKey = sData.key;
 									itemCount = sData.count;
 									detail = self.items.details[sData.key] or {};
 									soulbound = sData.soulbound;
 								}
+								itemProps.itemLink = itemProps.detail.link;
+								if not itemProps.itemLink then
+									_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
+								end
 								if filter(itemProps, filterArg) then
 									table.insert(rTable, itemProps);
 								end
 							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	local charName = UnitName("player");
+	local charRealm = GetRealmName();
+	local charGuild = GetGuildInfo("player");
+	
+	if realms[charRealm] and realms[charRealm].guilds and realms[charRealm].guilds[charGuild] then
+		gData = realms[charRealm].guilds[charGuild];
+		if gData.tabs then
+			for tabID, tab in pairs(gData.tabs) do
+				if tab.content then
+					for sID, sData in pairs(tab.content) do
+						local itemProps = {
+							realm = charRealm;
+							character = charName;
+							bagType = "Guild Bank";
+							bagIndex = tabID;
+							slotIndex = sID;
+							itemKey = sData.key;
+							itemCount = sData.count;
+							detail = self.items.details[sData.key] or {};
+						}
+						itemProps.itemLink = itemProps.detail.link;
+						if not itemProps.itemLink then
+							_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
+						end
+						if filter(itemProps, filterArg) then
+							table.insert(rTable, itemProps);
 						end
 					end
 				end
@@ -288,14 +358,19 @@ function FBoH_ItemDB:GetItemKey(itemLink)
 	local _, _, item = strsplit("|", itemLink);
 	if item == nil then return end;
 
-	local _, itemID, _, _, _, _, _, suffixID = strsplit(":", item);
+	local _, itemID, enchantID, jewelID1, jewelID2, jewelID3, jewelID4, suffixID = strsplit(":", item);
 	if itemID == nil then return end;
+	if enchantID == nil then return end;
+	if jewelID1 == nil then return end;
+	if jewelID2 == nil then return end;
+	if jewelID3 == nil then return end;
+	if jewelID4 == nil then return end;
 	if suffixID == nil then return end;
 	
 	local _, _, name = string.find(itemLink, "%[(.+)%]")
 	if name == nil then return end;
 	
-	return itemID .. ":" .. suffixID;
+	return itemID .. ":" .. enchantID .. ":" .. jewelID1 .. ":" .. jewelID2 .. ":" .. jewelID3 .. ":" .. jewelID4 .. ":" .. suffixID;
 end
 
 function FBoH_ItemDB:Purge()
@@ -311,7 +386,6 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 	local newItem = nil;
 	if itemLink then
 		newItem = {
-			link = itemLink;
 			count = itemCount;
 			key = self:GetItemKey(itemLink);
 		}
@@ -321,7 +395,7 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 		if self.items.details[newItem.key] == nil then
 			local d = {};
 			
-			d.name, _, d.rarity, d.level, d.minlevel, d.type, d.subtype, d.stackcount, d.equiploc, d.texture = GetItemInfo(itemLink);
+			d.name, d.link, d.rarity, d.level, d.minlevel, d.type, d.subtype, d.stackcount, d.equiploc, d.texture = GetItemInfo(itemLink);
 			if d.name then
 				self.items.details[newItem.key] = d;
 			end
@@ -353,6 +427,54 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 	bag.content = bag.content or {};
 	local content = bag.content;
 
+	content[slotID] = newItem;
+end
+
+function FBoH_ItemDB:SetGuildItem(tabID, slotID, itemLink, itemCount)
+--	FBoH:Print("Adding " .. tostring(itemCount) .. "x" .. tostring(itemLink) .. " at (" .. tostring(tabID) .. ", " .. tostring(slotID) ..")");
+	local newItem = nil;
+	if itemLink then
+		newItem = {
+			count = itemCount;
+			key = self:GetItemKey(itemLink);
+		}
+		
+		self.items.details = self.items.details or {};
+		if self.items.details[newItem.key] == nil then
+			local d = {};
+			
+			d.name, d.link, d.rarity, d.level, d.minlevel, d.type, d.subtype, d.stackcount, d.equiploc, d.texture = GetItemInfo(itemLink);
+			if d.name then
+				self.items.details[newItem.key] = d;
+			end
+		end		
+	end
+	
+	local realm = GetRealmName();
+	local guildName = GetGuildInfo("player");
+	if not guildName then return end;
+	
+	self.items.realms = self.items.realms or {};
+	local realms = self.items.realms;
+	
+	realms[realm] = realms[realm] or {};
+	local server = realms[realm];
+
+	server.guilds = server.guilds or {};
+	local guilds = server.guilds;
+	
+	guilds[guildName] = guilds[guildName] or {};
+	local guild = guilds[guildName];
+	
+	guild.tabs = guild.tabs or {};
+	local tabs = guild.tabs;
+	
+	tabs[tabID] = tabs[tabID] or {};
+	local tab = tabs[tabID];
+	
+	tab.content = tab.content or {};
+	local content = tab.content;
+	
 	content[slotID] = newItem;
 end
 

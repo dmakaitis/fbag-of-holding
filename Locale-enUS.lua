@@ -10,6 +10,7 @@ L["Main Bag"] = true;
 
 L["Bags"] = true;
 L["Bank"] = true;
+L["Guild Bank"] = true;
 L["Keyring"] = true;
 L["Mailbox"] = true;
 L["Wearing"] = true;

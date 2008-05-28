@@ -60,6 +60,32 @@ function FBoH:BANKFRAME_OPENED()
 	self:ScanContainer();
 end
 
+function FBoH:GUILDBANKFRAME_OPENED()
+	self.guildBankIsOpen = true;
+
+	local numTabs = GetNumGuildBankTabs();
+	for tab = 1, numTabs do
+		if IsTabViewable(tab) then
+			QueryGuildBankTab(tab);
+		end
+	end
+end
+
+function FBoH:GUILDBANKFRAME_CLOSED()
+	self.guildBankIsOpen = false;
+	self:UpdateBags();
+end
+
+function FBoH:GUILDBANKBAGSLOTS_CHANGED(arg1, arg2)
+	if self.guildBankIsOpen then
+		self:ScanGuildBank();
+	end
+end
+
+--function FBoH:GUILDBANK_UPDATE_TABS()
+--	self:Print("Updating Tabs");
+--end
+
 function FBoH:OnInitialize()
 	self.items = FBoH_ItemDB;
 
@@ -91,6 +117,11 @@ function FBoH:OnEnable()
 	self:RegisterEvent("BANKFRAME_OPENED");
 	self:RegisterEvent("BANKFRAME_CLOSED");
 
+	self:RegisterEvent("GUILDBANKFRAME_OPENED");
+	self:RegisterEvent("GUILDBANKFRAME_CLOSED");
+	self:RegisterEvent("GUILDBANKBAGSLOTS_CHANGED");
+--	self:RegisterEvent("GUILDBANK_UPDATE_TABS");
+	
 	self:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED", "ScanAllContainers");
 	self:RegisterEvent("PLAYERBANKSLOTS_CHANGED", "ScanAllContainers");
 	self:RegisterEvent("BAG_UPDATE", "ScanContainer");
@@ -776,6 +807,21 @@ function FBoH:GetBagID(bagType, bagIndex)
 	end
 	
 	return nil;
+end
+
+function FBoH:ScanGuildBank()
+	local numTabs = GetNumGuildBankTabs();
+	for tab = 1, numTabs do
+		if IsTabViewable(tab) then
+			for slot = 1, MAX_GUILDBANK_SLOTS_PER_TAB do
+				local link = GetGuildBankItemLink(tab, slot);
+				if link then
+					local _, count = GetGuildBankItemInfo(tab, slot);
+					self.items:SetGuildItem(tab, slot, link, count);
+				end
+			end
+		end
+	end
 end
 
 function FBoH:ScanBag(bagID)
