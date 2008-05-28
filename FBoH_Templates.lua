@@ -147,18 +147,7 @@ function FBoH_BankItemButton_DoEnter(self)
 end
 
 function FBoH_BankItemButton_DoModifiedClick(self, button)
-	if FBoH:IsBankOpen() == false then return end;
-	
-	if ( HandleModifiedItemClick(GetContainerItemLink(self.containerID, self.slotID)) ) then
-		return;
-	end
-	if ( IsModifiedClick("SPLITSTACK") ) then
-		local texture, itemCount, locked = GetContainerItemInfo(self.containerID, self.slotID);
-		if ( not locked ) then
-			OpenStackSplitFrame(self.item.itemCount, self, "BOTTOMLEFT", "TOPLEFT");
-		end
-		return;
-	end	
+	HandleModifiedItemClick(self.item.itemLink);
 end
 
 function FBoH_EmptyItemButton_DoEnter(self)
@@ -803,7 +792,7 @@ function FBoH_GridItemButton_SetBankItem(bFrame, item)
 	bFrame.containerID = bagID;
 	bFrame.slotID = slotID;
 	bFrame.item = item;
-	
+
 	local itemCount = item.itemCount;
 	local quality, texture = item.detail.rarity, item.detail.texture;
 	local _, _, locked, _, readable = GetContainerItemInfo(bagID, slotID)

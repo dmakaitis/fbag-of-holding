@@ -321,8 +321,8 @@
 		<Scripts>
 			<OnLoad>
 				self.DoEnter = FBoH_AltItemButton_DoEnter;
+				self.DoModifiedClick = FBoH_BankItemButton_DoModifiedClick;
 
-				self:RegisterForDrag("LeftButton");
 				self:RegisterForClicks("LeftButtonUp","RightButtonUp");
 			</OnLoad>
 			<OnEnter>
@@ -333,14 +333,10 @@
 				ResetCursor();
 			</OnLeave>
 			<OnClick>
-				return;
+				if ( IsModifiedClick() ) then
+					self:DoModifiedClick(arg1);
+				end
 			</OnClick>
-            <OnDragStart>
-				return;
-            </OnDragStart>
-            <OnReceiveDrag>
-				return;
-            </OnReceiveDrag>
 		</Scripts>		
 	</Button>
 	
