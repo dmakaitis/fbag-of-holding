@@ -208,7 +208,7 @@ function FBoH_TabModel.prototype:GetItems()
 	if self.itemCache == nil then
 		self.searchCache = nil;
 		local f = self:GetFilter();
-		local rVal = FBoH.items:FindItems(f.filter, f.arg);
+		local rVal = FBoH.items:FindItems(f.filter, f.arg, "both");
 		-- Set up sorting paramters
 		table.sort(rVal, FBoH.Sort_Items);
 		self.itemCache = rVal;

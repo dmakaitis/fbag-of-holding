@@ -134,38 +134,65 @@ function FBoH_ItemDB:CheckVersion()
 	end
 end
 
-function FBoH_ItemDB:FindItems(filter, filterArg)
-	local rTable = {};
+local function CopyItemProps(src, dest)
+	dest = dest or {};
+	for k, v in pairs(src) do
+		dest[k] = v;
+	end
+	return dest;
+end
+
+local FindItemProps = {};
+
+function FBoH_ItemDB:FindItems(filter, filterArg, subset)
+	-- Subset can be one of:
+	--	char - returns current character items
+	--	alt - returns alt items
+	--	both - return items for current character and alts (default)
+	--	gbank - returns items for the guild bank
 	
+	subset = subset or "both";
+	
+	local rTable = {};
+	local itemProps = FindItemProps;
+	
+	local charName = UnitName("player");
+	local charRealm = GetRealmName();
+
 	local realms = self.items.realms;
 	if realms == nil then return rTable end;
 	
 	self.items.details = self.items.details or {};
 	
-	for rName, rData in pairs(realms) do
-		if rData.characters then
-			for cName, cData in pairs(rData.characters) do
-				for bType, btData in pairs(cData) do
-					for bID, bData in pairs(btData) do
-						if bData.content then
-							for sID, sData in pairs(bData.content) do
-								local itemProps = {
-									realm = rName;
-									character = cName;
-									bagType = bType;
-									bagIndex = bID;
-									slotIndex = sID;
-									itemKey = sData.key;
-									itemCount = sData.count;
-									detail = self.items.details[sData.key] or {};
-									soulbound = sData.soulbound;
-								}
-								itemProps.itemLink = itemProps.detail.link;
-								if not itemProps.itemLink then
-									_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
-								end
-								if filter(itemProps, filterArg) then
-									table.insert(rTable, itemProps);
+	if subset == "char" or subset == "alt" or subset == "both" then
+		for rName, rData in pairs(realms) do
+			if rData.characters then
+				for cName, cData in pairs(rData.characters) do
+					if subset == "both" or 
+						(subset == "char" and cName == charName and rName == charRealm) or
+						(subset == "alt" and (cName ~= charName or rName ~= charRealm)) then
+						for bType, btData in pairs(cData) do
+							for bID, bData in pairs(btData) do
+								if bData.content then
+									for sID, sData in pairs(bData.content) do
+										itemProps.realm = rName;
+										itemProps.character = cName;
+										itemProps.bagType = bType;
+										itemProps.bagIndex = bID;
+										itemProps.slotIndex = sID;
+										itemProps.itemKey = sData.key;
+										itemProps.itemCount = sData.count;
+										itemProps.soulbound = sData.soulbound;
+										itemProps.detail = self.items.details[sData.key] or {};
+										itemProps.itemLink = itemProps.detail.link;
+										if not itemProps.itemLink then
+											_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
+										end
+										
+										if filter(itemProps, filterArg) then
+											table.insert(rTable, CopyItemProps(itemProps));
+										end
+									end
 								end
 							end
 						end
@@ -174,40 +201,39 @@ function FBoH_ItemDB:FindItems(filter, filterArg)
 			end
 		end
 	end
---[[
-	local charName = UnitName("player");
-	local charRealm = GetRealmName();
-	local charGuild = GetGuildInfo("player");
-	
-	if realms[charRealm] and realms[charRealm].guilds and realms[charRealm].guilds[charGuild] then
-		gData = realms[charRealm].guilds[charGuild];
-		if gData.tabs then
-			for tabID, tab in pairs(gData.tabs) do
-				if tab.content then
-					for sID, sData in pairs(tab.content) do
-						local itemProps = {
-							realm = charRealm;
-							character = charName;
-							bagType = "Guild Bank";
-							bagIndex = tabID;
-							slotIndex = sID;
-							itemKey = sData.key;
-							itemCount = sData.count;
-							detail = self.items.details[sData.key] or {};
-						}
-						itemProps.itemLink = itemProps.detail.link;
-						if not itemProps.itemLink then
-							_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
-						end
-						if filter(itemProps, filterArg) then
-							table.insert(rTable, itemProps);
+
+	if subset == "gbank" then
+		local charGuild = GetGuildInfo("player");
+		if realms[charRealm] and realms[charRealm].guilds and realms[charRealm].guilds[charGuild] then
+			gData = realms[charRealm].guilds[charGuild];
+			if gData.tabs then
+				for tabID, tab in pairs(gData.tabs) do
+					if tab.content then
+						for sID, sData in pairs(tab.content) do
+							itemProps.realm = charRealm;
+							itemProps.character = charName;
+							itemProps.bagType = "Guild Bank";
+							itemProps.bagIndex = tabID;
+							itemProps.slotIndex = sID;
+							itemProps.itemKey = sData.key;
+							itemProps.itemCount = sData.count;
+							itemProps.soulbound = nil;
+							itemProps.detail = self.items.details[sData.key] or {};
+							itemProps.itemLink = itemProps.detail.link;
+							if not itemProps.itemLink then
+								_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
+							end
+							
+							if filter(itemProps, filterArg) then
+								table.insert(rTable, CopyItemProps(itemProps));
+							end							
 						end
 					end
 				end
 			end
 		end
 	end
-]]	
+	
 	return rTable;
 end
 
