@@ -222,7 +222,7 @@ function FBoH_TabModel.prototype:GetItems()
 	if self.guildItemCache == nil then
 --		FBoH:Print("Updating guild items for " .. self.tabDef.name);
 		self.itemCache = nil;
-		self.guildItemCache = FBoH.items:FindItems(f.filter, f.arg, "gBank");
+		self.guildItemCache = FBoH.items:FindItems(f.filter, f.arg, "gbank");
 	end
 
 	
@@ -316,6 +316,7 @@ end
 function FBoH_TabModel.prototype:IsBagTypeVisible(bagType)
 	if bagType == "Bags" then return true end;
 	if bagType == "Bank" then return true end; -- Remember to make visible when at bank
+	if bagType == "Guild Bank" then return true end; -- Remember to make visible when at guild bank
 	return false;
 end
 

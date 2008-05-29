@@ -149,6 +149,37 @@ end
 function FBoH_BankItemButton_DoModifiedClick(self, button)
 	HandleModifiedItemClick(self.item.itemLink);
 end
+--[[
+function FBoH_GuildBankItemButton_DoClick(self, button)
+	if FBoH:IsBankOpen() == false then return end;
+
+	if ( button == "LeftButton" ) then
+		PickupContainerItem(self.containerID, self.slotID);
+	else
+		UseContainerItem(self.containerID, self.slotID);
+	end	
+end
+]]
+function FBoH_GuildBankItemButton_DoEnter(self)
+	local x;
+	x = self:GetRight();
+	if ( x >= ( GetScreenWidth() / 2 ) ) then
+		GameTooltip:SetOwner(self, "ANCHOR_LEFT");
+	else
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+	end
+	
+	GameTooltip:SetHyperlink(self.item.itemLink);
+	GameTooltip:AddLine(" ");
+	GameTooltip:AddLine(L["Item in guild bank"], 1, 0, 0);
+	GameTooltip:Show();
+	
+	CursorUpdate();	
+end
+
+function FBoH_GuildBankItemButton_DoModifiedClick(self, button)
+	HandleModifiedItemClick(self.item.itemLink);
+end
 
 function FBoH_EmptyItemButton_DoEnter(self)
 	local x;
@@ -671,6 +702,43 @@ function FBoH_GridItemButton_GetBankItemFrame(self)
 	return self.bankItemFrame;
 end
 
+FBoH_GridGuildBankItemButtonID = 1;
+
+function FBoH_GridItemButton_GetGuildBankItemFrame(self)
+	if self.guildBankItemFrame == nil then
+		local name = "FBoH_GridGuildBankItemButton_" .. FBoH_GridGuildBankItemButtonID;
+		FBoH_GridGuildBankItemButtonID = FBoH_GridGuildBankItemButtonID + 1;
+	
+		local bFrame = CreateFrame("Button", name, self, "FBoH_GuildBankItemButton");
+		bFrame:SetPoint("TOPLEFT");
+		bFrame:SetPoint("BOTTOMRIGHT");
+
+		bFrame.tex = _G[name .. "IconTexture"];
+		bFrame.tex:SetPoint("TOPLEFT", bFrame);
+		bFrame.tex:SetPoint("BOTTOMRIGHT", bFrame);
+		
+		bFrame.normal_tex = bFrame:GetNormalTexture();
+		bFrame.normal_tex:SetTexture("Interface\\Buttons\\UI-ActionButton-Border")
+		bFrame.normal_tex:SetBlendMode("ADD")
+		bFrame.normal_tex:SetAlpha(0.65)
+		bFrame.normal_tex:SetPoint("CENTER", bFrame, "CENTER", 1, 0)
+		bFrame.normal_tex:Show()
+		
+		bFrame:Show();
+		
+		bFrame.highlight = CreateFrame("Model", name .. "Highlighter", bFrame)
+		bFrame.highlight:Hide()
+		bFrame.highlight:SetModel("Interface\Buttons\UI-AutoCastButton.mdx")
+		bFrame.highlight:SetModelScale(1.2)
+		bFrame.highlight:SetAllPoints()
+		bFrame.highlight:SetSequence(0)
+		bFrame.highlight:SetSequenceTime(0, 0)
+
+		self.guildBankItemFrame = bFrame;
+	end
+	return self.guildBankItemFrame;
+end
+
 FBoH_GridEmptyItemButtonID = 1;
 
 function FBoH_GridItemButton_GetEmptyItemFrame(self)
@@ -824,6 +892,44 @@ function FBoH_GridItemButton_SetBankItem(bFrame, item)
 	bFrame.readable = readable
 end
 
+function FBoH_GridItemButton_SetGuildBankItem(bFrame, item)
+--	local bagID, slotID = FBoH:GetItemBagAndSlotIDs(item);
+	
+--	bFrame.containerID = bagID;
+--	bFrame.slotID = slotID;
+	bFrame.item = item;
+
+	local itemCount = item.itemCount;
+	local quality, texture = item.detail.rarity, item.detail.texture;
+--	local _, _, locked, _, readable = GetContainerItemInfo(bagID, slotID)
+
+	SetItemButtonTexture(bFrame, texture);
+	SetItemButtonCount(bFrame, itemCount);
+	SetItemButtonDesaturated(bFrame, locked, 0.5, 0.5, 0.5);
+	if texture then
+		bFrame.hasItem = 1;
+	else
+		bFrame.hasItem = nil;
+	end
+	
+--	FBoH_GridItemButton_SetContainerItem(bFrame, item);
+--	local itemFrame = bFrame.itemFrame;
+	
+--	if FBoH:IsBankOpen() then
+--		if (quality == nil) or (quality < 0) then quality = 0 end
+--		local r = FBoH_QualityColors[quality + 1]
+		
+--		bFrame.normal_tex:SetVertexColor(r[1], r[2], r[3])
+--		bFrame.normal_tex:SetVertexColor(1, 1, 0)
+--		bFrame.tex:SetAlpha(1.0);
+--	else
+		bFrame.normal_tex:SetVertexColor(1, 0, 0);
+		bFrame.tex:SetAlpha(0.5);
+--	end
+	
+--	bFrame.readable = readable
+end
+
 function FBoH_GridItemButton_SetContainerItem(cFrame, item)
 	local bagID, slotID = FBoH:GetItemBagAndSlotIDs(item);
 		
@@ -930,6 +1036,13 @@ function FBoH_GridItemButton_SetItem(self, item)
 			if bFrame == nil then return end;
 			
 			FBoH_GridItemButton_SetBankItem(bFrame, item);
+			
+			bFrame:Show();
+		elseif item.bagType == "Guild Bank" then
+			local bFrame = self:GetGuildBankItemFrame();
+			if bFrame == nil then return end;
+			
+			FBoH_GridItemButton_SetGuildBankItem(bFrame, item);
 			
 			bFrame:Show();
 		end

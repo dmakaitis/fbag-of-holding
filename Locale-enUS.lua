@@ -79,6 +79,7 @@ L["Grid Scale Desc"] = "Scales the size of item icons in the icon view";
 -- Views
 
 L["Item in bank"] = true;
+L["Item in guild bank"] = true;
 L["Item on "] = true;
 L["Item in "] = true;
 L["'s bank"] = true;

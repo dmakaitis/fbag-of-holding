@@ -274,6 +274,7 @@
 				self.SetItem = FBoH_GridItemButton_SetItem;
 				self.HideChildren = FBoH_GridItemButton_HideChildren;
 				self.GetBankItemFrame = FBoH_GridItemButton_GetBankItemFrame;
+				self.GetGuildBankItemFrame = FBoH_GridItemButton_GetGuildBankItemFrame;
 				self.GetContainerItemFrame = FBoH_GridItemButton_GetContainerItemFrame;
 				self.GetEmptyItemFrame = FBoH_GridItemButton_GetEmptyItemFrame;
 				self.GetAltItemFrame = FBoH_GridItemButton_GetAltItemFrame;
@@ -313,6 +314,42 @@
             </OnDragStart>
             <OnReceiveDrag>
 				self:DoClick("LeftButton");
+            </OnReceiveDrag>
+		</Scripts>		
+	</Button>
+	
+	<Button name="FBoH_GuildBankItemButton" inherits="ItemButtonTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self.DoEnter = FBoH_GuildBankItemButton_DoEnter;
+--				self.DoClick = FBoH_GuildBankItemButton_DoClick;
+				self.DoModifiedClick = FBoH_GuildBankItemButton_DoModifiedClick;
+--				self.SplitStack = function(button, split)
+--					SplitContainerItem(button.containerID, button.slotID, split);
+--				end
+
+--				self:RegisterForDrag("LeftButton");
+--				self:RegisterForClicks("LeftButtonUp","RightButtonUp");
+			</OnLoad>
+			<OnEnter>
+				self:DoEnter();
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+				ResetCursor();
+			</OnLeave>
+			<OnClick>
+				if ( IsModifiedClick() ) then
+					self:DoModifiedClick(arg1);
+				else
+--					self:DoClick(arg1);
+				end
+			</OnClick>
+            <OnDragStart>
+--				self:DoClick("LeftButton");
+            </OnDragStart>
+            <OnReceiveDrag>
+--				self:DoClick("LeftButton");
             </OnReceiveDrag>
 		</Scripts>		
 	</Button>
