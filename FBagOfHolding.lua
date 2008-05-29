@@ -73,7 +73,7 @@ end
 
 function FBoH:GUILDBANKFRAME_CLOSED()
 	self.guildBankIsOpen = false;
-	self:UpdateBags();
+	self:UpdateBagsGuild();
 end
 
 function FBoH:GUILDBANKBAGSLOTS_CHANGED(arg1, arg2)
@@ -822,6 +822,7 @@ function FBoH:ScanGuildBank()
 			end
 		end
 	end
+	self:UpdateBagsGuild();
 end
 
 function FBoH:ScanBag(bagID)
@@ -951,9 +952,23 @@ end
 
 function FBoH:DoUpdateBags()
 	for k, v in pairs(self.bagViews) do
-		v:UpdateBag()
+		v:UpdateBag();
 	end
 	self.bagUpdateQueued = nil;
+end
+
+function FBoH:UpdateBagsGuild()
+	if self.guildBagUpdateQueued then return end;
+--	self:Print("Queing guild bank update");
+	self.guildBagUpdateQueued = true;
+	self:ScheduleTimer(function() FBoH:DoUpdateBagsGuild(); end, 0);
+end
+
+function FBoH:DoUpdateBagsGuild()
+	for k, v in pairs(self.bagViews) do
+		v:UpdateBag("gbank");
+	end
+	self.guildBagUpdateQueued = nil;
 end
 
 function FBoH:IsBankOpen()

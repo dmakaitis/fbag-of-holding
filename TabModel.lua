@@ -202,17 +202,46 @@ end
 
 function FBoH_TabModel.prototype:GetItems()
 	if self.filterCache == nil then
-		self.itemCache = nil
+		self.selfItemCache = nil;
+		self.altItemCache = nil;
+		self.guildItemCache = nil;
 	end
+	
+	local f = self:GetFilter();
+	
+	if self.selfItemCache == nil then
+--		FBoH:Print("Updating self items for " .. self.tabDef.name);
+		self.itemCache = nil;
+		self.selfItemCache = FBoH.items:FindItems(f.filter, f.arg, "char");
+	end
+	if self.altItemCache == nil then
+--		FBoH:Print("Updating alt items for " .. self.tabDef.name);
+		self.itemCache = nil;
+		self.altItemCache = FBoH.items:FindItems(f.filter, f.arg, "alt");
+	end
+	if self.guildItemCache == nil then
+--		FBoH:Print("Updating guild items for " .. self.tabDef.name);
+		self.itemCache = nil;
+		self.guildItemCache = FBoH.items:FindItems(f.filter, f.arg, "gBank");
+	end
+
 	
 	if self.itemCache == nil then
 		self.searchCache = nil;
-		local f = self:GetFilter();
-		local rVal = FBoH.items:FindItems(f.filter, f.arg, "both");
-		-- Set up sorting paramters
-		table.sort(rVal, FBoH.Sort_Items);
-		self.itemCache = rVal;
+		self.itemCache = {};
+		for _, v in ipairs(self.selfItemCache) do
+			table.insert(self.itemCache, v);
+		end
+		for _, v in ipairs(self.altItemCache) do
+			table.insert(self.itemCache, v);
+		end
+		for _, v in ipairs(self.guildItemCache) do
+			table.insert(self.itemCache, v);
+		end
+		-- Set up sorting parameters
+		table.sort(self.itemCache, FBoH.Sort_Items);
 	end
+	
 	if self.searchCache == nil then
 		if self.viewModel.searchFilter then
 			self.searchCache = {};
@@ -232,12 +261,21 @@ function FBoH_TabModel.prototype:GetItems()
 	return self.searchCache;
 end
 
-function FBoH_TabModel.prototype:Update()
+function FBoH_TabModel.prototype:Update(cacheType)
+	cacheType = cacheType or "char";
+	
 	self.button:UpdateTabModel(self);
 	
-	self.itemCache = nil;
-	if FBoH_TabModel.defaultTab then
-		FBoH_TabModel.defaultTab.itemCache = nil;
+	if cacheType == "char" then
+		self.selfItemCache = nil;
+		if FBoH_TabModel.defaultTab then
+			FBoH_TabModel.defaultTab.selfItemCache = nil;
+		end
+	elseif cacheType == "gbank" then
+		self.guildItemCache = nil;
+		if FBoH_TabModel.defaultTab then
+			FBoH_TabModel.defaultTab.guildItemCache = nil;
+		end
 	end
 end
 

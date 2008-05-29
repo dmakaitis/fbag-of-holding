@@ -188,9 +188,9 @@ function FBoH_ViewModel.prototype:IsBagTypeVisible(bagType, tabIndex)
 	end
 end
 
-function FBoH_ViewModel.prototype:UpdateBag()
+function FBoH_ViewModel.prototype:UpdateBag(cacheType)
 	for _, v in pairs(self.tabData) do
-		v:Update();
+		v:Update(cacheType);
 	end
 	
 	self.view:UpdateViewModel(self);
