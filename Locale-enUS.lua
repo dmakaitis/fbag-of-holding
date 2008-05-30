@@ -65,8 +65,8 @@ L["Last Moved"] = true;
 L["Current Session"] = true;
 L["Today"] = true;
 L["Yesterday"] = true;
-L["Last Week"] = true;
-L["Last Month"] = true;
+L["Last 7 Days"] = true;
+L["Last 30 Days"] = true;
 
 -- FBoH Configuration
 
