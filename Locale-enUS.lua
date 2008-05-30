@@ -61,6 +61,9 @@ L["Item Type"] = true;
 L["Equip Slot"] = true;
 L["Not Equipable"] = true;
 
+L["Last Moved"] = true;
+L["Current Session"] = true;
+
 -- FBoH Configuration
 
 L["FuBar options"] = true;

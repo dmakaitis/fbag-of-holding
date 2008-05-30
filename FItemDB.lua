@@ -43,25 +43,6 @@ items = {
 
 ]]
 
-function FBoH_ItemDB:AreSameItem(oldItem, newItem)
-	if oldItem then
-		if newItem then
-			if oldItem.link ~= newItem.link then return false end;
-			if oldItem.count ~= newItem.count then return false end;
-			if oldItem.soulbound ~= newItem.soulbound then return false end;
-			return true;
-		else
-			return false;
-		end
-	else
-		if newItem then
-			return false;
-		else
-			return true;
-		end
-	end
-end
-
 function FBoH_ItemDB:CheckVersion()
 	self.items = self.items or FBoH_Items;
 	self.items.version = self.items.version or "purge";
@@ -180,6 +161,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 										itemProps.bagType = bType;
 										itemProps.bagIndex = bID;
 										itemProps.slotIndex = sID;
+										itemProps.lastUpdate = sData.lastUpdate;
 										itemProps.itemKey = sData.key;
 										itemProps.itemCount = sData.count;
 										itemProps.soulbound = sData.soulbound;
@@ -215,6 +197,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 							itemProps.bagType = "Guild Bank";
 							itemProps.bagIndex = tabID;
 							itemProps.slotIndex = sID;
+							itemProps.lastUpdate = sData.lastUpdate;
 							itemProps.itemKey = sData.key;
 							itemProps.itemCount = sData.count;
 							itemProps.soulbound = nil;
@@ -409,11 +392,44 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 	realm = realm or GetRealmName();
 	character = character or UnitName("player");
 	
+	local oldItem = self:GetItem(bagType, bagID, slotID, character, realm)
+	
+	local newKey = nil;
+	if itemLink then
+		newKey = self:GetItemKey(itemLink);
+	end
+	
+	local sameItem = true;
+	if oldItem then
+		if oldItem.key ~= newKey then sameItem = false
+		elseif oldItem.count ~= itemCount then sameItem = false
+		elseif oldItem.soulbound ~= soulbound then sameItem = false end;
+	else
+		if itemLink ~= nil then sameItem = false end;
+	end
+	
+--	if oldItem and oldItem.key == "34253:0:0:0:0:0:0" then
+--		FBoH:Print("Comparing " .. self.items.details[oldItem.key].link .. " with " ..
+--									tostring(itemLink));
+--	end
+	
+	if sameItem then
+--		if oldItem and oldItem.key == "34253:0:0:0:0:0:0" then
+--			FBoH:Print("These are the same item");
+--		end
+		return
+--	else
+--		if oldItem and oldItem.key == "34253:0:0:0:0:0:0" then
+--			FBoH:Print("These are NOT the same item");
+--		end
+	end;
+	
 	local newItem = nil;
 	if itemLink then
 		newItem = {
 			count = itemCount;
 			key = self:GetItemKey(itemLink);
+			lastUpdate = time();
 		}
 		newItem.soulbound = soulbound;
 		
@@ -427,10 +443,6 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 			end
 		end
 	end;
-	
-	local oldItem = self:GetItem(bagType, bagID, slotID, character, realm)
-	
-	if self:AreSameItem(oldItem, newItem) == true then return end;
 	
 	self.items.realms = self.items.realms or {};
 	local realms = self.items.realms;

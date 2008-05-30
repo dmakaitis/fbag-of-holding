@@ -420,3 +420,31 @@ function equipSlot.getOptions()
 end
 FBoH:RegisterProperty(equipSlot);
 
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+local lastMoved = {};
+
+lastMoved.name = "Last Moved";
+lastMoved.desc = L["Last Moved"];
+function lastMoved.filter(itemProps, timeframe)
+	if not itemProps.lastUpdate then return false end;
+	if timeframe == "session" then
+		if itemProps.lastUpdate > FBoH.sessionStartTime then
+			return true;
+		else
+			return false;
+		end
+	end
+	return false;
+end
+function lastMoved.getOptions()
+	return {
+		{
+			name = L["Current Session"],
+			value = "session",
+		},
+	};
+end
+FBoH:RegisterProperty(lastMoved);

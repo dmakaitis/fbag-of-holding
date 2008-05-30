@@ -105,6 +105,8 @@ function FBoH:OnInitialize()
 --	self:SetFuBarOption("configType", "Dewdrop-2.0");
 	self:SetFuBarOption("iconPath", "Interface\\Buttons\\Button-Backpack-Up");
 
+	self.sessionStartTime = time();
+	
 	optFrame = AceConfig:AddToBlizOptions(L["FBoH"], L["FBoH"]);	
 end
 
