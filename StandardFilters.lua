@@ -426,24 +426,67 @@ FBoH:RegisterProperty(equipSlot);
 
 local lastMoved = {};
 
+local lastMoved_SessionTime = nil;
+local lastMoved_Today = nil;
+local lastMoved_Yesterday = nil;
+local lastMoved_Week = nil;
+local lastMoved_Month = nil;
+
 lastMoved.name = "Last Moved";
 lastMoved.desc = L["Last Moved"];
 function lastMoved.filter(itemProps, timeframe)
 	if not itemProps.lastUpdate then return false end;
-	if timeframe == "session" then
-		if itemProps.lastUpdate > FBoH.sessionStartTime then
-			return true;
-		else
-			return false;
-		end
+
+	if lastMoved_SessionTime ~= FBoH.sessionStartTime then
+		lastMoved_SessionTime = FBoH.sessionStartTime;
+		
+		local hour, minute = GetGameTime();
+		
+		lastMoved_Today = lastMoved_SessionTime - (hour * 60 * 60) - (minute * 60);
+		lastMoved_Yesterday = lastMoved_Today - (24 * 60 * 60);
+		lastMoved_Week = lastMoved_Today - (7 * 24 * 60 * 60);
+		lastMoved_Month = lastMoved_Today - (30 * 24 * 60 * 60);
 	end
-	return false;
+	
+	local compare = FBoH.sessionStartTime;
+	
+	if timeframe == "today" then
+		compare = lastMoved_Today;
+	elseif timeframe == "yesterday" then
+		compare = lastMoved_Yesterday;
+	elseif timeframe == "week" then
+		compare = lastMoved_Week;
+	elseif timeframe == "month" then
+		compare = lastMoved_Month;
+	end
+	
+	if itemProps.lastUpdate > compare then
+		return true;
+	else
+		return false;
+	end
 end
 function lastMoved.getOptions()
 	return {
 		{
 			name = L["Current Session"],
 			value = "session",
+		},
+		{
+			name = L["Today"],
+			value = "today",
+		},
+		{
+			name = L["Yesterday"],
+			value = "yesterday",
+		},
+		{
+			name = L["Last 7 Days"],
+			value = "week",
+		},
+		{
+			name = L["Last 30 Days"],
+			value = "month",
 		},
 	};
 end

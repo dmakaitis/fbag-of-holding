@@ -1,4 +1,4 @@
-FBOH_ITEMS_DB_VERSION = "0.03.00";
+FBOH_ITEMS_DB_VERSION = "0.03.01";
 
 FBoH_Items = FBoH_Items or {};
 FBoH_ItemDB = {};
@@ -111,6 +111,26 @@ function FBoH_ItemDB:CheckVersion()
 				end
 			end			
 			self.items.version = "0.03.00";
+		end
+		if self.items.version == "0.03.00" then
+			if self.items.realms then
+				for _, r in pairs(self.items.realms) do
+					if r.characters then
+						for _, c in pairs(r.characters) do
+							for _, t in pairs(c) do
+								for _, b in pairs(t) do
+									if b.content then
+										for _, i in pairs(b.content) do
+											i.lastUpdate = i.lastUpdate or time();
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end			
+			self.items.version = "0.03.01";
 		end
 	end
 end

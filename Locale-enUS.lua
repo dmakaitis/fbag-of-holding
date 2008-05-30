@@ -63,6 +63,10 @@ L["Not Equipable"] = true;
 
 L["Last Moved"] = true;
 L["Current Session"] = true;
+L["Today"] = true;
+L["Yesterday"] = true;
+L["Last Week"] = true;
+L["Last Month"] = true;
 
 -- FBoH Configuration
 
