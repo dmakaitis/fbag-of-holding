@@ -414,6 +414,8 @@ function FBoH:OnUpdateFuBarTooltip()
 	local bgused = bgtotal - bgfree;
 
 	GameTooltip:AddLine(L["Feithar's Bag of Holding"]);
+	GameTooltip:AddLine("r" .. FBoH_GetVersion(), 0, 1, 1);
+	GameTooltip:AddLine(" ");
 	
 	local numbers;
 	if itotal ~= igtotal then
