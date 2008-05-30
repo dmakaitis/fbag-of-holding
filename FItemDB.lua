@@ -457,7 +457,7 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 		
 		self.items.details = self.items.details or {};
 		if self.items.details[newItem.key] == nil then
-			UpdateItemDetail(itemLink);
+			self:UpdateItemDetail(itemLink);
 		end
 	end;
 	
