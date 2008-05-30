@@ -187,7 +187,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 										itemProps.itemKey = sData.key;
 										itemProps.itemCount = sData.count;
 										itemProps.soulbound = sData.soulbound;
-										itemProps.detail = self.items.details[sData.key] or {};
+										itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. itemProps.itemKey .. ":0");
 										itemProps.itemLink = itemProps.detail.link;
 										if not itemProps.itemLink then
 											_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
@@ -223,7 +223,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 							itemProps.itemKey = sData.key;
 							itemProps.itemCount = sData.count;
 							itemProps.soulbound = nil;
-							itemProps.detail = self.items.details[sData.key] or {};
+							itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. itemProps.itemKey .. ":0");
 							itemProps.itemLink = itemProps.detail.link;
 							if not itemProps.itemLink then
 								_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
@@ -457,12 +457,7 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 		
 		self.items.details = self.items.details or {};
 		if self.items.details[newItem.key] == nil then
-			local d = {};
-			
-			d.name, d.link, d.rarity, d.level, d.minlevel, d.type, d.subtype, d.stackcount, d.equiploc, d.texture = GetItemInfo(itemLink);
-			if d.name then
-				self.items.details[newItem.key] = d;
-			end
+			UpdateItemDetail(itemLink);
 		end
 	end;
 	
@@ -488,6 +483,17 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 	local content = bag.content;
 
 	content[slotID] = newItem;
+end
+
+function FBoH_ItemDB:UpdateItemDetail(itemLink)
+	local d = {};
+	
+	d.name, d.link, d.rarity, d.level, d.minlevel, d.type, d.subtype, d.stackcount, d.equiploc, d.texture = GetItemInfo(itemLink);
+	if d.name then
+		self.items.details[self:GetItemKey(d.link)] = d;
+	end
+	
+	return d;
 end
 
 function FBoH_ItemDB:SetGuildItem(tabID, slotID, itemLink, itemCount)

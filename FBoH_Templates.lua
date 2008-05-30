@@ -1026,7 +1026,7 @@ function FBoH_GridItemButton_SetItem(self, item)
 			FBoH_GridItemButton_SetAltItem(aFrame, item);
 			
 			aFrame:Show();
-		elseif item.bagType == "Bags" then
+		elseif item.bagType == "Bags" or item.bagType == "Keyring" then
 			local cFrame = self:GetContainerItemFrame();
 			if cFrame == nil then return end;
 		

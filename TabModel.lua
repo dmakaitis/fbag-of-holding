@@ -317,6 +317,7 @@ end
 
 function FBoH_TabModel.prototype:IsBagTypeVisible(bagType)
 	if bagType == "Bags" then return true end;
+	if bagType == "Keyring" then return true end;
 	if bagType == "Bank" then return true end; -- Remember to make visible when at bank
 	if bagType == "Guild Bank" then return true end; -- Remember to make visible when at guild bank
 	return false;
