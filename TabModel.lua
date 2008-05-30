@@ -2,6 +2,8 @@
 -- Tab Template.
 --*****************************************************************************
 
+FBoH_SetVersion("$Revision$");
+
 FBoH_TabModel = FOO.Class();
 
 local FBoH_TabButtonID = 1;

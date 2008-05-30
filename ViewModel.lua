@@ -2,6 +2,8 @@
 -- View Template.
 --*****************************************************************************
 
+FBoH_SetVersion("$Revision$");
+
 FBoH_ViewModel = FOO.Class();
 
 local FBoH_ViewModelID = 1;

@@ -1,7 +1,27 @@
 FBOH_ITEMS_DB_VERSION = "0.03.01";
 
+-- This first bit is to help us keep track of the current revision number
+
+local FBoH_Version = nil;
+
+function FBoH_SetVersion(revision)
+	--$Revision$
+	local _, _, rev = strsplit(" ", revision);
+	FBoH_Version = FBoH_Version or rev;
+	if rev > FBoH_Version then
+		FBoH_Version = rev;
+	end
+end
+
+function FBoH_GetVersion()
+	return FBoH_Version;
+end
+
+FBoH_SetVersion("$Revision$");
+
 FBoH_Items = FBoH_Items or {};
 FBoH_ItemDB = {};
+
 
 --[[
 
@@ -578,4 +598,3 @@ function FBoH_ItemDB:UpdateBagUsage(bagType, bagID, character, realm)
 		end
 	end
 end
-

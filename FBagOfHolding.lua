@@ -9,6 +9,8 @@ local Dewdrop = AceLibrary("Dewdrop-2.0");
 
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
+FBoH_SetVersion("$Revision$");
+
 local defaults = {
 	profile = {
 		gridScale = 1.0,

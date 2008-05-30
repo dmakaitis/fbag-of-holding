@@ -1,5 +1,7 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
+FBoH_SetVersion("$Revision$");
+
 local function GetFuBarMinimapAttachedStatus(info)
 	return FBoH:IsFuBarMinimapAttached() -- or Omen.Options["FuBar.HideMinimapButton"]
 end
