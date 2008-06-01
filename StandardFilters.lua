@@ -145,6 +145,10 @@ function bagType.getOptions()
 			value = "Bank";
 		},
 		{
+			name = L["Guild Bank"],
+			value = "Guild Bank";
+		},
+		{
 			name = L["Keyring"],
 			value = "Keyring";
 		},

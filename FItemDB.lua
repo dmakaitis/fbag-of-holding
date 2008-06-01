@@ -175,26 +175,28 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 						(subset == "char" and cName == charName and rName == charRealm) or
 						(subset == "alt" and (cName ~= charName or rName ~= charRealm)) then
 						for bType, btData in pairs(cData) do
-							for bID, bData in pairs(btData) do
-								if bData.content then
-									for sID, sData in pairs(bData.content) do
-										itemProps.realm = rName;
-										itemProps.character = cName;
-										itemProps.bagType = bType;
-										itemProps.bagIndex = bID;
-										itemProps.slotIndex = sID;
-										itemProps.lastUpdate = sData.lastUpdate;
-										itemProps.itemKey = sData.key;
-										itemProps.itemCount = sData.count;
-										itemProps.soulbound = sData.soulbound;
-										itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. itemProps.itemKey .. ":0");
-										itemProps.itemLink = itemProps.detail.link;
-										if not itemProps.itemLink then
-											_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
-										end
-										
-										if filter(itemProps, filterArg) then
-											table.insert(rTable, CopyItemProps(itemProps));
+							if bType ~= "Wearing" or cName ~= charName then 
+								for bID, bData in pairs(btData) do
+									if bData.content then
+										for sID, sData in pairs(bData.content) do
+											itemProps.realm = rName;
+											itemProps.character = cName;
+											itemProps.bagType = bType;
+											itemProps.bagIndex = bID;
+											itemProps.slotIndex = sID;
+											itemProps.lastUpdate = sData.lastUpdate;
+											itemProps.itemKey = sData.key;
+											itemProps.itemCount = sData.count;
+											itemProps.soulbound = sData.soulbound;
+											itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. itemProps.itemKey .. ":0");
+											itemProps.itemLink = itemProps.detail.link;
+											if not itemProps.itemLink then
+												_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
+											end
+											
+											if filter(itemProps, filterArg) then
+												table.insert(rTable, CopyItemProps(itemProps));
+											end
 										end
 									end
 								end

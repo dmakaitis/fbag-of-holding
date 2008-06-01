@@ -248,12 +248,14 @@ function FBoH_TabModel.prototype:GetItems()
 		if self.viewModel.searchFilter then
 			self.searchCache = {};
 			for _, v in ipairs(self.itemCache) do
-				local _, _, itemName = string.find(v.itemLink, "%[(.+)%]")
-				local n = string.lower(itemName);
-				local c = string.lower(self.viewModel.searchFilter);
+				if v.itemLink then
+					local _, _, itemName = string.find(v.itemLink, "%[(.+)%]")
+					local n = string.lower(itemName);
+					local c = string.lower(self.viewModel.searchFilter);
 				
-				if string.find(n, c) then
-					table.insert(self.searchCache, v);
+					if string.find(n, c) then
+						table.insert(self.searchCache, v);
+					end
 				end
 			end
 		else
@@ -320,6 +322,7 @@ function FBoH_TabModel.prototype:IsBagTypeVisible(bagType)
 	if bagType == "Keyring" then return true end;
 	if bagType == "Bank" then return true end; -- Remember to make visible when at bank
 	if bagType == "Guild Bank" then return true end; -- Remember to make visible when at guild bank
+	if bagType == "Wearing" then return true end;
 	return false;
 end
 

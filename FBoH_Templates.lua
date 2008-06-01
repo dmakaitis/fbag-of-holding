@@ -107,12 +107,20 @@ function FBoH_AltItemButton_DoEnter(self)
 	end
 	local line = nil;
 	if self.item.bagType == "Bags" then
-		line = L["Item in "] .. alt .. L["'s bags"];
+		line = L["Item in %s's bags"];
 	elseif self.item.bagType == "Bank" then
-		line = L["Item in "] .. alt .. L["'s bank"];
+		line = L["Item in %s's bank"];
+	elseif self.item.bagType == "Mailbox" then
+		line = L["Item in %s's mailbox"];
+	elseif self.item.bagType == "Keyring" then
+		line = L["Item on %s's keyring"];
+	elseif self.item.bagType == "Wearing" then
+		line = L["Item worn by %s"];
 	else
-		line = L["Item on "] .. alt;
+		line = L["Item on %s"];
 	end
+	
+	line = string.format(line, alt);
 	
 	GameTooltip:AddLine(" ");
 	GameTooltip:AddLine(line, 1, 1, 0);

@@ -89,10 +89,12 @@ L["Grid Scale Desc"] = "Scales the size of item icons in the icon view";
 
 L["Item in bank"] = true;
 L["Item in guild bank"] = true;
-L["Item on "] = true;
-L["Item in "] = true;
-L["'s bank"] = true;
-L["'s bags"] = true;
+L["Item on %s"] = true;
+L["Item in %s's bank"] = true;
+L["Item in %s's bags"] = true;
+L["Item in %s's mailbox"] = true;
+L["Item on %s's keyring"] = true;
+L["Item worn by %s"] = true;
 
 -- View Menu
 
