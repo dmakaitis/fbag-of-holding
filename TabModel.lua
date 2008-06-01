@@ -13,10 +13,12 @@ function FBoH_TabModel.prototype:init(viewModel, tabIndex)
 	self.tabIndex = tabIndex;
 	self.tabDef = viewModel.viewDef.tabs[tabIndex];
 	
+	self.tabDef.id = self.tabDef.id or FBoH:GetUniqueTabID();
+	self.id = self.tabDef.id;
+	
 --	FBoH:Print("Initializing tab model: " .. self.tabDef.name);
 	
 	self.button = CreateFrame("Button", "FBoH_BagViewTab_" .. FBoH_TabButtonID, viewModel.view, "FBoH_ViewTabTemplate");
-	self.id = FBoH_TabButtonID;
 	FBoH_TabButtonID = FBoH_TabButtonID + 1;
 
 	self.tabDef.filter = self.tabDef.filter or "default";

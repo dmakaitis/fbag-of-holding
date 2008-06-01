@@ -5,7 +5,6 @@ Just because an item appears on this list does not guarantee it will be done.
 Bug Fixes:
 
 * Fix UI when "too many" tabs are attached to one window
-* Timestamp on stacks gets updated when stack size changes. Is this what we want?
 
 Features:
 
@@ -16,7 +15,6 @@ Features:
 * ButtonFacade support
 * Mailbox tracking
 * AutoBar support
-* Turn hooking on and off
 * Filter for "not in other bag"
 * Copy view
 * "subtabs" for tabs

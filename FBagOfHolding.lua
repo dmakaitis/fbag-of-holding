@@ -518,6 +518,49 @@ function FBoH:DeleteViewTab(tabModel)
 	self:RenumberViewIDs();
 end
 
+function FBoH:IsOpenAllBagsHooked()
+	return self.db.profile.hookOpenAllBags;
+end
+
+function FBoH:SetOpenAllBagsHooked(v)
+	self.db.profile.hookOpenAllBags = v;
+end
+
+function FBoH:IsOpenBackpackHooked()
+	return self.db.profile.hookToggleBackpack;
+end
+
+function FBoH:SetOpenBackpackHooked(v)
+	self.db.profile.hookToggleBackpack = v;
+end
+
+function FBoH:GetBagHook(bagID)
+	return self.db.profile.hookToggleBags[bagID] or "blizzard";
+end
+
+function FBoH:SetBagHook(bagID, value)
+	if value == "blizzard" then value = nil end;
+	self.db.profile.hookToggleBags[bagID] = value
+end
+
+function FBoH:GetBagHookChoices()
+	rVal = {};
+	
+	rVal["blizzard"] = L["- Blizzard Default -"];
+	
+	for _, v in ipairs(self.db.profile.viewDefs) do
+		for _, t in ipairs(v.tabs) do
+			if t.filter ~= "default" then
+				rVal[tostring(t.id)] = t.name;
+			end
+		end
+	end
+
+	rVal["default"] = L["- FBoH Main Bag -"];
+	
+	return rVal;
+end
+
 function FBoH:OpenAllBags()
 	if self.db.profile.hookOpenAllBags then
 		local showBags = false;
@@ -577,6 +620,8 @@ function FBoH:ToggleBag(id, force)
 		if tabID == "default" then
 			if not FBoH_TabModel.defaultTab then return end;
 			tabID = FBoH_TabModel.defaultTab.id;
+		else
+			tabID = tonumber(tabID);
 		end
 		
 		for _, v in ipairs(self.bagViews) do
@@ -707,6 +752,27 @@ function FBoH:UndockView(sourceView, sourceTab)
 	self:RenumberViewIDs();
 	
 	return newBagView;
+end
+
+function FBoH:GetUniqueTabID()
+	local rVal = time();
+	local unique = false;
+	
+	while unique == false do
+		unique = true;
+		for _, v in ipairs(self.db.profile.viewDefs) do
+			for _, t in ipairs(v.tabs) do
+				self:Print("Comparing " .. rVal .. " with " .. tostring(t.id));
+				if t.id == rVal then
+					self:Print("   values are the SAME");
+					unique = false;
+					rVal = rVal + 1;
+				end
+			end
+		end
+	end
+	
+	return rVal;
 end
 
 --*****************************************************************************

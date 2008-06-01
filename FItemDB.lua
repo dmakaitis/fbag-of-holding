@@ -423,11 +423,18 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 		newKey = self:GetItemKey(itemLink);
 	end
 	
+	local newItemTimestamp = time();
+	
 	local sameItem = true;
 	if oldItem then
 		if oldItem.key ~= newKey then sameItem = false
-		elseif oldItem.count ~= itemCount then sameItem = false
-		elseif oldItem.soulbound ~= soulbound then sameItem = false end;
+		elseif oldItem.soulbound ~= soulbound then sameItem = false
+		elseif oldItem.count ~= itemCount then 
+			sameItem = false;
+			if itemCount < oldItem.count then
+				newItemTimestamp = oldItem.lastUpdate or newItemTimestamp;
+			end
+		end
 	else
 		if itemLink ~= nil then sameItem = false end;
 	end
@@ -453,7 +460,7 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 		newItem = {
 			count = itemCount;
 			key = self:GetItemKey(itemLink);
-			lastUpdate = time();
+			lastUpdate = newItemTimestamp;
 		}
 		newItem.soulbound = soulbound;
 		

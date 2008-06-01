@@ -129,6 +129,63 @@ local options = {
 				},
 			},
 		},
+		general = {
+			type = "group",
+			name = L["General"],
+			desc = L["General"],
+			args = {
+				hookAllBags = {
+					type = "toggle",
+					name = L["Hook Open All Bags"],
+					desc = L["Opening all bags will open FBoH bags instead."],
+					get = function(info) return FBoH:IsOpenAllBagsHooked() end,
+					set = function(info, v) FBoH:SetOpenAllBagsHooked(v) end,
+				},
+				hookBackpack = {
+					type = "toggle",
+					name = L["Hook Open Backpack"],
+					desc = L["Opening the backpack will open the FBoH main view instead."],
+					get = function(info) return FBoH:IsOpenBackpackHooked() end,
+					set = function(info, v) FBoH:SetOpenBackpackHooked(v) end,
+				},
+				hookBag1 = {
+					type = "select",
+					name = L["Hook Bag 1"],
+					desc = L["Opening bag 1 will open the selected bag instead."],
+					get = function(info) return FBoH:GetBagHook(1) end,
+					set = function(info, v) FBoH:SetBagHook(1, v) end,
+					style = "dropdown",
+					values = function(info) return FBoH:GetBagHookChoices() end,
+				},
+				hookBag2 = {
+					type = "select",
+					name = L["Hook Bag 2"],
+					desc = L["Opening bag 2 will open the selected bag instead."],
+					get = function(info) return FBoH:GetBagHook(2) end,
+					set = function(info, v) FBoH:SetBagHook(2, v) end,
+					style = "dropdown",
+					values = function(info) return FBoH:GetBagHookChoices() end,
+				},
+				hookBag3 = {
+					type = "select",
+					name = L["Hook Bag 3"],
+					desc = L["Opening bag 3 will open the selected bag instead."],
+					get = function(info) return FBoH:GetBagHook(3) end,
+					set = function(info, v) FBoH:SetBagHook(3, v) end,
+					style = "dropdown",
+					values = function(info) return FBoH:GetBagHookChoices() end,
+				},
+				hookBag4 = {
+					type = "select",
+					name = L["Hook Bag 4"],
+					desc = L["Opening bag 4 will open the selected bag instead."],
+					get = function(info) return FBoH:GetBagHook(4) end,
+					set = function(info, v) FBoH:SetBagHook(4, v) end,
+					style = "dropdown",
+					values = function(info) return FBoH:GetBagHookChoices() end,
+				},
+			},
+		},
 	}
 }
 

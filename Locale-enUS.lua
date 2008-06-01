@@ -85,6 +85,22 @@ L["Display"] = true;
 L["Grid Scale"] = "Icon Scale";
 L["Grid Scale Desc"] = "Scales the size of item icons in the icon view";
 
+L["General"] = true;
+L["Hook Open All Bags"] = true;
+L["Opening all bags will open FBoH bags instead."] = true;
+L["Hook Open Backpack"] = true;
+L["Opening the backpack will open the FBoH main view instead."] = true;
+L["- FBoH Main Bag -"] = true;
+L["- Blizzard Default -"] = true;
+L["Hook Bag 1"] = true;
+L["Opening bag 1 will open the selected bag instead."] = true;
+L["Hook Bag 2"] = true;
+L["Opening bag 2 will open the selected bag instead."] = true;
+L["Hook Bag 3"] = true;
+L["Opening bag 3 will open the selected bag instead."] = true;
+L["Hook Bag 4"] = true;
+L["Opening bag 4 will open the selected bag instead."] = true;
+
 -- Views
 
 L["Item in bank"] = true;
