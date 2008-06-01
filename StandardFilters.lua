@@ -156,10 +156,10 @@ function bagType.getOptions()
 			name = L["Wearing"],
 			value = "Wearing";
 		},
-		{
-			name = L["Mailbox"],
-			value = "Mailbox";
-		},
+--		{
+--			name = L["Mailbox"],
+--			value = "Mailbox";
+--		},
 	};
 end
 FBoH:RegisterProperty(bagType);

@@ -2,4 +2,25 @@ This is a list of things to do for FBoH.
 
 Just because an item appears on this list does not guarantee it will be done.
 
-* View items worn
+Bug Fixes:
+
+* Fix UI when "too many" tabs are attached to one window
+* Timestamp on stacks gets updated when stack size changes. Is this what we want?
+
+Features:
+
+* Ability to manipulate guild bank objects while at the guild bank
+* Bag compression (a la Baggins)
+* View items worn (done for alts)
+* ClosetGnome filter
+* ButtonFacade support
+* Mailbox tracking
+* AutoBar support
+* Turn hooking on and off
+* Filter for "not in other bag"
+* Copy view
+* "subtabs" for tabs
+
+Nice To Haves:
+
+* Get rid of DewDrop/Ace2 dependencies.
