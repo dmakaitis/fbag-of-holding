@@ -191,7 +191,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 											itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. itemProps.itemKey .. ":0");
 											itemProps.itemLink = itemProps.detail.link;
 											if not itemProps.itemLink then
-												_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
+												_, itemProps.itemLink = GetItemInfo("item:" .. sData.key .. ":0");
 											end
 											
 											if filter(itemProps, filterArg) then
@@ -228,7 +228,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 							itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. itemProps.itemKey .. ":0");
 							itemProps.itemLink = itemProps.detail.link;
 							if not itemProps.itemLink then
-								_, itemProps.itemLink = GetItemInfo("item:" .. itemProps.itemKey .. ":0");
+								_, itemProps.itemLink = GetItemInfo("item:" .. sData.key .. ":0");
 							end
 							
 							if filter(itemProps, filterArg) then
@@ -439,20 +439,8 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 		if itemLink ~= nil then sameItem = false end;
 	end
 	
---	if oldItem and oldItem.key == "34253:0:0:0:0:0:0" then
---		FBoH:Print("Comparing " .. self.items.details[oldItem.key].link .. " with " ..
---									tostring(itemLink));
---	end
-	
 	if sameItem then
---		if oldItem and oldItem.key == "34253:0:0:0:0:0:0" then
---			FBoH:Print("These are the same item");
---		end
 		return
---	else
---		if oldItem and oldItem.key == "34253:0:0:0:0:0:0" then
---			FBoH:Print("These are NOT the same item");
---		end
 	end;
 	
 	local newItem = nil;

@@ -11,12 +11,17 @@ Features:
 * Ability to manipulate guild bank objects while at the guild bank
 * Bag compression (a la Baggins)
 * View items worn (done for alts)
-* ClosetGnome filter
-* ButtonFacade support
-* Mailbox tracking
-* AutoBar support
 * Filter for "not in other bag"
 * Copy view
+* Mailbox tracking
+* Custom sorting
+* Custom searching
+* Tooltip filter
+
+* ClosetGnome filter
+* ButtonFacade support
+* AutoBar filter
+
 * "subtabs" for tabs
 
 Nice To Haves:
