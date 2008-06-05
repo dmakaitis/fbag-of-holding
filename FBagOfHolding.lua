@@ -762,9 +762,7 @@ function FBoH:GetUniqueTabID()
 		unique = true;
 		for _, v in ipairs(self.db.profile.viewDefs) do
 			for _, t in ipairs(v.tabs) do
-				self:Print("Comparing " .. rVal .. " with " .. tostring(t.id));
 				if t.id == rVal then
-					self:Print("   values are the SAME");
 					unique = false;
 					rVal = rVal + 1;
 				end
