@@ -1103,16 +1103,6 @@ function FBoH.Sort_Items(a, b)
 	
 	-- If configured sorts didn't get everything else figured out, do the rest...
 	
-	-- Sort by realm and character
-	if a.realm < b.realm then return true end;
-	if a.realm > b.realm then return false end;
-	if a.character < b.character then return true end;
-	if a.character > b.character then return false end;
-		
-	-- Sort by bag type
-	if a.bagType < b.bagType then return true end;
-	if a.bagType > b.bagType then return false end;
-
 	local aName, aRarity = a.detail.name, a.detail.rarity;
 	local bName, bRarity = b.detail.name, b.detail.rarity;
 	
@@ -1130,6 +1120,16 @@ function FBoH.Sort_Items(a, b)
 	if aName < bName then return true end;
 	if aName > bName then return false end;
 	
+	-- Sort by realm and character
+	if a.realm < b.realm then return true end;
+	if a.realm > b.realm then return false end;
+	if a.character < b.character then return true end;
+	if a.character > b.character then return false end;
+		
+	-- Sort by bag type
+	if a.bagType < b.bagType then return true end;
+	if a.bagType > b.bagType then return false end;
+
 	-- As a last resort, sort in the order they appear in the default UI
 	if a.bagIndex < b.bagIndex then return true end;
 	if a.bagIndex > b.bagIndex then return false end;

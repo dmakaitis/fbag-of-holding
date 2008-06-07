@@ -129,6 +129,6 @@ L["Filters"] = true;
 L["Sorting"] = true;
 L["Name:"] = true;
 L["Default Bag Filter"] = "The default bag view will display items for the current character not displayed in other bag views.";
-L["Sorters Help"] = "Drag properties from the left into this frame to sort by that property in the order by which they appear in this frame. Click the button for each sorter to toggle between ascending and descending order. Items belonging to the current character will always appear first and be grouped by the bag type before any configured sorting is applied.";
+L["Sorters Help"] = "Drag properties from the left into this frame to sort by that property in the order by which they appear in this frame. Click the button for each sorter to toggle between ascending and descending order. Items belonging to the current character will always appear first and be grouped by location before any configured sorting is applied.";
 L["Ascending"] = true;
 L["Descending"] = true;

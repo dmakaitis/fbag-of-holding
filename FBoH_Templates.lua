@@ -528,8 +528,12 @@ function FBoH_GridTemplate_ResizeGrid(self)
 	while self.items[itemIndex] do
 		local bagType = self.items[itemIndex].bagType;
 		
+		if (chr ~= self.items[itemIndex].character) or (rlm ~= self.items[itemIndex].realm) then
+			bagType = "alt";
+		end
+		
 		if bagType ~= lastBagType then
-			if (chr == lastChr) and (rlm == lastRlm) then
+--			if (chr == lastChr) and (rlm == lastRlm) then
 				if model:IsBagTypeVisible(lastBagType) then
 					if (lastBagType ~= "Bank") or (FBoH:IsBankOpen() == true) then
 						local empty = emptySlots[lastBagType];
@@ -556,7 +560,7 @@ function FBoH_GridTemplate_ResizeGrid(self)
 						end
 					end
 				end
-			end
+--			end
 
 			if item ~= 1 then
 				row = row + 1;
@@ -567,7 +571,7 @@ function FBoH_GridTemplate_ResizeGrid(self)
 		lastChr = self.items[itemIndex].character;
 		lastRlm = self.items[itemIndex].realm;
 		
-		if model:IsBagTypeVisible(bagType) then
+		if bagType == "alt" or model:IsBagTypeVisible(bagType) then
 			self.rowData[row] = self.rowData[row] or {};
 			self.rowData[row][item] = itemIndex;
 			
