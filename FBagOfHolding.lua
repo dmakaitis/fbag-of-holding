@@ -1075,7 +1075,6 @@ end
 --*****************************************************************************
 
 function FBoH.Sort_Items(a, b)
-	-- Sort by realm and character, just in case
 	-- Current character always comes first.
 	local chr = UnitName("player");
 	if a.realm == b.realm then
@@ -1083,16 +1082,37 @@ function FBoH.Sort_Items(a, b)
 		if (a.character ~= chr) and (b.character == chr) then return false end;
 	end
 	
+	-- For the current character, always sort by bag type first so we can group correctly
+	if (a.character == chr) and (a.realm == GetRealmName()) then
+		if a.bagType < b.bagType then return true end;
+		if a.bagType > b.bagType then return false end;
+	end
+	
+	-- Do configured sorts now...
+	local sorters = FBoH.sorters or {};
+	for _, s in ipairs(sorters) do
+		local rTrue, rFalse = true, false;
+		if s.descending then
+			rTrue, rFalse = false, true;
+		end
+		
+		local sorter = FBoH:GetSorter(s.name);
+		if sorter.sortCompare(a, b) then return rTrue end;
+		if sorter.sortCompare(b, a) then return rFalse end;
+	end
+	
+	-- If configured sorts didn't get everything else figured out, do the rest...
+	
+	-- Sort by realm and character
 	if a.realm < b.realm then return true end;
 	if a.realm > b.realm then return false end;
 	if a.character < b.character then return true end;
 	if a.character > b.character then return false end;
 		
-	-- Always sort by location first
+	-- Sort by bag type
 	if a.bagType < b.bagType then return true end;
 	if a.bagType > b.bagType then return false end;
 
-	-- Do configured sorts now...
 	local aName, aRarity = a.detail.name, a.detail.rarity;
 	local bName, bRarity = b.detail.name, b.detail.rarity;
 	
@@ -1102,13 +1122,15 @@ function FBoH.Sort_Items(a, b)
 	aRarity = aRarity or 0;
 	bRarity = bRarity or 0;
 	
+	-- Sort by quality
 	if aRarity > bRarity then return true end;
 	if aRarity < bRarity then return false end;
-	
+
+	-- Sory be name
 	if aName < bName then return true end;
 	if aName > bName then return false end;
 	
-	-- As a last resort, sort in natural order
+	-- As a last resort, sort in the order they appear in the default UI
 	if a.bagIndex < b.bagIndex then return true end;
 	if a.bagIndex > b.bagIndex then return false end;
 	if a.slotIndex < b.slotIndex then return true end;

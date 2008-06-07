@@ -255,7 +255,7 @@ function FBoH_TabModel.prototype:GetItems()
 		for _, v in ipairs(self.guildItemCache) do
 			table.insert(self.itemCache, v);
 		end
-		-- Set up sorting parameters
+		FBoH.sorters = self.tabDef.sort;
 		table.sort(self.itemCache, FBoH.Sort_Items);
 	end
 	

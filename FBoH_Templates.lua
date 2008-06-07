@@ -847,9 +847,13 @@ function FBoH_GridItemButton_SetAltItem(aFrame, item)
 		quality, texture = item.detail.rarity, item.detail.texture;
 	end
 	if (quality == nil) or (texture == nil) then
-		local _, _, q, _, _, _, _, _, _, t = GetItemInfo(item.itemLink)
-		quality = quality or q;
-		texture = texture or t;
+		if item.itemLink then
+			local _, _, q, _, _, _, _, _, _, t = GetItemInfo(item.itemLink)
+			quality = quality or q;
+			texture = texture or t;
+		else
+			quality = 0;
+		end
 	end
 
 	SetItemButtonTexture(aFrame, texture);

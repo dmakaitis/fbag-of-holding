@@ -6,6 +6,19 @@ FBoH_SetVersion("$Revision$");
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
+local realm = {};
+
+realm.name = "FBoH_Realm";
+realm.desc = L["Realm"];
+function realm.sortCompare(a, b)
+	if a.realm < b.realm then return true else return false end;
+end
+FBoH:RegisterProperty(realm);
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
 local character = {};
 
 character.name = "Character";
@@ -91,13 +104,16 @@ local itemName = {};
 itemName.name = "Item Name";
 itemName.desc = L["Item Name"];
 function itemName.sortCompare(a, b)
-	if a.detail and b.detail then
+	if a.detail and a.detail.name and b.detail and b.detail.name then
 		if a.detail.name < b.detail.name then return true else return false end;
 	else
-		local _, _, aName = string.find(a.itemLink, "%[(.+)%]");
-		local _, _, bName = string.find(b.itemLink, "%[(.+)%]");
-		if aName < bName then return true else return false end;
+		if a.itemLink and b.itemLink then
+			local _, _, aName = string.find(a.itemLink, "%[(.+)%]");
+			local _, _, bName = string.find(b.itemLink, "%[(.+)%]");
+			if aName < bName then return true else return false end;
+		end
 	end
+	return false;
 end
 function itemName.filter(itemProps, name)
 	local _, _, itemName = string.find(itemProps.itemLink, "%[(.+)%]");
@@ -192,7 +208,7 @@ quality.name = "Quality";
 quality.desc = L["Quality"];
 function quality.sortCompare(a, b)
 	if a.detail and b.detail then
-		if a.detail.rarity < b.detail.rarity then return true else return false end;
+		if (a.detail.rarity or 0) < (b.detail.rarity or 0) then return true else return false end;
 	end
 	if a.detail then return true end;
 	return false;
@@ -286,7 +302,7 @@ itemType.name = "Item Type";
 itemType.desc = L["Item Type"];
 function itemType.sortCompare(a, b)
 	if a.detail and b.detail then
-		if a.detail.type < b.detail.type then return true else return false end;
+		if (a.detail.type or "") < (b.detail.type or "") then return true else return false end;
 	end
 	if a.detail then return true end;
 	return false;
