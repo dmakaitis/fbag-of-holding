@@ -392,6 +392,123 @@
 		</Scripts>
 	</Button>
 	
+	<Button name="FBoH_SorterButton" virtual="true" hidden="false">
+		<Size>
+			<AbsDimension x="150" y="32"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parent_Background" file="Interface\Buttons\UI-ListBox-Highlight2">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-4"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString name="$parent_Text" inherits="GameFontNormal" justifyH="LEFT" text="Sorter Button">
+					<Size>
+						<AbsDimension x="0" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="8" y="0"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="RIGHT" relativeTo="$parent_NotButton">
+							<Offset>
+								<AbsDimension x="-8" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parent_ArgBtn" inherits="UIPanelButtonTemplate" text="Ascending">
+				<Size>
+					<AbsDimension x="158" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="RIGHT">
+						<Offset>
+							<AbsDimension x="-8" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self:DoClick();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="$parent_InsertTop" inherits="FBoH_HorizontalInsertTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="TOPLEFT"/>
+					<Anchor point="RIGHT" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Frame>
+			<Frame name="$parent_InsertBottom" inherits="FBoH_HorizontalInsertTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="RIGHT" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.fontString = _G[self:GetName() .. "_Text"];
+				self.argButton = _G[self:GetName() .. "_ArgBtn"];
+				self.insertTop = _G[self:GetName() .. "_InsertTop"];
+				self.insertBottom = _G[self:GetName() .. "_InsertBottom"];
+				self.backgroundTexture = _G[self:GetName() .. "_Background"];
+				
+				self.SetSorter = FBoH_SorterButton_SetSorter;
+				self.UpdateView = FBoH_FilterButton_UpdateView;
+				self.DoUpdate = FBoH_SorterButton_DoUpdate;
+				self.ReceiveDrag = FBoH_SorterButton_ReceiveDrag;
+
+				self.argButton.DoClick = FBoH_SorterButtonArgBtn_DoClick;
+				
+				self.backgroundTexture:SetVertexColor(0.5, 0.8, 1.0, 0.6);
+
+				self.type = "sorter";
+				self:RegisterForDrag("LeftButton");
+			</OnLoad>
+			<OnUpdate>
+				self:DoUpdate();
+			</OnUpdate>
+			<OnDragStart>
+				self.backgroundTexture:SetVertexColor(0.5, 0.8, 1.0, 0.2);
+				self.isBeingDragged = true;
+				FBoH_ConfigureDrag:SetText(self.fontString:GetText());
+				FBoH_ConfigureDrag:Show();
+				FBoH_Configure.dragData = {
+					source=self;
+				}
+			</OnDragStart>
+			<OnDragStop>
+				self.backgroundTexture:SetVertexColor(0.5, 0.8, 1.0, 0.6);
+				FBoH_ConfigureDrag:Hide();
+				if not FBoH_Configure:ExecuteDrag() then
+--					FBoH:Print("Drag was not received by a target: deleting...");
+					self:GetParent():DeleteSorter(self.index);
+				end
+				self.isBeingDragged = nil;
+				FBoH_Configure.dragData = nil;
+			</OnDragStop>
+		</Scripts>
+	</Button>
+	
 	<Frame name="FBoH_GroupTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="46" y="32"/>
@@ -883,6 +1000,194 @@
 		</Scripts>
 	</Frame>
 	
+	<Frame name="FBoH_ConfigureSortersWellTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="500" y="256"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-TopLeft">
+					<Size>
+						<AbsDimension x="256" y="132"/>
+					</Size>
+					<TexCoords top="0" left="0" bottom="0.515625" right="1"/>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="-4" y="4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-TopRight">
+					<Size>
+						<AbsDimension x="256" y="132"/>
+					</Size>
+					<TexCoords top="0" left="0" bottom="0.515625" right="1"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="4" y="4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-BotLeft">
+					<Size>
+						<AbsDimension x="256" y="132"/>
+					</Size>
+					<TexCoords top="0.484375" left="0" bottom="1" right="1"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="-4" y="-4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-BotRight">
+					<Size>
+						<AbsDimension x="256" y="132"/>
+					</Size>
+					<TexCoords top="0.484375" left="0" bottom="1" right="1"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="4" y="-4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString name="$parent_DefaultOutput" inherits="GameFontNormal" text="">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="50" y="0"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-50" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>				
+			</Layer>
+		</Layers>
+		<Frames>
+			<ScrollFrame name="$parent_Scroll" inherits="FBoH_ScrollFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						ScrollFrame_OnLoad();
+						
+						self.DoVerticalScroll = FBoH_ConfigureSortersWellTemplate_DoVerticalScroll;
+
+						self.rowHeight = 32;
+					</OnLoad>
+					<OnVerticalScroll>
+						FBOH_SCROLL_FRAME = self;
+						FauxScrollFrame_OnVerticalScroll(self.rowHeight, FBoH_Configure_OnVerticalScroll);
+						FBOH_SCROLL_FRAME = nil;
+					</OnVerticalScroll>
+				</Scripts>
+			</ScrollFrame>
+			<Button name="$parent_Button1" inherits="FBoH_SorterButton" id="1">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="5" y="0"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-5" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button2" inherits="FBoH_SorterButton" id="2">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button1" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button1" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button3" inherits="FBoH_SorterButton" id="3">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button2" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button2" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button4" inherits="FBoH_SorterButton" id="4">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button3" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button3" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button5" inherits="FBoH_SorterButton" id="5">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button4" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button4" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button6" inherits="FBoH_SorterButton" id="6">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button5" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button5" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button7" inherits="FBoH_SorterButton" id="7">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button6" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button6" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button8" inherits="FBoH_SorterButton" id="8">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button7" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button7" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.SetSorters = FBoH_ConfigureSortersWellTemplate_SetSorters;
+--				self.GetGroupFrame = FBoH_ConfigureFiltersWellTemplate_GetGroupFrame;
+				self.ReceiveDrag = FBoH_ConfigureSortersWellTemplate_ReceiveDrag;
+				self.DeleteSorter = FBoH_ConfigureSortersWellTemplate_DeleteSorter;
+--				self.InsertGroup = FBoH_ConfigureFiltersWellTemplate_InsertGroup;
+				self.UpdateView = FBoH_ConfigureSortersWellTemplate_UpdateView;
+				
+				self.scrollFrame = _G[self:GetName() .. "_Scroll"];
+				self.defaultString = _G[self:GetName() .. "_DefaultOutput"];
+				
+--				self.filterSettings = {};
+--				self.groupFrames = {};
+			</OnLoad>
+			<OnUpdate>
+				local dragData = FBoH_Configure.dragData;
+				if dragData and MouseIsOver(self) then
+					local top = self:GetTop();
+					if self.lastRowButton then
+						top = self.lastRowButton:GetBottom();
+					end
+
+					local _, cursorY = GetCursorPosition();
+					cursorY = cursorY / UIParent:GetEffectiveScale();
+					
+					if top > cursorY then
+						dragData.target = self;
+					end
+				end
+			</OnUpdate>
+		</Scripts>
+	</Frame>
+	
 	<Button name="FBoH_ConfigureTabTemplate" inherits="CharacterFrameTabButtonTemplate" virtual="true">
 		<Scripts>
 			<OnLoad>
@@ -985,6 +1290,39 @@
 		<Size>
 			<AbsDimension x="0" y="256"/>
 		</Size>
+		<Frames>
+			<Frame name="$parent_Left" inherits="FBoH_ConfigureLeftWellTemplate">
+				<Anchors>
+					<Anchor point="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="5" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Frame>
+			<Frame name="$parent_Right" inherits="FBoH_ConfigureSortersWellTemplate">
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="-28" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.SetChoices = function(frame, choices)
+					frame.choicesList:SetChoices(choices); 
+				end
+				self.SetSorters = function(frame, sorters)
+					frame.sortersList:SetSorters(sorters)
+				end
+				
+				self.choicesList = _G[self:GetName() .. "_Left"];
+				self.sortersList = _G[self:GetName() .. "_Right"];
+			</OnLoad>
+		</Scripts>
 	</Frame>
 	
 	<Frame name="FBoH_Configure" hidden="true" toplevel="true" frameStrata="DIALOG" movable="true" clampedToScreen="true" enableMouse="true" parent="UIParent">
@@ -1165,6 +1503,7 @@
 
 				self.baseOptions = _G[self:GetName() .. "_Base"]
 				self.filtersFrame = FBoH_GetChildObjectByID(self, 1001);
+				self.sortersFrame = FBoH_GetChildObjectByID(self, 1002);
 				
 				self.tabCount = 2;
 				

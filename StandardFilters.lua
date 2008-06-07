@@ -10,6 +10,9 @@ local character = {};
 
 character.name = "Character";
 character.desc = L["Character"];
+function character.sortCompare(a, b)
+	if a.character < b.character then return true else return false end;
+end
 function character.filter(itemProps, character)
 	character = character or ".";
 	local rlm, chr = strsplit(".", character);
@@ -87,6 +90,15 @@ local itemName = {};
 
 itemName.name = "Item Name";
 itemName.desc = L["Item Name"];
+function itemName.sortCompare(a, b)
+	if a.detail and b.detail then
+		if a.detail.name < b.detail.name then return true else return false end;
+	else
+		local _, _, aName = string.find(a.itemLink, "%[(.+)%]");
+		local _, _, bName = string.find(b.itemLink, "%[(.+)%]");
+		if aName < bName then return true else return false end;
+	end
+end
 function itemName.filter(itemProps, name)
 	local _, _, itemName = string.find(itemProps.itemLink, "%[(.+)%]");
 	if not itemName then
@@ -114,6 +126,9 @@ local bagIndex = {};
 
 bagIndex.name = "Bag Index";
 bagIndex.desc = L["Bag Index"];
+function bagIndex.sortCompare(a, b)
+	if a.bagIndex < b.bagIndex then return true else return false end;
+end
 function bagIndex.filter(itemProps, bagIndex)
 	bagIndex = tonumber(bagIndex) or 1;
 	if itemProps.bagIndex == bagIndex then return true end;
@@ -129,6 +144,9 @@ local bagType = {};
 
 bagType.name = "Bag Type";
 bagType.desc = L["Bag Type"];
+function bagType.sortCompare(a, b)
+	if a.bagType < b.bagType then return true else return false end;
+end
 function bagType.filter(itemProps, btype)
 	btype = btype or "Bags";
 	if itemProps.bagType == btype then return true end;
@@ -172,6 +190,13 @@ local quality = {};
 
 quality.name = "Quality";
 quality.desc = L["Quality"];
+function quality.sortCompare(a, b)
+	if a.detail and b.detail then
+		if a.detail.rarity < b.detail.rarity then return true else return false end;
+	end
+	if a.detail then return true end;
+	return false;
+end
 function quality.filter(itemProps, quality)
 	if not itemProps.detail then return false end;
 	quality = tonumber(quality) or 0;
@@ -226,6 +251,12 @@ local soulbound = {};
 
 soulbound.name = "Soulbound";
 soulbound.desc = L["Soulbound"];
+function soulbound.sortCompare(a, b)
+	if a.soulbound and b.soulbound then return false end;
+	if a.soulbound then return false end;
+	if b.soulbound then return true end;
+	return false;
+end
 function soulbound.filter(itemProps, bound)
 	if bound and itemProps.soulbound then return true end;
 	if bound or itemProps.soulbound then return false end;
@@ -253,6 +284,13 @@ local itemType = {};
 
 itemType.name = "Item Type";
 itemType.desc = L["Item Type"];
+function itemType.sortCompare(a, b)
+	if a.detail and b.detail then
+		if a.detail.type < b.detail.type then return true else return false end;
+	end
+	if a.detail then return true end;
+	return false;
+end
 function itemType.filter(itemProps, itemType)
 	if not itemProps.detail then return false end;
 	if itemType == itemProps.detail.type then return true else return false end;
@@ -440,6 +478,13 @@ local lastMoved_Month = nil;
 
 lastMoved.name = "Last Moved";
 lastMoved.desc = L["Last Moved"];
+function lastMoved.sortCompare(a, b)
+	if a.lastUpdate and b.lastUpdate then
+		if a.lastUpdate < b.lastUpdate then return true else return false end;
+	end
+	if b.lastUpdate then return true end;
+	return false;
+end
 function lastMoved.filter(itemProps, timeframe)
 	if not itemProps.lastUpdate then return false end;
 

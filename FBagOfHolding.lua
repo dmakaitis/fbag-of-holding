@@ -1151,11 +1151,49 @@ function FBoH:GetFilters(allFilters)
 	local rVal = {};
 	for k, v in pairs(self.filters) do
 		if allFilters or (not v.internal) then
-			local newFilter = {
-				label = v.desc or k;
-				key = k;
-			};
-			table.insert(rVal, newFilter);
+			if v.filter then
+				local newFilter = {
+					label = v.desc or k;
+					key = k;
+				};
+				table.insert(rVal, newFilter);
+			end
+		end
+	end
+	table.sort(rVal, function(a, b)
+		return (a.label < b.label);
+	end);
+	return rVal;
+end
+
+function FBoH:GetSorter(sorterName)
+	local rVal = self.filters[sorterName];
+
+	if rVal == nil then
+		rVal = {
+			name = sorterName,
+			desc = L["Undefined"],
+			undefined = true;
+		};
+	end
+	if rVal.sortCompare == nil then
+		rVal.sortCompare = function() return false end;
+	end
+	
+	return rVal;
+end
+
+function FBoH:GetSorters(allSorters)
+	local rVal = {};
+	for k, v in pairs(self.filters) do
+		if allSorters or (not v.internal) then
+			if v.sortCompare then
+				local newSorter = {
+					label = v.desc or k;
+					key = k;
+				};
+				table.insert(rVal, newSorter);
+			end
 		end
 	end
 	table.sort(rVal, function(a, b)

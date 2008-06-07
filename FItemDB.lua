@@ -135,6 +135,52 @@ function FBoH_ItemDB:CheckVersion()
 			self.items.version = "0.03.01";
 		end
 	end
+	
+	self:CleanDatabase();
+end
+
+function FBoH_ItemDB:CleanDatabase()
+	local details = self.items.details;
+	for k, v in pairs(details) do
+		local used = false;
+		if self.items.realms then
+			for _, r in pairs(self.items.realms) do
+				if r.characters then
+					for _, c in pairs(r.characters) do
+						for _, t in pairs(c) do
+							for _, b in pairs(t) do
+								if b.content then
+									for _, s in pairs(b.content) do
+										if s.key == k then
+											used = true;
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+				if r.guilds then
+					for _, g in pairs(r.guilds) do
+						if g.tabs then
+							for _, t in pairs(g.tabs) do
+								if t.content then
+									for _, s in pairs(t.content) do
+										if s.key == k then
+											used = true;
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+		if used == false then
+			details[k] = nil;
+		end
+	end
 end
 
 local function CopyItemProps(src, dest)
@@ -188,7 +234,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 											itemProps.itemKey = sData.key;
 											itemProps.itemCount = sData.count;
 											itemProps.soulbound = sData.soulbound;
-											itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. itemProps.itemKey .. ":0");
+											itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. sData.key .. ":0");
 											itemProps.itemLink = itemProps.detail.link;
 											if not itemProps.itemLink then
 												_, itemProps.itemLink = GetItemInfo("item:" .. sData.key .. ":0");
@@ -225,7 +271,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 							itemProps.itemKey = sData.key;
 							itemProps.itemCount = sData.count;
 							itemProps.soulbound = nil;
-							itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. itemProps.itemKey .. ":0");
+							itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. sData.key .. ":0");
 							itemProps.itemLink = itemProps.detail.link;
 							if not itemProps.itemLink then
 								_, itemProps.itemLink = GetItemInfo("item:" .. sData.key .. ":0");

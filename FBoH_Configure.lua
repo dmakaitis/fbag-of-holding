@@ -47,15 +47,15 @@ function FBoH_Configure_SetModel(self, viewModel)
 	
 	self.baseOptions:Update();
 	self.filtersFrame:SetFilters(viewModel:GetTab().tabDef.filter);
+	self.sortersFrame:SetSorters(viewModel:GetTab().tabDef.sort);
 end
 
 function FBoH_Configure_DoShow(self)
 	PlaySound("UChatScrollButton");
 	self:ShowTab(1);
 	
-	local filters = FBoH:GetFilters();
-	
-	self.filtersFrame:SetChoices(filters);
+	self.filtersFrame:SetChoices(FBoH:GetFilters());
+	self.sortersFrame:SetChoices(FBoH:GetSorters());
 end
 
 function FBoH_Configure_ExecuteDrag(self)
@@ -654,4 +654,197 @@ function FBoH_FilterButtonArgBtn_DoClick(self)
 		end,
 		'point', FBoH.DewdropMenuPoint
 	);
+end
+
+function FBoH_ConfigureSortersWellTemplate_SetSorters(self, sorters)
+	self.sorters = sorters or self.sorters;
+	
+	if #(self.sorters) == 0 then
+		self.defaultString:SetText(L["Sorters Help"]);
+	else
+		self.defaultString:SetText("");		
+	end
+	
+	self.scrollFrame:DoVerticalScroll();
+end
+
+function FBoH_ConfigureSortersWellTemplate_DoVerticalScroll(self)
+	local parent = self:GetParent();
+	local visibleEntries = 8;
+	
+	if not parent.sorters then
+		FauxScrollFrame_Update(self, 0, visibleEntries, self.rowHeight);
+		
+		for i = 1, 8 do
+			local button = _G[parent:GetName() .. "_Button" .. i];
+			button:Hide();
+		end
+		
+		return;
+	end
+	
+	local maxEntries = #(parent.sorters);
+	
+	FauxScrollFrame_Update(self, maxEntries, visibleEntries, self.rowHeight);
+	local offset = FauxScrollFrame_GetOffset(self) or 0;
+	
+	parent.lastRowButton = nil;
+	
+	-- Go through all the rows and set up groups and positions...
+	for i = 1, 8 do
+		local rowID = i + offset;
+		local button = _G[parent:GetName() .. "_Button" .. i];
+		local sorter = parent.sorters[rowID];
+		
+		if sorter then
+			button:Show();
+			button:SetSorter(parent.sorters[rowID], rowID);
+			parent.lastRowButton = button;
+		else
+			button:Hide();
+		end
+	end
+end
+
+function FBoH_ConfigureSortersWellTemplate_ReceiveDrag(self, dragData)
+	if dragData.source.type == "property" then
+		if self.sorters then
+			local newSorter = {
+				name = dragData.source.property;
+			};
+			table.insert(self.sorters, newSorter);
+			self:SetSorters();
+			self:UpdateView();
+		end
+	elseif dragData.source.type == "sorter" then
+		if self.sorters then
+			local sorter = table.remove(self.sorters, dragData.source.index);
+			table.insert(self.sorters, sorter);
+			self:SetSorters();
+			self:UpdateView();
+		end
+	else
+		FBoH:Print("Sorter well received unknown drag type: " .. tostring(dragData.source.type));
+	end;
+end
+
+function FBoH_ConfigureSortersWellTemplate_UpdateView(self)
+	local tabModel = self:GetParent():GetParent().tabModel;
+	tabModel:SetSorting();
+	tabModel.viewModel.view:UpdateViewModel();	
+	if FBoH_TabModel.defaultTab then
+		FBoH_TabModel.defaultTab.viewModel.view:UpdateViewModel(nil, true);
+	end
+end
+
+function FBoH_ConfigureSortersWellTemplate_DeleteSorter(self, index)
+	if self.sorters then
+		table.remove(self.sorters, index);
+		self:SetSorters();
+		self:UpdateView();
+	end
+end
+
+function FBoH_ConfigureSortersWellTemplate_InsertSorter(self, sorter, index)
+	if self.sorters then
+		table.insert(self.sorters, index, sorter);
+		self:SetSorters();
+		self:UpdateView();
+	end
+end
+
+function FBoH_SorterButton_DoUpdate(self)
+	local dragData = FBoH_Configure.dragData;
+	if dragData and MouseIsOver(self) then
+		dragData.target = self;
+			
+		if not self.isBeingDragged then
+			local topY = self:GetTop();
+			local bottomY = self:GetBottom();
+			local centerY = (topY + bottomY) / 2;
+			
+			local _, cursorY = GetCursorPosition();
+			cursorY = cursorY / UIParent:GetEffectiveScale();
+			
+			dragData.target = self;
+			
+			if cursorY > centerY then
+				dragData.insert = "above";
+				self.insertTop:Show();			
+				self.insertBottom:Hide();
+			else
+				dragData.insert = "below";
+				self.insertTop:Hide();		
+				self.insertBottom:Show();
+			end
+		end
+	else
+		self.insertTop:Hide();
+		self.insertBottom:Hide();
+	end
+end
+
+function FBoH_SorterButton_ReceiveDrag(self, dragData)
+	local parent = self:GetParent();
+	
+	if dragData.source.type == "property" then
+		if parent.sorters then
+			local newSorter = {
+				name = dragData.source.property;
+			};
+			
+			local target = self.index;
+			if dragData.insert == "below" then target = target + 1 end;
+			
+			table.insert(parent.sorters, target, newSorter);
+			parent:SetSorters();
+			parent:UpdateView();
+		end
+	elseif dragData.source.type == "sorter" then
+		if parent.sorters then
+			local source = dragData.source.index;
+			local target = self.index;
+			if dragData.insert == "below" then target = target + 1 end;
+
+			if source < target then target = target - 1 end;
+			
+			if source == target then return end;
+			
+			local sorter = table.remove(parent.sorters, source);
+			table.insert(parent.sorters, target, sorter);
+			
+			parent:SetSorters();
+			parent:UpdateView();
+		end
+	else
+		FBoH:Print("Sorter received unknown drag type: " .. tostring(dragData.source.type));
+	end;
+end
+
+function FBoH_SorterButton_SetSorter(self, sorter, index)
+	if sorter then
+		self.index = index;
+	end
+	self.sorter = sorter or self.sorter;
+	
+	local sorterDef = FBoH:GetSorter(self.sorter.name);
+	
+	self.fontString:SetText(sorterDef.desc or sorterDef.name);
+	
+	if self.sorter.descending == true then
+		self.argButton:SetText(L["Descending"]);
+	else
+		self.argButton:SetText(L["Ascending"]);
+	end
+end
+
+function FBoH_SorterButtonArgBtn_DoClick(self)
+	local sorter = self:GetParent().sorter;
+	if sorter.descending == true then
+		sorter.descending = nil;
+	else
+		sorter.descending = true;
+	end
+	self:GetParent():SetSorter();
+	self:GetParent():UpdateView();
 end

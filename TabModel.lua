@@ -27,6 +27,8 @@ function FBoH_TabModel.prototype:init(viewModel, tabIndex)
 --		FBoH:Print(self.tabDef.name .. " is the default tab");
 	end
 	
+	self.tabDef.sort = self.tabDef.sort or {};
+	
 	if FBoH_TabModel.defaultTab then
 --		FBoH:Print("Clearing filter cache for " .. FBoH_TabModel.defaultTab.tabDef.name);
 		FBoH_TabModel.defaultTab.filterCache = nil;
@@ -145,6 +147,17 @@ function FBoH_TabModel.prototype:SetFilter(filter)
 	if FBoH_TabModel.defaultTab then
 		FBoH_TabModel.defaultTab.filterCache = nil;
 		FBoH_TabModel.defaultTab.viewModel.allFilterCache = nil;
+	end
+	
+	self:Update();
+end
+
+function FBoH_TabModel.prototype:SetSorting(sorting)
+	self.tabDef.sort = sorting or self.tabDef.sort;
+	self.itemCache = nil;
+	
+	if FBoH_TabModel.defaultTab then
+		FBoH_TabModel.defaultTab.itemCache = nil;
 	end
 	
 	self:Update();
