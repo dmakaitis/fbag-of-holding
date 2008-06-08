@@ -2,6 +2,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 local Dewdrop = AceLibrary("Dewdrop-2.0");
 
 FBoH_SetVersion("$Revision$");
+FBoH_SetVersion = nil;
 
 FBOH_CONFIG_TITLE = L["Configure Bag View"];
 FBOH_CONFIG_FILTERS = L["Filters"];

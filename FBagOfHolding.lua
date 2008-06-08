@@ -43,6 +43,7 @@ local AceConfig = LibStub("AceConfigDialog-3.0");
 
 FBoH = LibStub("AceAddon-3.0"):NewAddon("Feithar's Bag of Holding",
 										"AceConsole-3.0",
+										"AceComm-3.0",
 										"AceEvent-3.0",
 										"AceHook-3.0",
 										"AceTimer-3.0",
@@ -84,6 +85,11 @@ function FBoH:GUILDBANKBAGSLOTS_CHANGED(arg1, arg2)
 	end
 end
 
+function FBoH:ZONE_CHANGED()
+	self:SendCommMessage("FBoH", "version " .. tostring(FBoH_GetVersion()), "GUILD");
+--	self:SendCommMessage("FBoH", "version " .. tostring(FBoH_GetVersion()), "ZONE");
+end
+
 --function FBoH:GUILDBANK_UPDATE_TABS()
 --	self:Print("Updating Tabs");
 --end
@@ -118,6 +124,8 @@ FBoH.bagViews = {};
 function FBoH:OnEnable()
 	self.items:CheckVersion();
 	
+	self:RegisterEvent("ZONE_CHANGED");
+
 	self:RegisterEvent("BANKFRAME_OPENED");
 	self:RegisterEvent("BANKFRAME_CLOSED");
 
@@ -131,6 +139,8 @@ function FBoH:OnEnable()
 	self:RegisterEvent("BAG_UPDATE", "ScanContainer");
 	self:RegisterEvent("UNIT_INVENTORY_CHANGED", "ScanInventory");
 
+	self:RegisterComm("FBoH");
+	
 	local iSlots = {
 		"HeadSlot",
 		"NeckSlot",
@@ -189,6 +199,13 @@ end
 function FBoH:OnDisable()
 	self:UnhookAll();
 	TipHooker:Unhook(self.ProcessTooltip, "item")
+end
+
+function FBoH:OnCommReceived(prefix, message, distribution, sender)
+	if string.find(message, "version") == 1 then
+		_, version = strsplit(" ", message);
+--		self:Print(sender .. " is using FBoH " .. version);
+	end
 end
 
 -- Simple shallow copy for copying defaults

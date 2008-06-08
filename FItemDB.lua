@@ -225,23 +225,25 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 								for bID, bData in pairs(btData) do
 									if bData.content then
 										for sID, sData in pairs(bData.content) do
-											itemProps.realm = rName;
-											itemProps.character = cName;
-											itemProps.bagType = bType;
-											itemProps.bagIndex = bID;
-											itemProps.slotIndex = sID;
-											itemProps.lastUpdate = sData.lastUpdate;
-											itemProps.itemKey = sData.key;
-											itemProps.itemCount = sData.count;
-											itemProps.soulbound = sData.soulbound;
-											itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. sData.key .. ":0");
-											itemProps.itemLink = itemProps.detail.link;
-											if not itemProps.itemLink then
-												_, itemProps.itemLink = GetItemInfo("item:" .. sData.key .. ":0");
-											end
-											
-											if filter(itemProps, filterArg) then
-												table.insert(rTable, CopyItemProps(itemProps));
+											local detail = self:GetItemDetail(sData.key);
+											if detail and detail.link then
+												itemProps.realm = rName;
+												itemProps.character = cName;
+												itemProps.bagType = bType;
+												itemProps.bagIndex = bID;
+												itemProps.slotIndex = sID;
+												
+												itemProps.lastUpdate = sData.lastUpdate;
+												itemProps.itemKey = sData.key;
+												itemProps.itemCount = sData.count;
+												itemProps.soulbound = sData.soulbound;
+												
+												itemProps.detail = detail;
+												itemProps.itemLink = detail.link;
+												
+												if filter(itemProps, filterArg) then
+													table.insert(rTable, CopyItemProps(itemProps));
+												end
 											end
 										end
 									end
@@ -262,24 +264,26 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 				for tabID, tab in pairs(gData.tabs) do
 					if tab.content then
 						for sID, sData in pairs(tab.content) do
-							itemProps.realm = charRealm;
-							itemProps.character = charName;
-							itemProps.bagType = "Guild Bank";
-							itemProps.bagIndex = tabID;
-							itemProps.slotIndex = sID;
-							itemProps.lastUpdate = sData.lastUpdate;
-							itemProps.itemKey = sData.key;
-							itemProps.itemCount = sData.count;
-							itemProps.soulbound = nil;
-							itemProps.detail = self.items.details[sData.key] or self:UpdateItemDetail("item:" .. sData.key .. ":0");
-							itemProps.itemLink = itemProps.detail.link;
-							if not itemProps.itemLink then
-								_, itemProps.itemLink = GetItemInfo("item:" .. sData.key .. ":0");
+							local detail = self:GetItemDetail(sData.key);
+							if detail then
+								itemProps.realm = charRealm;
+								itemProps.character = charName;
+								itemProps.bagType = "Guild Bank";
+								itemProps.bagIndex = tabID;
+								itemProps.slotIndex = sID;
+								
+								itemProps.lastUpdate = sData.lastUpdate;
+								itemProps.itemKey = sData.key;
+								itemProps.itemCount = sData.count;
+								itemProps.soulbound = nil;
+								
+								itemProps.detail = detail;
+								itemProps.itemLink = itemProps.detail.link;
+								
+								if filter(itemProps, filterArg) then
+									table.insert(rTable, CopyItemProps(itemProps));
+								end							
 							end
-							
-							if filter(itemProps, filterArg) then
-								table.insert(rTable, CopyItemProps(itemProps));
-							end							
 						end
 					end
 				end
@@ -532,11 +536,31 @@ function FBoH_ItemDB:UpdateItemDetail(itemLink)
 	local d = {};
 	
 	d.name, d.link, d.rarity, d.level, d.minlevel, d.type, d.subtype, d.stackcount, d.equiploc, d.texture = GetItemInfo(itemLink);
+	d.lastUpdate = time();
 	if d.name then
 		self.items.details[self:GetItemKey(d.link)] = d;
 	end
 	
 	return d;
+end
+
+function FBoH_ItemDB:GetItemDetail(key)
+	local detail = self.items.details[key];
+	if detail and detail.link then
+		if detail.lastUpdate and (detail.lastUpdate >= FBoH.sessionStartTime) then
+			return detail;
+		end
+	end
+	
+	local item = "item:" .. key .. ":0";
+	self:UpdateItemDetail(item);
+	
+	detail = self.items.details[key];
+	if detail and detail.link then
+		return detail;
+	end
+
+	return nil;
 end
 
 function FBoH_ItemDB:SetGuildItem(tabID, slotID, itemLink, itemCount)
