@@ -28,12 +28,6 @@ local options = {
 					name = 'Purge Item Data',
 					func = 'CmdPurge'
 				},
-				bags = {
-					type = 'execute',
-					desc = 'list items contained in each bag view',
-					name = 'List Bag Contents',
-					func = 'CmdShowBags'
-				},
 				viewAsList = {
 					type = "toggle",
 					name = "Allow View As List",
