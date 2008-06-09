@@ -86,8 +86,7 @@ function FBoH:GUILDBANKBAGSLOTS_CHANGED(arg1, arg2)
 end
 
 function FBoH:ZONE_CHANGED()
-	self:SendCommMessage("FBoH", "version " .. tostring(FBoH_GetVersion()), "GUILD");
---	self:SendCommMessage("FBoH", "version " .. tostring(FBoH_GetVersion()), "ZONE");
+	self:SendFBoHMessage("V#" .. tostring(FBoH_GetVersion()));
 end
 
 --function FBoH:GUILDBANK_UPDATE_TABS()
@@ -124,7 +123,7 @@ FBoH.bagViews = {};
 function FBoH:OnEnable()
 	self.items:CheckVersion();
 	
-	self:RegisterEvent("ZONE_CHANGED");
+--	self:RegisterEvent("ZONE_CHANGED");
 
 	self:RegisterEvent("BANKFRAME_OPENED");
 	self:RegisterEvent("BANKFRAME_CLOSED");
@@ -202,10 +201,20 @@ function FBoH:OnDisable()
 end
 
 function FBoH:OnCommReceived(prefix, message, distribution, sender)
-	if string.find(message, "version") == 1 then
-		_, version = strsplit(" ", message);
---		self:Print(sender .. " is using FBoH " .. version);
+	local key, arg = strsplit("#", message);
+	if key == "V" then
+		-- arg is the version number of another user.
+--		self:Print(sender .. " is using FBoH r" .. arg);
 	end
+end
+
+function FBoH:SendFBoHMessage(message)
+	self:Print("Sending message: " .. message);
+	self:SendCommMessage("FBoH", message, "GUILD");
+	self:SendCommMessage("FBoH", message, "RAID");
+	self:SendCommMessage("FBoH", message, "BATTLEGROUND");
+	SendChatMessage("/FBoH!" .. message, "CHANNEL", nil, 6);
+--	self:SendCommMessage("FBoH", "version " .. tostring(FBoH_GetVersion()), "ZONE");
 end
 
 -- Simple shallow copy for copying defaults

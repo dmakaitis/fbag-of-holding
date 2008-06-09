@@ -14,7 +14,6 @@ Features:
 * Filter for "not in other bag"
 * Copy view
 * Mailbox tracking
-* Custom sorting
 * Custom searching
 * Tooltip filter
 
