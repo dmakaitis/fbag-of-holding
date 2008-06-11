@@ -1,6 +1,5 @@
 local L = LibStub("AceLocale-3.0"):NewLocale("FBoH", "enUS", true)
-
---FBoH_SetVersion("$Revision$");
+if not L then return end;
 
 L["Feithar's Bag of Holding"] = true;	-- Full Title
 L["FBoH"] = true;						-- Short Title
