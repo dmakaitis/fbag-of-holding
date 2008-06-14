@@ -79,7 +79,8 @@ function FBoH:GUILDBANKFRAME_CLOSED()
 	self:UpdateBagsGuild();
 end
 
-function FBoH:GUILDBANKBAGSLOTS_CHANGED(arg1, arg2)
+function FBoH:GUILDBANKBAGSLOTS_CHANGED()
+--	self:Print("GUILDBANKBAGSLOTS_CHANGED");
 	if self.guildBankIsOpen then
 		self:ScanGuildBank();
 	end
@@ -914,6 +915,8 @@ function FBoH:ScanGuildBank()
 				if link then
 					local _, count = GetGuildBankItemInfo(tab, slot);
 					self.items:SetGuildItem(tab, slot, link, count);
+				else
+					self.items:SetGuildItem(tab, slot, nil, 0);
 				end
 			end
 		end
