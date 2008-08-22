@@ -545,6 +545,8 @@ function FBoH_ItemDB:UpdateItemDetail(itemLink)
 end
 
 function FBoH_ItemDB:GetItemDetail(key)
+	if key == nil then return nil end;
+	
 	local detail = self.items.details[key];
 	if detail and detail.link then
 		if detail.lastUpdate and (detail.lastUpdate >= FBoH.sessionStartTime) then
