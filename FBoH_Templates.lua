@@ -1111,19 +1111,25 @@ end
 function FBoH_ViewTabTemplate_UpdateTabModel(self, model)
 	self.tabModel = model or self.tabModel;
 	self:SetText(self.tabModel.tabDef.name);
-
+	
+--	local text = getglobal(self:GetName().."Text");
+--	text:SetText(self.tabModel.tabDef.name);
+--	text:SetTextColor(1.0, 1.0, 1.0);
+	
+--	self.label:SetText(self.tabModel.tabDef.name);
+	
 	self.dockRegion:ClearAllPoints();
 	self.dockRegion:SetPoint("BOTTOMLEFT", self, "BOTTOMRIGHT");
 	
-	PanelTemplates_TabResize(5, self);
+--	PanelTemplates_TabResize(5, self);
 	
 	-- Is this tab active...
 	local tabTexture = nil;
 	if self.tabModel.tabIndex == self.tabModel.viewModel.viewDef.activeTab then
-		self:SetTextColor(1, 0.8, 0);
+--		self:SetTextColor(1, 0.8, 0);
 		tabTexture = "Interface\\HelpFrame\\HelpFrameTab-Active";
 	else
-		self:SetTextColor(0.7, 0.7, 0.7);
+--		self:SetTextColor(0.7, 0.7, 0.7);
 		tabTexture = "Interface\\HelpFrame\\HelpFrameTab-Inactive";
 	end
 	

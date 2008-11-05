@@ -738,7 +738,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						ScrollFrame_OnLoad();
+						ScrollFrame_OnLoad(self);
 						
 						self.DoVerticalScroll = FBoH_ConfigureLeftWellTemplate_DoVerticalScroll;
 
@@ -746,7 +746,7 @@
 					</OnLoad>
 					<OnVerticalScroll>
 						FBOH_SCROLL_FRAME = self;
-						FauxScrollFrame_OnVerticalScroll(self.rowHeight, FBoH_Configure_OnVerticalScroll);
+						FauxScrollFrame_OnVerticalScroll(self, offset, self.rowHeight, FBoH_Configure_OnVerticalScroll);
 						FBOH_SCROLL_FRAME = nil;
 					</OnVerticalScroll>
 				</Scripts>
@@ -895,7 +895,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						ScrollFrame_OnLoad();
+						ScrollFrame_OnLoad(self);
 						
 						self.DoVerticalScroll = FBoH_ConfigureFiltersWellTemplate_DoVerticalScroll;
 
@@ -903,7 +903,7 @@
 					</OnLoad>
 					<OnVerticalScroll>
 						FBOH_SCROLL_FRAME = self;
-						FauxScrollFrame_OnVerticalScroll(self.rowHeight, FBoH_Configure_OnVerticalScroll);
+						FauxScrollFrame_OnVerticalScroll(self, offset, self.rowHeight, FBoH_Configure_OnVerticalScroll);
 						FBOH_SCROLL_FRAME = nil;
 					</OnVerticalScroll>
 				</Scripts>
@@ -1084,7 +1084,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						ScrollFrame_OnLoad();
+						ScrollFrame_OnLoad(self);
 						
 						self.DoVerticalScroll = FBoH_ConfigureSortersWellTemplate_DoVerticalScroll;
 
@@ -1092,7 +1092,7 @@
 					</OnLoad>
 					<OnVerticalScroll>
 						FBOH_SCROLL_FRAME = self;
-						FauxScrollFrame_OnVerticalScroll(self.rowHeight, FBoH_Configure_OnVerticalScroll);
+						FauxScrollFrame_OnVerticalScroll(self, offset, self.rowHeight, FBoH_Configure_OnVerticalScroll);
 						FBOH_SCROLL_FRAME = nil;
 					</OnVerticalScroll>
 				</Scripts>

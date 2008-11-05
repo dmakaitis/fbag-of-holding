@@ -137,7 +137,7 @@
 				end
 			</OnClick>
 			<OnEnter>
-				GameTooltip_AddNewbieTip("Bag View Options", 1.0, 1.0, 1.0, NEWBIE_TOOLTIP_CHATOPTIONS, 1);
+				GameTooltip_AddNewbieTip(self, "Bag View Options", 1.0, 1.0, 1.0, NEWBIE_TOOLTIP_CHATOPTIONS, 1);
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide();
@@ -248,7 +248,9 @@
 				</Anchor>
 			</Anchors>
 		</ButtonText>
-		<NormalFont inherits="GameFontNormalSmall"/>
+		<NormalFont style="GameFontNormalSmall"/>
+		<HighlightFont style="GameFontHighlightSmall"/>
+		<DisabledFont style="GameFontHighlightSmall"/>
 		<HighlightTexture file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD">
 			<Anchors>
 				<Anchor point="LEFT" relativeTo="$parentLeft">
@@ -562,7 +564,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						ScrollFrame_OnLoad();
+						ScrollFrame_OnLoad(self);
 						
 --						self.DoVerticalScroll = FBoH_GridTemplate_DoVerticalScroll;
 						
@@ -570,7 +572,7 @@
 					</OnLoad>
 					<OnVerticalScroll>
 --						FBOH_SCROLL_GRID = self;
---						FauxScrollFrame_OnVerticalScroll(self.rowHeight, FBoH_GridTemplate_OnVerticalScroll);
+--						FauxScrollFrame_OnVerticalScroll(self, offset, self.rowHeight, FBoH_GridTemplate_OnVerticalScroll);
 --						FBOH_SCROLL_GRID = nil;
 					</OnVerticalScroll>
 				</Scripts>
@@ -605,7 +607,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						ScrollFrame_OnLoad();
+						ScrollFrame_OnLoad(self);
 						
 						self.DoVerticalScroll = FBoH_GridTemplate_DoVerticalScroll;
 						
@@ -615,7 +617,7 @@
 					</OnLoad>
 					<OnVerticalScroll>
 						FBOH_SCROLL_GRID = self;
-						FauxScrollFrame_OnVerticalScroll(self:GetRowHeight(), FBoH_GridTemplate_OnVerticalScroll);
+						FauxScrollFrame_OnVerticalScroll(self, offset, self:GetRowHeight(), FBoH_GridTemplate_OnVerticalScroll);
 						FBOH_SCROLL_GRID = nil;
 					</OnVerticalScroll>
 				</Scripts>
