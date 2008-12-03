@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 Name: TipHooker-3.0
 Description: A Library for hooking tooltips.
 Revision: $Revision: 67029 $
