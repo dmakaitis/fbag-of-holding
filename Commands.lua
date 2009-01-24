@@ -11,7 +11,7 @@ local options = {
     handler = FBoH,
 	type = 'group',
     args = {
-		test = {
+--[[		test = {
 			type = "group",
 			name = "Test Commands",
 			desc = "Test Commands",
@@ -40,7 +40,7 @@ local options = {
 					end
 				},
 			}
-		},
+		},--]]
 		fubar = {
 			type = "group",
 			name = L["FuBar options"],

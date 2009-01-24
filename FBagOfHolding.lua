@@ -113,7 +113,7 @@ function FBoH:OnInitialize()
 --	self:SetFuBarOption("configType", "Dewdrop-2.0");
 	self:SetFuBarOption("iconPath", "Interface\\Buttons\\Button-Backpack-Up");
 
-	self.sessionStartTime = time();
+	self.sessionStartTime = time() + 10;
 	
 	optFrame = AceConfig:AddToBlizOptions(L["FBoH"], L["FBoH"]);	
 end
@@ -566,7 +566,7 @@ function FBoH:GetBagHook(bagID)
 end
 
 function FBoH:SetBagHook(bagID, value)
-	if value == "blizzard" then value = nil end;
+--	if value == "blizzard" then value = nil end;
 	self.db.profile.hookToggleBags[bagID] = value
 end
 
@@ -642,8 +642,14 @@ function FBoH:ToggleBackpack()
 end
 
 function FBoH:ToggleBag(id, force)
+	local tabID = nil;
 	if self.db.profile.hookToggleBags and self.db.profile.hookToggleBags[id] then
-		local tabID = self.db.profile.hookToggleBags[id];
+		if self.db.profile.hookToggleBags[id] ~= "blizzard" then
+			tabID = self.db.profile.hookToggleBags[id];
+		end
+	end
+	
+	if tabID then
 		if tabID == "default" then
 			if not FBoH_TabModel.defaultTab then return end;
 			tabID = FBoH_TabModel.defaultTab.id;
