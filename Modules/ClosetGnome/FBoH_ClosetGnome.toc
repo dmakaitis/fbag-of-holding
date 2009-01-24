@@ -1,0 +1,11 @@
+## Interface: 30000
+## Author: Feithar
+## Title: FBoH - ClosetGnome
+## Version: 1.0
+## X-Category: Inventory
+## Dependencies:FBagOfHolding,ClosetGnome
+## Notes: Adds the ability to recognize items that are configured in ClosetGnome.
+  
+Locale-enUS.lua
+
+FBoH_ClosetGnome.lua

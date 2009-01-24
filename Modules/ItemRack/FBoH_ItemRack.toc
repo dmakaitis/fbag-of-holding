@@ -1,0 +1,12 @@
+## Interface: 30000
+## Author: Feithar
+## Title: FBoH - ItemRack
+## Version: 1.0
+## X-Category: Inventory
+## Dependencies:FBagOfHolding,ItemRack
+## Notes: Adds the ability to recognize items that are configured in ItemRack.
+  
+Locale-enUS.lua
+
+FBoH_ItemRack.lua
+FBoH_ItemRack2.lua
