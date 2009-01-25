@@ -663,6 +663,7 @@ end
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
+if WoWUnit then
 
 local FBoH_UnitTests = {
 	mocks = {
@@ -680,8 +681,10 @@ local FBoH_UnitTests = {
 		FBoH_ItemDB.items = {};
 		FBoH_ItemDB.items.version = "0.01.00";
 		FBoH_ItemDB:UpgradeFrom0_01_00();
-		assert("0.02.00" == FBoH_ItemDB.items.version, "Item DB version should now be 0.02.00 (was " .. FBoH_ItemDB.items.version .. ")");
+		assertEquals("0.02.00", FBoH_ItemDB.items.version);
 	end;
 };
 
 WoWUnit:AddTestSuite("FBoH_ItemDB", FBoH_UnitTests);
+
+end
