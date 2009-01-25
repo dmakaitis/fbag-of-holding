@@ -56,29 +56,7 @@ function FBoH_ItemDB:CheckVersion()
 			return;
 		end
 		if self.items.version == "0.01.00" then
-			-- Move all item details out of the inventory section and into the details section.
-			self.items.details = {};
-			local details = self.items.details;
-			-- Go through and transfer all item details...
-			if self.items.realms then
-				for _, r in pairs(self.items.realms) do
-					if r.characters then
-						for _, c in pairs(r.characters) do
-							for _, t in pairs(c) do
-								for _, b in pairs(t) do
-									if b.content then
-										for _, i in pairs(b.content) do
-											details[i.key] = i.detail;
-											i.detail = nil;
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-			end
-			self.items.version = "0.02.00";
+			self:UpgradeFrom0_01_00();
 		end
 		if self.items.version == "0.02.00" then
 			-- Move the item link out of the inventory section and into the details section.
@@ -137,6 +115,32 @@ function FBoH_ItemDB:CheckVersion()
 	end
 	
 	self:CleanDatabase();
+end
+
+function FBoH_ItemDB:UpgradeFrom0_01_00()
+	-- Move all item details out of the inventory section and into the details section.
+	self.items.details = {};
+	local details = self.items.details;
+	-- Go through and transfer all item details...
+	if self.items.realms then
+		for _, r in pairs(self.items.realms) do
+			if r.characters then
+				for _, c in pairs(r.characters) do
+					for _, t in pairs(c) do
+						for _, b in pairs(t) do
+							if b.content then
+								for _, i in pairs(b.content) do
+									details[i.key] = i.detail;
+									i.detail = nil;
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	self.items.version = "0.02.00";
 end
 
 function FBoH_ItemDB:CleanDatabase()
@@ -655,3 +659,29 @@ function FBoH_ItemDB:UpdateBagUsage(bagType, bagID, character, realm)
 		end
 	end
 end
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
+local FBoH_UnitTests = {
+	mocks = {
+		FBoH_Items = {};
+		FBoH_ItemDB = FBoH_ItemDB;
+	};
+	
+	testCreateNewItemDatabase = function()
+		FBoH_ItemDB.items = nil;
+		FBoH_ItemDB:CheckVersion();
+		assert(FBOH_ITEMS_DB_VERSION == FBoH_Items.version, "Item DB version should be " .. FBOH_ITEMS_DB_VERSION .. " (was " .. FBoH_Items.version .. ")");
+	end;
+	
+	testUpgradeItemDatabaseFrom0_01_00 = function()
+		FBoH_ItemDB.items = {};
+		FBoH_ItemDB.items.version = "0.01.00";
+		FBoH_ItemDB:UpgradeFrom0_01_00();
+		assert("0.02.00" == FBoH_ItemDB.items.version, "Item DB version should now be 0.02.00 (was " .. FBoH_ItemDB.items.version .. ")");
+	end;
+};
+
+WoWUnit:AddTestSuite("FBoH_ItemDB", FBoH_UnitTests);
