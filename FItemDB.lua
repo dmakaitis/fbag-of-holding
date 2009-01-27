@@ -59,58 +59,10 @@ function FBoH_ItemDB:CheckVersion()
 			self:UpgradeFrom0_01_00();
 		end
 		if self.items.version == "0.02.00" then
-			-- Move the item link out of the inventory section and into the details section.
-			-- Update item keys to use new format
-			-- Wipe the guild bank data (since nobody should have anything there yet except me since it hasn't been published yet).
-			local oldDetails = self.items.details;
-			self.items.details = {};
-			local details = self.items.details;
-			if self.items.realms then
-				for _, r in pairs(self.items.realms) do
-					r.guilds = nil;
-					if r.characters then
-						for _, c in pairs(r.characters) do
-							for _, t in pairs(c) do
-								for _, b in pairs(t) do
-									if b.content then
-										for _, i in pairs(b.content) do
-											local oldKey = i.key;
-											local newKey = self:GetItemKey(i.link);
-											details[newKey] = oldDetails[i.key];
-											if details[newKey] then
-												details[newKey].link = i.link;
-											end
-											i.link = nil;
-											i.key = newKey;
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-			end			
-			self.items.version = "0.03.00";
+			self:UpgradeFrom0_02_00();
 		end
 		if self.items.version == "0.03.00" then
-			if self.items.realms then
-				for _, r in pairs(self.items.realms) do
-					if r.characters then
-						for _, c in pairs(r.characters) do
-							for _, t in pairs(c) do
-								for _, b in pairs(t) do
-									if b.content then
-										for _, i in pairs(b.content) do
-											i.lastUpdate = i.lastUpdate or time();
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-			end			
-			self.items.version = "0.03.01";
+			self:UpgradeFrom0_03_00();
 		end
 	end
 	
@@ -141,6 +93,62 @@ function FBoH_ItemDB:UpgradeFrom0_01_00()
 		end
 	end
 	self.items.version = "0.02.00";
+end
+
+function FBoH_ItemDB:UpgradeFrom0_02_00()
+	-- Move the item link out of the inventory section and into the details section.
+	-- Update item keys to use new format
+	-- Wipe the guild bank data (since nobody should have anything there yet except me since it hasn't been published yet).
+	local oldDetails = self.items.details;
+	self.items.details = {};
+	local details = self.items.details;
+	if self.items.realms then
+		for _, r in pairs(self.items.realms) do
+			r.guilds = nil;
+			if r.characters then
+				for _, c in pairs(r.characters) do
+					for _, t in pairs(c) do
+						for _, b in pairs(t) do
+							if b.content then
+								for _, i in pairs(b.content) do
+									local oldKey = i.key;
+									local newKey = self:GetItemKey(i.link);
+									details[newKey] = oldDetails[i.key];
+									if details[newKey] then
+										details[newKey].link = i.link;
+									end
+									i.link = nil;
+									i.key = newKey;
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end			
+	self.items.version = "0.03.00";
+end
+
+function FBoH_ItemDB:UpgradeFrom0_03_00()
+	if self.items.realms then
+		for _, r in pairs(self.items.realms) do
+			if r.characters then
+				for _, c in pairs(r.characters) do
+					for _, t in pairs(c) do
+						for _, b in pairs(t) do
+							if b.content then
+								for _, i in pairs(b.content) do
+									i.lastUpdate = i.lastUpdate or time();
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end			
+	self.items.version = "0.03.01";
 end
 
 function FBoH_ItemDB:CleanDatabase()
@@ -663,9 +671,16 @@ end
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
+
+FBoH_UnitTests = {};
+
 if WoWUnit then
 
-local FBoH_UnitTests = {
+WoWUnit:AddTestSuite("FBoH", FBoH_UnitTests);
+
+end
+
+FBoH_UnitTests.ItemDB = {
 	mocks = {
 		FBoH_Items = {};
 		FBoH_ItemDB = FBoH_ItemDB;
@@ -683,8 +698,18 @@ local FBoH_UnitTests = {
 		FBoH_ItemDB:UpgradeFrom0_01_00();
 		assertEquals("0.02.00", FBoH_ItemDB.items.version);
 	end;
+	
+	testUpgradeItemDatabaseFrom0_02_00 = function()
+		FBoH_ItemDB.items = {};
+		FBoH_ItemDB.items.version = "0.02.00";
+		FBoH_ItemDB:UpgradeFrom0_02_00();
+		assertEquals("0.03.00", FBoH_ItemDB.items.version);
+	end;
+	
+	testUpgradeItemDatabaseFrom0_03_00 = function()
+		FBoH_ItemDB.items = {};
+		FBoH_ItemDB.items.version = "0.03.00";
+		FBoH_ItemDB:UpgradeFrom0_03_00();
+		assertEquals("0.03.01", FBoH_ItemDB.items.version);
+	end;
 };
-
-WoWUnit:AddTestSuite("FBoH_ItemDB", FBoH_UnitTests);
-
-end
