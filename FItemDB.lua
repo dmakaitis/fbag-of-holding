@@ -45,31 +45,25 @@ items = {
 
 ]]
 
-function FBoH_ItemDB:CheckVersion()
-	self.items = self.items or FBoH_Items;
-	self.items.version = self.items.version or "purge";
-	
-	if self.items.version ~= FBOH_ITEMS_DB_VERSION then
-		if self.items.version == "purge" then
-			self:Purge();
-			return;
-		end
-		FBoH:Print("Updating item database: " .. self.items.version .. " -> " .. FBOH_ITEMS_DB_VERSION);
-		if self.items.version == "0.01.00" then
-			UpgradeFrom0_01_00(self);
-		end
-		if self.items.version == "0.02.00" then
-			UpgradeFrom0_02_00(self);
-		end
-		if self.items.version == "0.03.00" then
-			UpgradeFrom0_03_00(self);
-		end
+------------------------ Private functions -----------------------------
+
+local
+function _CopyItemProps(src, dest)
+	dest = dest or {};
+	for k, v in pairs(src) do
+		dest[k] = v;
 	end
-	
-	self:CleanDatabase();
+	return dest;
 end
 
-local function UpgradeFrom0_01_00(self)
+local
+function _TestFilter(filter, filterArg, itemProps)
+	local pResult, rVal = pcall(filter, itemProps, filterArg);
+	if pResult == true then return rVal else return false end;
+end
+
+local
+function _UpgradeFrom0_01_00(self)
 	-- Move all item details out of the inventory section and into the details section.
 	self.items.details = {};
 	local details = self.items.details;
@@ -95,7 +89,8 @@ local function UpgradeFrom0_01_00(self)
 	self.items.version = "0.02.00";
 end
 
-local function UpgradeFrom0_02_00(self)
+local
+function _UpgradeFrom0_02_00(self)
 	-- Move the item link out of the inventory section and into the details section.
 	-- Update item keys to use new format
 	-- Wipe the guild bank data (since nobody should have anything there yet except me since it hasn't been published yet).
@@ -130,7 +125,8 @@ local function UpgradeFrom0_02_00(self)
 	self.items.version = "0.03.00";
 end
 
-local function UpgradeFrom0_03_00(self)
+local
+function _UpgradeFrom0_03_00(self)
 	if self.items.realms then
 		for _, r in pairs(self.items.realms) do
 			if r.characters then
@@ -151,7 +147,8 @@ local function UpgradeFrom0_03_00(self)
 	self.items.version = "0.03.01";
 end
 
-function FBoH_ItemDB:CleanDatabase()
+local
+function _CleanDatabase(self)
 	local details = self.items.details;
 	for k, v in pairs(details) do
 		local used = false;
@@ -195,20 +192,102 @@ function FBoH_ItemDB:CleanDatabase()
 	end
 end
 
-local function CopyItemProps(src, dest)
-	dest = dest or {};
-	for k, v in pairs(src) do
-		dest[k] = v;
+local
+function _SortEmptySlots(a, b)
+	return a.restrictionCode < b.restrictionCode;
+end
+
+local
+function _GetItem(self, bagType, bagID, slotID, character, realm)
+	realm = realm or GetRealmName();
+	character = character or UnitName("player");
+	
+	local realms = self.items.realms;
+	if realms == nil then return end;
+	
+	local server = realms[realm];
+	if server == nil then return end;
+	
+	local chars = server.characters;
+	if chars == nil then return end;
+	
+	local chr = chars[character];
+	if chr == nil then return end;
+	
+	local bType = chr[bagType];
+	if bType == nil then return end;
+	
+	local bag = bType[bagID];
+	if bag == nil then return end;
+	
+	local content = bag.content;
+	if content == nil then return end;
+	
+	return content[slotID];
+end
+
+local
+function _UpdateItemDetail(self, itemLink)
+	local d = {};
+	
+	d.name, d.link, d.rarity, d.level, d.minlevel, d.type, d.subtype, d.stackcount, d.equiploc, d.texture = GetItemInfo(itemLink);
+	d.lastUpdate = time();
+	if d.name then
+		self.items.details[self:GetItemKey(d.link)] = d;
 	end
-	return dest;
+	
+	return d;
+end
+
+local
+function _GetItemDetail(self, key)
+	if key == nil then return nil end;
+	
+	local detail = self.items.details[key];
+	if detail and detail.link then
+		if detail.lastUpdate and (detail.lastUpdate >= FBoH.sessionStartTime) then
+			return detail;
+		end
+	end
+	
+	local item = "item:" .. key .. ":0";
+	_UpdateItemDetail(self, item);
+	
+	detail = self.items.details[key];
+	if detail and detail.link then
+		return detail;
+	end
+
+	return nil;
+end
+
+------------------ Public Interface ---------------------------
+
+function FBoH_ItemDB:CheckVersion()
+	self.items = self.items or FBoH_Items;
+	self.items.version = self.items.version or "purge";
+	
+	if self.items.version ~= FBOH_ITEMS_DB_VERSION then
+		if self.items.version == "purge" then
+			self:Purge();
+			return;
+		end
+		FBoH:Print("Updating item database: " .. self.items.version .. " -> " .. FBOH_ITEMS_DB_VERSION);
+		if self.items.version == "0.01.00" then
+			_UpgradeFrom0_01_00(self);
+		end
+		if self.items.version == "0.02.00" then
+			_UpgradeFrom0_02_00(self);
+		end
+		if self.items.version == "0.03.00" then
+			_UpgradeFrom0_03_00(self);
+		end
+	end
+	
+	_CleanDatabase(self);
 end
 
 local FindItemProps = {};
-
-local function TestFilter(filter, filterArg, itemProps)
-	local presult, rVal = pcall(filter, itemProps, filterArg);
-	if presult == true then return rVal else return false end;
-end
 
 function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 	-- Subset can be one of:
@@ -242,7 +321,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 								for bID, bData in pairs(btData) do
 									if bData.content then
 										for sID, sData in pairs(bData.content) do
-											local detail = self:GetItemDetail(sData.key);
+											local detail = _GetItemDetail(self, sData.key);
 											if detail and detail.link then
 												itemProps.realm = rName;
 												itemProps.character = cName;
@@ -258,8 +337,8 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 												itemProps.detail = detail;
 												itemProps.itemLink = detail.link;
 												
-												if TestFilter(filter, filterArg, itemProps) then
-													table.insert(rTable, CopyItemProps(itemProps));
+												if _TestFilter(filter, filterArg, itemProps) then
+													table.insert(rTable, _CopyItemProps(itemProps));
 												end
 											end
 										end
@@ -281,7 +360,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 				for tabID, tab in pairs(gData.tabs) do
 					if tab.content then
 						for sID, sData in pairs(tab.content) do
-							local detail = self:GetItemDetail(sData.key);
+							local detail = _GetItemDetail(self, sData.key);
 							if detail then
 								itemProps.realm = charRealm;
 								itemProps.character = charName;
@@ -297,8 +376,8 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 								itemProps.detail = detail;
 								itemProps.itemLink = itemProps.detail.link;
 								
-								if filter(itemProps, filterArg) then
-									table.insert(rTable, CopyItemProps(itemProps));
+								if _TestFilter(filter, filterArg, itemProps) then
+									table.insert(rTable, _CopyItemProps(itemProps));
 								end							
 							end
 						end
@@ -414,42 +493,10 @@ function FBoH_ItemDB:GetEmptySlots(bagType, bagID, character, realm)
 	
 	-- Sort the values...
 	for _, v in pairs(rVal) do
-		table.sort(v, self.SortEmptySlots);
+		table.sort(v, _SortEmptySlots);
 	end
 	
 	return rVal;
-end
-
-function FBoH_ItemDB.SortEmptySlots(a, b)
-	return a.restrictionCode < b.restrictionCode;
-end
-
-function FBoH_ItemDB:GetItem(bagType, bagID, slotID, itemLink, itemCount, character, realm)
-	realm = realm or GetRealmName();
-	character = character or UnitName("player");
-	
-	local realms = self.items.realms;
-	if realms == nil then return end;
-	
-	local server = realms[realm];
-	if server == nil then return end;
-	
-	local chars = server.characters;
-	if chars == nil then return end;
-	
-	local chr = chars[character];
-	if chr == nil then return end;
-	
-	local bType = chr[bagType];
-	if bType == nil then return end;
-	
-	local bag = bType[bagID];
-	if bag == nil then return end;
-	
-	local content = bag.content;
-	if content == nil then return end;
-	
-	return content[slotID];
 end
 
 function FBoH_ItemDB:GetItemKey(itemLink)
@@ -483,7 +530,7 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 	realm = realm or GetRealmName();
 	character = character or UnitName("player");
 	
-	local oldItem = self:GetItem(bagType, bagID, slotID, character, realm)
+	local oldItem = _GetItem(self, bagType, bagID, slotID, character, realm)
 	
 	local newKey = nil;
 	if itemLink then
@@ -521,7 +568,7 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 		
 		self.items.details = self.items.details or {};
 		if self.items.details[newItem.key] == nil then
-			self:UpdateItemDetail(itemLink);
+			_UpdateItemDetail(self, itemLink);
 		end
 	end;
 	
@@ -547,39 +594,6 @@ function FBoH_ItemDB:SetItem(bagType, bagID, slotID, itemLink, itemCount, soulbo
 	local content = bag.content;
 
 	content[slotID] = newItem;
-end
-
-function FBoH_ItemDB:UpdateItemDetail(itemLink)
-	local d = {};
-	
-	d.name, d.link, d.rarity, d.level, d.minlevel, d.type, d.subtype, d.stackcount, d.equiploc, d.texture = GetItemInfo(itemLink);
-	d.lastUpdate = time();
-	if d.name then
-		self.items.details[self:GetItemKey(d.link)] = d;
-	end
-	
-	return d;
-end
-
-function FBoH_ItemDB:GetItemDetail(key)
-	if key == nil then return nil end;
-	
-	local detail = self.items.details[key];
-	if detail and detail.link then
-		if detail.lastUpdate and (detail.lastUpdate >= FBoH.sessionStartTime) then
-			return detail;
-		end
-	end
-	
-	local item = "item:" .. key .. ":0";
-	self:UpdateItemDetail(item);
-	
-	detail = self.items.details[key];
-	if detail and detail.link then
-		return detail;
-	end
-
-	return nil;
 end
 
 function FBoH_ItemDB:SetGuildItem(tabID, slotID, itemLink, itemCount)
@@ -685,11 +699,385 @@ WoWUnit:AddTestSuite("FBoH", FBoH_UnitTests);
 
 end
 
+local ItemDB_0_03_01 = {
+	["details"] = {
+		["00000:0:2740:3111:0:0:0"] = {
+			["type"] = "Armor",
+			["rarity"] = 4,
+			["subtype"] = "Cloth",
+			["minlevel"] = 70,
+			["equiploc"] = "INVTYPE_WAIST",
+			["name"] = "Imaginary Belt of Blasting",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:13|h[Imaginary Belt of Blasting]|h|r",
+			["level"] = 128,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Belt_13",
+		},
+		["2589:0:0:0:0:0:0"] = {
+			["type"] = "Trade Goods",
+			["rarity"] = 1,
+			["subtype"] = "Cloth",
+			["minlevel"] = 0,
+			["equiploc"] = "",
+			["name"] = "Linen Cloth",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffffffff|Hitem:2589:0:0:0:0:0:0:0:13|h[Linen Cloth]|h|r",
+			["level"] = 5,
+			["stackcount"] = 20,
+			["texture"] = "Interface\\Icons\\INV_Fabric_Linen_01",
+		},
+		["11000:0:0:0:0:0:0"] = {
+			["type"] = "Key",
+			["rarity"] = 1,
+			["subtype"] = "Key",
+			["minlevel"] = 0,
+			["equiploc"] = "",
+			["name"] = "Shadowforge Key",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffffffff|Hitem:11000:0:0:0:0:0:0:0:13|h[Shadowforge Key]|h|r",
+			["level"] = 1,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Misc_Key_08",
+		},
+		["24490:0:0:0:0:0:0"] = {
+			["type"] = "Key",
+			["rarity"] = 1,
+			["subtype"] = "Key",
+			["minlevel"] = 0,
+			["equiploc"] = "",
+			["name"] = "The Master's Key",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffffffff|Hitem:24490:0:0:0:0:0:0:0:13|h[The Master's Key]|h|r",
+			["level"] = 1,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Misc_Key_07",
+		},
+		["27886:0:0:0:0:0:0"] = {
+			["type"] = "Armor",
+			["rarity"] = 3,
+			["subtype"] = "Idols",
+			["minlevel"] = 68,
+			["equiploc"] = "INVTYPE_RELIC",
+			["name"] = "Idol of the Emerald Queen",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cff0070dd|Hitem:27886:0:0:0:0:0:0:0:13|h[Idol of the Emerald Queen]|h|r",
+			["level"] = 112,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\Spell_Nature_NatureResistanceTotem",
+		},
+		["28348:0:0:0:0:0:0"] = {
+			["type"] = "Armor",
+			["rarity"] = 3,
+			["subtype"] = "Leather",
+			["minlevel"] = 70,
+			["equiploc"] = "INVTYPE_HEAD",
+			["name"] = "Moonglade Cowl",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cff0070dd|Hitem:28348:0:0:0:0:0:0:0:13|h[Moonglade Cowl]|h|r",
+			["level"] = 115,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Helmet_15",
+		},
+		["30038:0:2740:3111:0:0:0"] = {
+			["type"] = "Armor",
+			["rarity"] = 4,
+			["subtype"] = "Cloth",
+			["minlevel"] = 70,
+			["equiploc"] = "INVTYPE_WAIST",
+			["name"] = "Belt of Blasting",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffa335ee|Hitem:30038:0:2740:3111:0:0:0:0:13|h[Belt of Blasting]|h|r",
+			["level"] = 128,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Belt_13",
+		},
+		["30623:0:0:0:0:0:0"] = {
+			["type"] = "Key",
+			["rarity"] = 1,
+			["subtype"] = "Key",
+			["minlevel"] = 0,
+			["equiploc"] = "",
+			["name"] = "Reservoir Key",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffffffff|Hitem:30623:0:0:0:0:0:0:0:13|h[Reservoir Key]|h|r",
+			["level"] = 0,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Misc_Key_13",
+		},
+		["33445:0:0:0:0:0:0"] = {
+			["type"] = "Consumable",
+			["rarity"] = 1,
+			["subtype"] = "Food & Drink",
+			["minlevel"] = 75,
+			["equiploc"] = "",
+			["name"] = "Honeymint Tea",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffffffff|Hitem:33445:0:0:0:0:0:0:0:13|h[Honeymint Tea]|h|r",
+			["level"] = 85,
+			["stackcount"] = 20,
+			["texture"] = "Interface\\Icons\\INV_Drink_25_HoneyTea",
+		},
+		["37149:3820:3623:3488:0:0:0"] = {
+			["type"] = "Armor",
+			["rarity"] = 3,
+			["subtype"] = "Leather",
+			["minlevel"] = 80,
+			["equiploc"] = "INVTYPE_HEAD",
+			["name"] = "Helm of Anomalus",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cff0070dd|Hitem:37149:3820:3623:3488:0:0:0:0:13|h[Helm of Anomalus]|h|r",
+			["level"] = 200,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Helmet_104",
+		},
+		["39878:0:0:0:0:0:0"] = {
+			["type"] = "Consumable",
+			["rarity"] = 1,
+			["subtype"] = "Consumable",
+			["minlevel"] = 70,
+			["equiploc"] = "",
+			["name"] = "Mysterious Egg",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffffffff|Hitem:39878:0:0:0:0:0:0:0:13|h[Mysterious Egg]|h|r",
+			["level"] = 1,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Egg_02",
+		},
+		["43348:0:0:0:0:0:0"] = {
+			["type"] = "Armor",
+			["rarity"] = 4,
+			["subtype"] = "Miscellaneous",
+			["minlevel"] = 0,
+			["equiploc"] = "INVTYPE_TABARD",
+			["name"] = "Tabard of the Explorer",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffa335ee|Hitem:43348:0:0:0:0:0:0:0:13|h[Tabard of the Explorer]|h|r",
+			["level"] = 1,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Chest_Cloth_30",
+		},
+		["44228:0:0:0:0:0:0"] = {
+			["type"] = "Consumable",
+			["rarity"] = 1,
+			["subtype"] = "Food & Drink",
+			["minlevel"] = 0,
+			["equiploc"] = "",
+			["name"] = "Baby Spice",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffffffff|Hitem:44228:0:0:0:0:0:0:0:13|h[Baby Spice]|h|r",
+			["level"] = 1,
+			["stackcount"] = 20,
+			["texture"] = "Interface\\Icons\\INV_Misc_Powder_Green",
+		},
+	},
+	["version"] = "0.03.01",
+	["realms"] = {
+		["Spirestone"] = {
+			["characters"] = {
+				["Feithar"] = {
+					["Bank"] = {
+						{
+							["content"] = {
+								{
+									["lastUpdate"] = 1212116014,
+									["key"] = "28348:0:0:0:0:0:0",
+									["count"] = 1,
+								}, -- [1]
+							},
+							["size"] = {
+								["total"] = 28,
+								["general"] = true,
+								["free"] = 0,
+							},
+						}, -- [1]
+						{
+							["content"] = {
+								{
+									["lastUpdate"] = 1229815277,
+									["count"] = 1,
+									["key"] = "30038:0:2740:3111:0:0:0",
+									["soulbound"] = true,
+								}, -- [1]
+							},
+							["size"] = {
+								["restrictionCode"] = 0,
+								["total"] = 20,
+								["general"] = true,
+								["free"] = 0,
+							},
+						}, -- [2]
+						{
+							["content"] = {
+								{
+									["lastUpdate"] = 1229689777,
+									["key"] = "43348:0:0:0:0:0:0",
+									["soulbound"] = true,
+									["count"] = 1,
+								}, -- [1]
+							},
+							["size"] = {
+								["restrictionCode"] = 0,
+								["total"] = 18,
+								["general"] = true,
+								["free"] = 0,
+							},
+						}, -- [3]
+					},
+					["Wearing"] = {
+						{
+							["content"] = {
+								{
+									["lastUpdate"] = 1233001829,
+									["count"] = 1,
+									["key"] = "37149:3820:3623:3488:0:0:0",
+								}, -- [1]
+							},
+						}, -- [1]
+					},
+					["Bags"] = {
+						{
+							["content"] = {
+								{
+									["lastUpdate"] = 1233808438,
+									["soulbound"] = true,
+									["count"] = 1,
+									["key"] = "39878:0:0:0:0:0:0",
+								}, -- [1]
+							},
+							["size"] = {
+								["total"] = 16,
+								["general"] = true,
+								["free"] = 2,
+							},
+						}, -- [1]
+						{
+							["content"] = {
+								{
+									["lastUpdate"] = 1233834239,
+									["count"] = 18,
+									["key"] = "33445:0:0:0:0:0:0",
+								}, -- [1]
+							},
+							["size"] = {
+								["restrictionCode"] = 0,
+								["total"] = 22,
+								["general"] = true,
+								["free"] = 2,
+							},
+						}, -- [2]
+						{
+							["content"] = {
+								{
+									["lastUpdate"] = 1233748873,
+									["key"] = "44228:0:0:0:0:0:0",
+									["soulbound"] = true,
+									["count"] = 15,
+								}, -- [1]
+							},
+							["size"] = {
+								["restrictionCode"] = 0,
+								["total"] = 20,
+								["general"] = true,
+								["free"] = 4,
+							},
+						}, -- [3]
+						{
+							["content"] = {
+								nil, -- [1]
+							},
+							["size"] = {
+								["restrictionCode"] = 0,
+								["total"] = 22,
+								["general"] = true,
+								["free"] = 5,
+							},
+						}, -- [4]
+						{
+							["content"] = {
+								{
+									["lastUpdate"] = 1233748873,
+									["key"] = "27886:0:0:0:0:0:0",
+									["soulbound"] = true,
+									["count"] = 1,
+								}, -- [1]
+							},
+							["size"] = {
+								["restrictionCode"] = 0,
+								["total"] = 22,
+								["general"] = true,
+								["free"] = 3,
+							},
+						}, -- [5]
+					},
+					["Keyring"] = {
+						{
+							["content"] = {
+								{
+									["lastUpdate"] = 1212116014,
+									["count"] = 1,
+									["key"] = "30623:0:0:0:0:0:0",
+								}, -- [1]
+								{
+									["lastUpdate"] = 1212116014,
+									["count"] = 1,
+									["key"] = "24490:0:0:0:0:0:0",
+								}, -- [2]
+								{
+									["lastUpdate"] = 1212116014,
+									["count"] = 1,
+									["key"] = "11000:0:0:0:0:0:0",
+								}, -- [3]
+							},
+							["size"] = {
+								["total"] = 32,
+								["general"] = false,
+								["free"] = 0,
+							},
+						}, -- [1]
+					},
+				},
+			},
+			["guilds"] = {
+				["Heros of the Horde"] = {
+					["tabs"] = {
+						{
+							["content"] = {
+								{
+									["count"] = 20,
+									["key"] = "2589:0:0:0:0:0:0",
+								}, -- [1]
+								{
+									["count"] = 20,
+									["key"] = "2589:0:0:0:0:0:0",
+								}, -- [2]
+								{
+									["count"] = 20,
+									["key"] = "2589:0:0:0:0:0:0",
+								}, -- [3]
+							},
+						}, -- [1]
+					},
+				},
+			},
+		},
+	},
+};
+
 FBoH_UnitTests.ItemDB = {
 	mocks = {
-		FBoH_Items = {};
+		FBoH = FBoH;
+		
 		FBoH_ItemDB = FBoH_ItemDB;
+		ItemDB_0_03_01 = ItemDB_0_03_01;
+		
+		GetRealmName = function() return "Spirestone" end;
+		UnitName = function() return "Feithar" end;
 	};
+	
+	setUp = function()
+		FBoH_ItemDB.items = ItemDB_0_03_01;
+	end;
 	
 	testCreateNewItemDatabase = function()
 		FBoH_ItemDB.items = nil;
@@ -700,21 +1088,21 @@ FBoH_UnitTests.ItemDB = {
 	testUpgradeItemDatabaseFrom0_01_00 = function()
 		FBoH_ItemDB.items = {};
 		FBoH_ItemDB.items.version = "0.01.00";
-		UpgradeFrom0_01_00(FBoH_ItemDB);
+		_UpgradeFrom0_01_00(FBoH_ItemDB);
 		assertEquals("0.02.00", FBoH_ItemDB.items.version);
 	end;
 	
 	testUpgradeItemDatabaseFrom0_02_00 = function()
 		FBoH_ItemDB.items = {};
 		FBoH_ItemDB.items.version = "0.02.00";
-		UpgradeFrom0_02_00(FBoH_ItemDB);
+		_UpgradeFrom0_02_00(FBoH_ItemDB);
 		assertEquals("0.03.00", FBoH_ItemDB.items.version);
 	end;
 	
 	testUpgradeItemDatabaseFrom0_03_00 = function()
 		FBoH_ItemDB.items = {};
 		FBoH_ItemDB.items.version = "0.03.00";
-		UpgradeFrom0_03_00(FBoH_ItemDB);
+		_UpgradeFrom0_03_00(FBoH_ItemDB);
 		assertEquals("0.03.01", FBoH_ItemDB.items.version);
 	end;
 	
@@ -723,7 +1111,7 @@ FBoH_UnitTests.ItemDB = {
 		local filterArg = nil;
 		local itemProps = nil;
 		
-		local result = TestFilter(filter, filterArg, itemProps);
+		local result = _TestFilter(filter, filterArg, itemProps);
 		
 		assertEquals(true, result);
 	end;
@@ -733,7 +1121,7 @@ FBoH_UnitTests.ItemDB = {
 		local filterArg = nil;
 		local itemProps = nil;
 		
-		local result = TestFilter(filter, filterArg, itemProps);
+		local result = _TestFilter(filter, filterArg, itemProps);
 		
 		assertEquals(false, result);
 	end;
@@ -743,8 +1131,167 @@ FBoH_UnitTests.ItemDB = {
 		local filterArg = nil;
 		local itemProps = nil;
 		
-		local result = TestFilter(filter, filterArg, itemProps);
+		local result = _TestFilter(filter, filterArg, itemProps);
 		
 		assertEquals(false, result);
 	end;
+	
+	testSortEmptySlotsTrue = function()
+		local a = { restrictionCode = 1 };
+		local b = { restrictionCode = 2 };
+		assertEquals(true, _SortEmptySlots(a, b));
+	end;
+	
+	testSortEmptySlotsFalse = function()
+		local a = { restrictionCode = 2 };
+		local b = { restrictionCode = 1 };
+		assertEquals(false, _SortEmptySlots(a, b));
+	end;
+	
+	testSortEmptySlotsEqual = function()
+		local a = { restrictionCode = 1 };
+		local b = { restrictionCode = 1 };
+		assertEquals(false, _SortEmptySlots(a, b));
+	end;
+	
+	testCopyItemProps = function()
+		local src = { a = 1, b = 2, c = 3 };
+		local dst = nil;
+		local target = { a = 1, b = 2, c = 3 };
+		assertEquals(target, _CopyItemProps(src, dst));
+	end;
+	
+	testCopyItemPropsMerge = function()
+		local src = { a = 1, b = 2, c = 3 };
+		local dst = { a = 4, b = 5, c = 6, d = 7 };
+		local target = { a = 1, b = 2, c = 3, d = 7 };
+		assertEquals(target, _CopyItemProps(src, dst));
+	end;
+	
+	testGetItem = function()
+		local realm = "Spirestone";
+		local character = "Feithar";
+		local bagType = "Bags";
+		local bagID = 1;
+		local slotID = 1;
+		
+		local expected = {
+			["lastUpdate"] = 1233808438,
+			["soulbound"] = true,
+			["count"] = 1,
+			["key"] = "39878:0:0:0:0:0:0",
+		};
+		
+		local rVal = _GetItem(FBoH_ItemDB, bagType, bagID, slotID, character, realm);
+		
+		assertEquals(expected, rVal);
+	end;
+	
+	testGetItemDefaultCharRealm = function()
+		local bagType = "Bags";
+		local bagID = 1;
+		local slotID = 1;
+		
+		local expected = {
+			["lastUpdate"] = 1233808438,
+			["soulbound"] = true,
+			["count"] = 1,
+			["key"] = "39878:0:0:0:0:0:0",
+		};
+		
+		local rVal = _GetItem(FBoH_ItemDB, bagType, bagID, slotID);
+		
+		assertEquals(expected, rVal);
+	end;
+	
+	testGetItemDetail = function()
+		local key = "30038:0:2740:3111:0:0:0";
+		local expected = {
+			["type"] = "Armor",
+			["rarity"] = 4,
+			["subtype"] = "Cloth",
+			["minlevel"] = 70,
+			["equiploc"] = "INVTYPE_WAIST",
+			["name"] = "Belt of Blasting",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffa335ee|Hitem:30038:0:2740:3111:0:0:0:0:13|h[Belt of Blasting]|h|r",
+			["level"] = 128,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Belt_13",
+		};
+
+		FBoH.sessionStartTime = 1234020000;		-- Ensure we use the cached data
+
+		assertEquals("Session start time reset", 1234020000, FBoH.sessionStartTime);
+		assertEquals("Not using test item database", ItemDB_0_03_01, FBoH_ItemDB.items);
+		
+		local result = _GetItemDetail(FBoH_ItemDB, key);
+
+		assertEquals("Last update time changed - not using cached value", expected.lastUpdate, result.lastUpdate);
+		assertEquals(expected, result);
+	end;
+	
+	testGetImaginaryItemDetail = function()
+		local key = "00000:0:2740:3111:0:0:0";
+		local expected = {
+			["type"] = "Armor",
+			["rarity"] = 4,
+			["subtype"] = "Cloth",
+			["minlevel"] = 70,
+			["equiploc"] = "INVTYPE_WAIST",
+			["name"] = "Imaginary Belt of Blasting",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:13|h[Imaginary Belt of Blasting]|h|r",
+			["level"] = 128,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Belt_13",
+		};
+
+		FBoH.sessionStartTime = 1234020000;		-- Ensure we use the cached data
+
+		assertEquals("Session start time reset", 1234020000, FBoH.sessionStartTime);
+		assertEquals("Not using test item database", ItemDB_0_03_01, FBoH_ItemDB.items);
+		
+		local result = _GetItemDetail(FBoH_ItemDB, key);
+
+		assertEquals("Last update time changed - not using cached value", expected.lastUpdate, result.lastUpdate);
+		assertEquals(expected, result);
+	end;
+	
+	testGetImaginaryItemDetailCacheDefault = function()
+		local key = "00000:0:2740:3111:0:0:0";
+		local expected = {
+			["type"] = "Armor",
+			["rarity"] = 4,
+			["subtype"] = "Cloth",
+			["minlevel"] = 70,
+			["equiploc"] = "INVTYPE_WAIST",
+			["name"] = "Imaginary Belt of Blasting",
+			["lastUpdate"] = 1234020812,
+			["link"] = "|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:13|h[Imaginary Belt of Blasting]|h|r",
+			["level"] = 128,
+			["stackcount"] = 1,
+			["texture"] = "Interface\\Icons\\INV_Belt_13",
+		};
+
+		FBoH.sessionStartTime = 1234030000;		-- Ensure we attempt to read from client cache
+
+		assertEquals("Not using test item database", ItemDB_0_03_01, FBoH_ItemDB.items);
+		
+		local result = _GetItemDetail(FBoH_ItemDB, key);
+
+		assertEquals("Last update time changed - not using cached value", expected.lastUpdate, result.lastUpdate);
+		assertEquals(expected, result);
+	end;
+	
+	testUpdateImaginaryItemDetail = function()
+		local link = "item:00000:0:2740:3111:0:0:0:0";
+		local expected = {};
+		
+		local result = _UpdateItemDetail(FBoH_ItemDB, link);
+		
+		expected.lastUpdate = result.lastUpdate;
+		assertEquals(expected, result);
+	end;
+	
 };
