@@ -1075,10 +1075,6 @@ FBoH_UnitTests.ItemDB = {
 		UnitName = function() return "Feithar" end;
 	};
 	
-	setUp = function()
-		FBoH_ItemDB.items = ItemDB_0_03_01;
-	end;
-	
 	testCreateNewItemDatabase = function()
 		FBoH_ItemDB.items = nil;
 		FBoH_ItemDB:CheckVersion();
@@ -1182,6 +1178,8 @@ FBoH_UnitTests.ItemDB = {
 			["key"] = "39878:0:0:0:0:0:0",
 		};
 		
+		FBoH_ItemDB.items = ItemDB_0_03_01;
+
 		local rVal = _GetItem(FBoH_ItemDB, bagType, bagID, slotID, character, realm);
 		
 		assertEquals(expected, rVal);
@@ -1199,6 +1197,8 @@ FBoH_UnitTests.ItemDB = {
 			["key"] = "39878:0:0:0:0:0:0",
 		};
 		
+		FBoH_ItemDB.items = ItemDB_0_03_01;
+
 		local rVal = _GetItem(FBoH_ItemDB, bagType, bagID, slotID);
 		
 		assertEquals(expected, rVal);
@@ -1219,6 +1219,8 @@ FBoH_UnitTests.ItemDB = {
 			["stackcount"] = 1,
 			["texture"] = "Interface\\Icons\\INV_Belt_13",
 		};
+
+		FBoH_ItemDB.items = ItemDB_0_03_01;
 
 		FBoH.sessionStartTime = 1234020000;		-- Ensure we use the cached data
 
@@ -1247,6 +1249,8 @@ FBoH_UnitTests.ItemDB = {
 			["texture"] = "Interface\\Icons\\INV_Belt_13",
 		};
 
+		FBoH_ItemDB.items = ItemDB_0_03_01;
+
 		FBoH.sessionStartTime = 1234020000;		-- Ensure we use the cached data
 
 		assertEquals("Session start time reset", 1234020000, FBoH.sessionStartTime);
@@ -1274,6 +1278,8 @@ FBoH_UnitTests.ItemDB = {
 			["texture"] = "Interface\\Icons\\INV_Belt_13",
 		};
 
+		FBoH_ItemDB.items = ItemDB_0_03_01;
+
 		FBoH.sessionStartTime = 1234030000;		-- Ensure we attempt to read from client cache
 
 		assertEquals("Not using test item database", ItemDB_0_03_01, FBoH_ItemDB.items);
@@ -1288,6 +1294,8 @@ FBoH_UnitTests.ItemDB = {
 		local link = "item:00000:0:2740:3111:0:0:0:0";
 		local expected = {};
 		
+		FBoH_ItemDB.items = ItemDB_0_03_01;
+
 		local result = _UpdateItemDetail(FBoH_ItemDB, link);
 		
 		expected.lastUpdate = result.lastUpdate;

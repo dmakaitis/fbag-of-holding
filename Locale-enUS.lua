@@ -85,6 +85,8 @@ L["Right"] = true;
 L["Display"] = true;
 L["Grid Scale"] = "Icon Scale";
 L["Grid Scale Desc"] = "Scales the size of item icons in the icon view";
+L["Toggle debug"] = true;
+L["Toggle printing of debug messages to the chat window."] = true;
 
 L["General"] = true;
 L["Hook Open All Bags"] = true;

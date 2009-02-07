@@ -121,6 +121,13 @@ local options = {
 					max = 2.0,
 					isPercent = true,
 				},
+				debugOutput = {
+					type = "toggle",
+					name = L["Toggle debug"],
+					desc = L["Toggle printing of debug messages to the chat window."],
+					get = function(info) return FBoH:IsDebugEnabled() end,
+					set = function(info, v) FBoH:SetDebugEnabled(v) end,
+				},
 			},
 		},
 		general = {

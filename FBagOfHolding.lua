@@ -43,189 +43,42 @@ local AceConfig = LibStub("AceConfigDialog-3.0");
 
 FBoH = LibStub("AceAddon-3.0"):NewAddon("Feithar's Bag of Holding",
 										"AceConsole-3.0",
-										"AceComm-3.0",
 										"AceEvent-3.0",
 										"AceHook-3.0",
 										"AceTimer-3.0",
 										"LibFuBarPlugin-Mod-3.0");
 
 --*****************************************************************************
--- Events
+-- Error handling and debugging
 --*****************************************************************************
 
-function FBoH:BANKFRAME_CLOSED()
-	self.bankIsOpen = false;
-	self:UpdateBags();
+local
+function _ErrorHandler(msg)
+	FBoH:Debug("|cffff0000UNHANDLED ERROR:|r |cffffff00" .. tostring(msg) .. "|r");
 end
 
-function FBoH:BANKFRAME_OPENED()
-	self.bankIsOpen = true;
-	self:ScanContainer();
+local
+function _SafeCall(method)
+	xpcall(method, _ErrorHandler);
 end
 
-function FBoH:GUILDBANKFRAME_OPENED()
-	self.guildBankIsOpen = true;
-
-	local numTabs = GetNumGuildBankTabs();
-	for tab = 1, numTabs do
-		if IsTabViewable(tab) then
-			QueryGuildBankTab(tab);
-		end
-	end
+function FBoH:Debug(message)
+	if self.db.profile.debugMessages then self:Print(message) end;
 end
 
-function FBoH:GUILDBANKFRAME_CLOSED()
-	self.guildBankIsOpen = false;
-	self:UpdateBagsGuild();
-end
-
-function FBoH:GUILDBANKBAGSLOTS_CHANGED()
---	self:Print("GUILDBANKBAGSLOTS_CHANGED");
-	if self.guildBankIsOpen then
-		self:ScanGuildBank();
-	end
-end
-
-function FBoH:ZONE_CHANGED()
-	self:SendFBoHMessage("V#" .. tostring(FBoH_GetVersion()));
-end
-
---function FBoH:GUILDBANK_UPDATE_TABS()
---	self:Print("Updating Tabs");
---end
-
-function FBoH:OnInitialize()
-	self.items = FBoH_ItemDB;
-
-	self.db = LibStub("AceDB-3.0"):New("FBoH_DB", defaults)
-	
-	self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
-	self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
-	self.db.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
-	
-	self.configOptions.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-
-	-- Create the FuBarPlugin bits.
-	self:SetFuBarOption("GameTooltip", true);
---	self:SetFuBarOption("hasNoColor", true)
---	self:SetFuBarOption("cannotDetachTooltip", true)
---	self:SetFuBarOption("hideWithoutStandby", true)
---	self:SetFuBarOption("configType", "Dewdrop-2.0");
-	self:SetFuBarOption("iconPath", "Interface\\Buttons\\Button-Backpack-Up");
-
-	self.sessionStartTime = time() + 10;
-	
-	optFrame = AceConfig:AddToBlizOptions(L["FBoH"], L["FBoH"]);	
-end
-
-FBoH.filters = {};
-FBoH.bagViews = {};
-
-function FBoH:OnEnable()
-	self.items:CheckVersion();
-	
---	self:RegisterEvent("ZONE_CHANGED");
-
-	self:RegisterEvent("BANKFRAME_OPENED");
-	self:RegisterEvent("BANKFRAME_CLOSED");
-
-	self:RegisterEvent("GUILDBANKFRAME_OPENED");
-	self:RegisterEvent("GUILDBANKFRAME_CLOSED");
-	self:RegisterEvent("GUILDBANKBAGSLOTS_CHANGED");
---	self:RegisterEvent("GUILDBANK_UPDATE_TABS");
-	
-	self:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED", "ScanAllContainers");
-	self:RegisterEvent("PLAYERBANKSLOTS_CHANGED", "ScanAllContainers");
-	self:RegisterEvent("BAG_UPDATE", "ScanContainer");
-	self:RegisterEvent("UNIT_INVENTORY_CHANGED", "ScanInventory");
-
-	self:RegisterComm("FBoH");
-	
-	local iSlots = {
-		"HeadSlot",
-		"NeckSlot",
-		"ShoulderSlot",
-		"BackSlot",
-		"ChestSlot",
-		"ShirtSlot",
-		"TabardSlot",
-		"WristSlot",
-		"HandsSlot",
-		"WaistSlot",
-		"LegsSlot",
-		"FeetSlot",
-		"Finger0Slot",
-		"Finger1Slot",
-		"Trinket0Slot",
-		"Trinket1Slot",
-
-		"MainHandSlot",
-		"SecondaryHandSlot",
-		"RangedSlot",
-		"AmmoSlot",
-
-		"Bag0Slot",
-		"Bag1Slot",
-		"Bag2Slot",
-		"Bag3Slot"
-	};
-
-	self.inventorySlots = {};
-	
-	for _, v in pairs(iSlots) do
-		local id, tex = GetInventorySlotInfo(v);
-		self.inventorySlots[id] = {
-			name = v;
-			texture = tex;
-		};
-	end
-	
-	self.bankIsOpen = false;
-	self.scanQueues = {};
-	
-	TipHooker:Hook(self.ProcessTooltip, "item")
-
-	self:RawHook("OpenAllBags", true);
-	self:Hook("CloseAllBags", true);
-	self:RawHook("ToggleBackpack", true);
-	self:RawHook("ToggleBag", true);
-	
-	self:ScanContainer(0);	-- Because WoW doesn't update the main bag when the player logs in...
-	self:ScanInventory();
-	
-	self:OnProfileChanged();
-end
-
-function FBoH:OnDisable()
-	self:UnhookAll();
-	TipHooker:Unhook(self.ProcessTooltip, "item")
-end
-
-function FBoH:OnCommReceived(prefix, message, distribution, sender)
-	local key, arg = strsplit("#", message);
-	if key == "V" then
-		-- arg is the version number of another user.
---		self:Print(sender .. " is using FBoH r" .. arg);
-	end
-end
-
-function FBoH:SendFBoHMessage(message)
-	self:Print("Sending message: " .. message);
-	self:SendCommMessage("FBoH", message, "GUILD");
-	self:SendCommMessage("FBoH", message, "RAID");
-	self:SendCommMessage("FBoH", message, "BATTLEGROUND");
-	SendChatMessage("/FBoH!" .. message, "CHANNEL", nil, 6);
---	self:SendCommMessage("FBoH", "version " .. tostring(FBoH_GetVersion()), "ZONE");
-end
+--*****************************************************************************
+-- Private Methods
+--*****************************************************************************
 
 -- Simple shallow copy for copying defaults
-local function copyTable(src, dest)
+local
+function _CopyTable(src, dest)
 	if type(dest) ~= "table" then dest = {} end
 	if type(src) == "table" then
 		for k,v in pairs(src) do
 			if type(v) == "table" then
 				-- try to index the key first so that the metatable creates the defaults, if set, and use that table
-				v = copyTable(v, dest[k])
+				v = _CopyTable(v, dest[k])
 			end
 			dest[k] = v
 		end
@@ -233,31 +86,24 @@ local function copyTable(src, dest)
 	return dest
 end
 
-function FBoH:OnProfileChanged()
-	-- First, if we have existing bag views, hide them all
-	if self.bagViews then
-		for _, v in pairs(self.bagViews) do
-			v:Hide();
-		end
+local
+function _DewdropMenuPoint(frame)
+	local x, y = frame:GetCenter()
+	local leftRight
+	if x < GetScreenWidth() / 2 then
+		leftRight = "LEFT"
+	else
+		leftRight = "RIGHT"
 	end
-	
-	FBoH_Configure:Hide();
-	
-	self.db.profile.viewDefs = self.db.profile.viewDefs or copyTable(defaultViewDefinitions);
---	self.db.profile.viewDefs = defaultViewDefinitions;
-	self.bagViews = {};
-	
-	local viewDefs = self.db.profile.viewDefs;
-	for k, v in pairs(viewDefs) do
-		self.bagViews[k] = FBoH_ViewModel(v);
-		if FBoH_TabModel.defaultTab then
-			FBoH_TabModel.defaultTab.filterCache = nil;
-		end
+	if y < GetScreenHeight() / 2 then
+		return "BOTTOM" .. leftRight, "TOP" .. leftRight
+	else
+		return "TOP" .. leftRight, "BOTTOM" .. leftRight
 	end
-	self:RenumberViewIDs();
 end
-
-function FBoH.ProcessTooltip(tooltip, name, link)
+	
+local
+function _ProcessTooltip(tooltip, name, link)
 	local output = FBoH:GetItemCounts(link);
 	
 	if output then
@@ -269,9 +115,187 @@ function FBoH.ProcessTooltip(tooltip, name, link)
 	tooltip:Show();
 end
 
+--*****************************************************************************
+-- Events
+--*****************************************************************************
+
+function FBoH:BANKFRAME_CLOSED()
+	_SafeCall(function()
+		self.bankIsOpen = false;
+		self:UpdateBags();
+	end);
+end
+
+function FBoH:BANKFRAME_OPENED()
+	_SafeCall(function()
+		self.bankIsOpen = true;
+		self:ScanContainer();
+	end);
+end
+
+function FBoH:GUILDBANKFRAME_OPENED()
+	_SafeCall(function()
+		self.guildBankIsOpen = true;
+
+		local numTabs = GetNumGuildBankTabs();
+		for tab = 1, numTabs do
+			if IsTabViewable(tab) then
+				QueryGuildBankTab(tab);
+			end
+		end
+	end);
+end
+
+function FBoH:GUILDBANKFRAME_CLOSED()
+	_SafeCall(function()
+		self.guildBankIsOpen = false;
+		self:UpdateBagsGuild();
+	end);
+end
+
+function FBoH:GUILDBANKBAGSLOTS_CHANGED()
+	_SafeCall(function()
+		if self.guildBankIsOpen then
+			self:ScanGuildBank();
+		end
+	end);
+end
+
+function FBoH:OnInitialize()
+	_SafeCall(function()
+		self.items = FBoH_ItemDB;
+
+		self.db = LibStub("AceDB-3.0"):New("FBoH_DB", defaults)
+		
+		self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
+		self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileChanged")
+		self.db.RegisterCallback(self, "OnProfileReset", "OnProfileChanged")
+		
+		self.configOptions.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+
+		-- Create the FuBarPlugin bits.
+		self:SetFuBarOption("GameTooltip", true);
+		self:SetFuBarOption("iconPath", "Interface\\Buttons\\Button-Backpack-Up");
+
+		self.sessionStartTime = time() + 10;
+		
+		optFrame = AceConfig:AddToBlizOptions(L["FBoH"], L["FBoH"]);	
+	end);
+end
+
+FBoH.filters = {};
+FBoH.bagViews = {};
+
+function FBoH:OnEnable()
+	_SafeCall(function()
+		self.items:CheckVersion();
+		
+		self:RegisterEvent("BANKFRAME_OPENED");
+		self:RegisterEvent("BANKFRAME_CLOSED");
+
+		self:RegisterEvent("GUILDBANKFRAME_OPENED");
+		self:RegisterEvent("GUILDBANKFRAME_CLOSED");
+		self:RegisterEvent("GUILDBANKBAGSLOTS_CHANGED");
+		
+		self:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED", "ScanAllContainers");
+		self:RegisterEvent("PLAYERBANKSLOTS_CHANGED", "ScanAllContainers");
+		self:RegisterEvent("BAG_UPDATE", "ScanContainer");
+		self:RegisterEvent("UNIT_INVENTORY_CHANGED", "ScanInventory");
+
+		local iSlots = {
+			"HeadSlot",
+			"NeckSlot",
+			"ShoulderSlot",
+			"BackSlot",
+			"ChestSlot",
+			"ShirtSlot",
+			"TabardSlot",
+			"WristSlot",
+			"HandsSlot",
+			"WaistSlot",
+			"LegsSlot",
+			"FeetSlot",
+			"Finger0Slot",
+			"Finger1Slot",
+			"Trinket0Slot",
+			"Trinket1Slot",
+
+			"MainHandSlot",
+			"SecondaryHandSlot",
+			"RangedSlot",
+			"AmmoSlot",
+
+			"Bag0Slot",
+			"Bag1Slot",
+			"Bag2Slot",
+			"Bag3Slot"
+		};
+
+		self.inventorySlots = {};
+		
+		for _, v in pairs(iSlots) do
+			local id, tex = GetInventorySlotInfo(v);
+			self.inventorySlots[id] = {
+				name = v;
+				texture = tex;
+			};
+		end
+		
+		self.bankIsOpen = false;
+		self.scanQueues = {};
+		
+		TipHooker:Hook(_ProcessTooltip, "item")
+
+		self:RawHook("OpenAllBags", true);
+		self:Hook("CloseAllBags", true);
+		self:RawHook("ToggleBackpack", true);
+		self:RawHook("ToggleBag", true);
+		
+		self:ScanContainer(0);	-- Because WoW doesn't update the main bag when the player logs in...
+		self:ScanInventory();
+		
+		self:OnProfileChanged();
+	end);
+end
+
+function FBoH:OnDisable()
+	_SafeCall(function()
+		self:UnhookAll();
+		TipHooker:Unhook(_ProcessTooltip, "item")
+	end);
+end
+
+function FBoH:OnProfileChanged()
+	_SafeCall(function()
+		-- First, if we have existing bag views, hide them all
+		if self.bagViews then
+			for _, v in pairs(self.bagViews) do
+				v:Hide();
+			end
+		end
+		
+		FBoH_Configure:Hide();
+		
+		self.db.profile.viewDefs = self.db.profile.viewDefs or _CopyTable(defaultViewDefinitions);
+--		self.db.profile.viewDefs = defaultViewDefinitions;
+		self.bagViews = {};
+		
+		local viewDefs = self.db.profile.viewDefs;
+		for k, v in pairs(viewDefs) do
+			self.bagViews[k] = FBoH_ViewModel(v);
+			if FBoH_TabModel.defaultTab then
+				FBoH_TabModel.defaultTab.filterCache = nil;
+			end
+		end
+		self:RenumberViewIDs();
+	end);
+end
+
 function FBoH:ShowConfig()
-	AceConfig:SetDefaultSize(L["FBoH"], 500, 550)
-	AceConfig:Open(L["FBoH"], configFrame)
+	_SafeCall(function()
+		AceConfig:SetDefaultSize(L["FBoH"], 500, 550)
+		AceConfig:Open(L["FBoH"], configFrame)
+	end);
 end
 FBoH.OpenMenu = FBoH.ShowConfig -- for FuBar
 
@@ -282,6 +306,14 @@ end
 --*****************************************************************************
 -- Commands
 --*****************************************************************************
+
+function FBoH:IsDebugEnabled()
+	return self.db.profile.debugMessages;
+end
+
+function FBoH:SetDebugEnabled(value)
+	self.db.profile.debugMessages = value;
+end
 
 function FBoH:CmdPurge()
 	self.items:Purge();
@@ -347,27 +379,13 @@ end
 -- FuBar Functions
 --*****************************************************************************
 
-local function ShowView(bagIndex, tabIndex)
+local
+function ShowView(bagIndex, tabIndex)
 	local view = FBoH.bagViews[bagIndex];
 	view:Show();
 	view:SelectTab(tabIndex);
 end
 
-function FBoH.DewdropMenuPoint(frame)
-	local x, y = frame:GetCenter()
-	local leftRight
-	if x < GetScreenWidth() / 2 then
-		leftRight = "LEFT"
-	else
-		leftRight = "RIGHT"
-	end
-	if y < GetScreenHeight() / 2 then
-		return "BOTTOM" .. leftRight, "TOP" .. leftRight
-	else
-		return "TOP" .. leftRight, "BOTTOM" .. leftRight
-	end
-end
-	
 function FBoH:OnFuBarClick()
 	GameTooltip:Hide();
 	
@@ -416,7 +434,7 @@ function FBoH:OnFuBarClick()
 				end
 			);
 		end,
-		'point', FBoH.DewdropMenuPoint
+		'point', _DewdropMenuPoint
 	);
 end
 
@@ -965,57 +983,63 @@ function FBoH:ScanBag(bagID)
 end
 
 function FBoH:DoScanContainer(bagID, arg)
-	if type(bagID) == "string" then
-		bagID = arg;
-	end
-	
-	if bagID then
-		if self.scanQueues.all == true then
-			return
+	_SafeCall(function()
+		if type(bagID) == "string" then
+			bagID = arg;
 		end
 		
-		self:ScanBag(bagID);
-	else
-		self:ScanBag(0);
-		
-		for bag = 1, NUM_BAG_SLOTS do
-			self:ScanBag(bag);
-		end
-		
-		if self:IsBankOpen() then
-			self:ScanBag(BANK_CONTAINER);
-		
-			for bag = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
+		if bagID then
+			if self.scanQueues.all == true then
+				return
+			end
+			
+			self:ScanBag(bagID);
+		else
+			self:ScanBag(0);
+			
+			for bag = 1, NUM_BAG_SLOTS do
 				self:ScanBag(bag);
 			end
+			
+			if self:IsBankOpen() then
+				self:ScanBag(BANK_CONTAINER);
+			
+				for bag = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
+					self:ScanBag(bag);
+				end
+			end
+			
+			self.scanQueues = {};
 		end
 		
-		self.scanQueues = {};
-	end
-	
-	self:UpdateFuBarPlugin();
-	self:UpdateBags();
+		self:UpdateFuBarPlugin();
+		self:UpdateBags();
+	end);
 end
 
 function FBoH:ScanAllContainers()
-	self:ScanContainer();
+	_SafeCall(function()
+		self:ScanContainer();
+	end);
 end
 
 function FBoH:ScanContainer(bagID)
-	if self.scanQueues.all == true then
-		return;
-	end
-	
-	if bagID == nil then
-		self.scanQueues.all = true;
-	else
-		if self.scanQueues[bagID] == true then
+	_SafeCall(function()
+		if self.scanQueues.all == true then
 			return;
 		end
-		self.scanQueues[bagID] = true;
-	end
-	
-	self:ScheduleTimer(function() FBoH:DoScanContainer(bagID); end, 0);
+		
+		if bagID == nil then
+			self.scanQueues.all = true;
+		else
+			if self.scanQueues[bagID] == true then
+				return;
+			end
+			self.scanQueues[bagID] = true;
+		end
+		
+		self:ScheduleTimer(function() FBoH:DoScanContainer(bagID); end, 0);
+	end);
 end
 
 --*****************************************************************************
@@ -1023,29 +1047,33 @@ end
 --*****************************************************************************
 
 function FBoH:DoScanInventory()
-	for id, _ in pairs(self.inventorySlots) do
-		local iLink = GetInventoryItemLink("player", id);
+	_SafeCall(function()
+		for id, _ in pairs(self.inventorySlots) do
+			local iLink = GetInventoryItemLink("player", id);
 --[[
-		FBoH_ItemTooltip:ClearLines();
-		FBoH_ItemTooltip:SetInventoryItem("player", BankButtonIDToInvSlotID(id, nil))
-		local soulbound = nil;
-		for i=1,FBoH_ItemTooltip:NumLines() do
-			local text = _G["FBoH_ItemTooltipTextLeft" .. i]:GetText();
-			if text == L["Soulbound"] or text == L["Quest Item"] then
-				soulbound = true;
+			FBoH_ItemTooltip:ClearLines();
+			FBoH_ItemTooltip:SetInventoryItem("player", BankButtonIDToInvSlotID(id, nil))
+			local soulbound = nil;
+			for i=1,FBoH_ItemTooltip:NumLines() do
+				local text = _G["FBoH_ItemTooltipTextLeft" .. i]:GetText();
+				if text == L["Soulbound"] or text == L["Quest Item"] then
+					soulbound = true;
+				end
 			end
-		end
 ]]		
-		self.items:SetItem("Wearing", 1, id, iLink, 1, soulbound);
-	end
-	
-	self.scanInventoryQueued = nil;
+			self.items:SetItem("Wearing", 1, id, iLink, 1, soulbound);
+		end
+		
+		self.scanInventoryQueued = nil;
+	end);
 end
 
 function FBoH:ScanInventory()
-	if self.scanInventoryQueued == true then return end;
-	self.scanInventoryQueued = true;
-	self:ScheduleTimer(function() FBoH:DoScanInventory(); end, 0);
+	_SafeCall(function()
+		if self.scanInventoryQueued == true then return end;
+		self.scanInventoryQueued = true;
+		self:ScheduleTimer(function() FBoH:DoScanInventory(); end, 0);
+	end);
 end
 
 function FBoH:UpdateBags()
@@ -1056,10 +1084,12 @@ function FBoH:UpdateBags()
 end
 
 function FBoH:DoUpdateBags()
-	for k, v in pairs(self.bagViews) do
-		v:UpdateBag();
-	end
-	self.bagUpdateQueued = nil;
+	_SafeCall(function()
+		for k, v in pairs(self.bagViews) do
+			v:UpdateBag();
+		end
+		self.bagUpdateQueued = nil;
+	end);
 end
 
 function FBoH:UpdateBagsGuild()
@@ -1070,10 +1100,12 @@ function FBoH:UpdateBagsGuild()
 end
 
 function FBoH:DoUpdateBagsGuild()
-	for k, v in pairs(self.bagViews) do
-		v:UpdateBag("gbank");
-	end
-	self.guildBagUpdateQueued = nil;
+	_SafeCall(function()
+		for k, v in pairs(self.bagViews) do
+			v:UpdateBag("gbank");
+		end
+		self.guildBagUpdateQueued = nil;
+	end);
 end
 
 function FBoH:IsBankOpen()
@@ -1323,4 +1355,18 @@ FBoH:RegisterProperty(itemKeyProperty);
 --------------------------------------------------------------------------
 
 FBoH_UnitTests.Core = {
+
+	setUp = function()
+		FBoH_UnitTests.Core.wasDebugEnabled = FBoH:IsDebugEnabled();
+		FBoH:SetDebugEnabled(nil);
+	end;
+	
+	tearDown = function()
+		FBoH:SetDebugEnabled(FBoH_UnitTests.Core.wasDebugEnabled);
+	end;
+	
+	testHandleError = function()
+		_SafeCall(function() error("Throw a test error"); end);
+	end;
+	
 };
