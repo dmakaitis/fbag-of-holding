@@ -1079,23 +1079,7 @@ end
 function FBoH:IsBankOpen()
 	return self.bankIsOpen;
 end
---[[
-function FBoH:GenerateUniqueBagViewID()
-	self.NextUniqueBagID = self.NextUniqueBagID or 1;
-	while true do
-		local done = true;
-		for k, v in pairs(self.db.profile.bagDefs) do
-			if self.NextUniqueBagID == v.id then
-				self.NextUniqueBagID = self.NextUniqueBagID + 1;
-				done = false;
-			end
-		end
-		if done then
-			return self.NextUniqueBagID;
-		end
-	end
-end
-]]
+
 function FBoH:GetBagViewByID(bagViewID)
 	for k, v in pairs(self.bagViews) do
 		if v.bagDef.id == bagViewID then
@@ -1334,3 +1318,9 @@ end
 
 FBoH:RegisterProperty(itemKeyProperty);
 
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
+FBoH_UnitTests.Core = {
+};

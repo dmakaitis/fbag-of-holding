@@ -50,26 +50,26 @@ function FBoH_ItemDB:CheckVersion()
 	self.items.version = self.items.version or "purge";
 	
 	if self.items.version ~= FBOH_ITEMS_DB_VERSION then
-		FBoH:Print("Updating item database: " .. self.items.version .. " -> " .. FBOH_ITEMS_DB_VERSION);
 		if self.items.version == "purge" then
 			self:Purge();
 			return;
 		end
+		FBoH:Print("Updating item database: " .. self.items.version .. " -> " .. FBOH_ITEMS_DB_VERSION);
 		if self.items.version == "0.01.00" then
-			self:UpgradeFrom0_01_00();
+			UpgradeFrom0_01_00(self);
 		end
 		if self.items.version == "0.02.00" then
-			self:UpgradeFrom0_02_00();
+			UpgradeFrom0_02_00(self);
 		end
 		if self.items.version == "0.03.00" then
-			self:UpgradeFrom0_03_00();
+			UpgradeFrom0_03_00(self);
 		end
 	end
 	
 	self:CleanDatabase();
 end
 
-function FBoH_ItemDB:UpgradeFrom0_01_00()
+local function UpgradeFrom0_01_00(self)
 	-- Move all item details out of the inventory section and into the details section.
 	self.items.details = {};
 	local details = self.items.details;
@@ -95,7 +95,7 @@ function FBoH_ItemDB:UpgradeFrom0_01_00()
 	self.items.version = "0.02.00";
 end
 
-function FBoH_ItemDB:UpgradeFrom0_02_00()
+local function UpgradeFrom0_02_00(self)
 	-- Move the item link out of the inventory section and into the details section.
 	-- Update item keys to use new format
 	-- Wipe the guild bank data (since nobody should have anything there yet except me since it hasn't been published yet).
@@ -130,7 +130,7 @@ function FBoH_ItemDB:UpgradeFrom0_02_00()
 	self.items.version = "0.03.00";
 end
 
-function FBoH_ItemDB:UpgradeFrom0_03_00()
+local function UpgradeFrom0_03_00(self)
 	if self.items.realms then
 		for _, r in pairs(self.items.realms) do
 			if r.characters then
@@ -205,6 +205,11 @@ end
 
 local FindItemProps = {};
 
+local function TestFilter(filter, filterArg, itemProps)
+	local presult, rVal = pcall(filter, itemProps, filterArg);
+	if presult == true then return rVal else return false end;
+end
+
 function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 	-- Subset can be one of:
 	--	char - returns current character items
@@ -253,7 +258,7 @@ function FBoH_ItemDB:FindItems(filter, filterArg, subset)
 												itemProps.detail = detail;
 												itemProps.itemLink = detail.link;
 												
-												if filter(itemProps, filterArg) then
+												if TestFilter(filter, filterArg, itemProps) then
 													table.insert(rTable, CopyItemProps(itemProps));
 												end
 											end
@@ -695,21 +700,51 @@ FBoH_UnitTests.ItemDB = {
 	testUpgradeItemDatabaseFrom0_01_00 = function()
 		FBoH_ItemDB.items = {};
 		FBoH_ItemDB.items.version = "0.01.00";
-		FBoH_ItemDB:UpgradeFrom0_01_00();
+		UpgradeFrom0_01_00(FBoH_ItemDB);
 		assertEquals("0.02.00", FBoH_ItemDB.items.version);
 	end;
 	
 	testUpgradeItemDatabaseFrom0_02_00 = function()
 		FBoH_ItemDB.items = {};
 		FBoH_ItemDB.items.version = "0.02.00";
-		FBoH_ItemDB:UpgradeFrom0_02_00();
+		UpgradeFrom0_02_00(FBoH_ItemDB);
 		assertEquals("0.03.00", FBoH_ItemDB.items.version);
 	end;
 	
 	testUpgradeItemDatabaseFrom0_03_00 = function()
 		FBoH_ItemDB.items = {};
 		FBoH_ItemDB.items.version = "0.03.00";
-		FBoH_ItemDB:UpgradeFrom0_03_00();
+		UpgradeFrom0_03_00(FBoH_ItemDB);
 		assertEquals("0.03.01", FBoH_ItemDB.items.version);
+	end;
+	
+	testTestFilterForPass = function()
+		local filter = function() return true; end;
+		local filterArg = nil;
+		local itemProps = nil;
+		
+		local result = TestFilter(filter, filterArg, itemProps);
+		
+		assertEquals(true, result);
+	end;
+	
+	testTestFilterForFail = function()
+		local filter = function() return false; end;
+		local filterArg = nil;
+		local itemProps = nil;
+		
+		local result = TestFilter(filter, filterArg, itemProps);
+		
+		assertEquals(false, result);
+	end;
+	
+	testTestFilterForError = function()
+		local filter = function() error("This test should fail"); end;
+		local filterArg = nil;
+		local itemProps = nil;
+		
+		local result = TestFilter(filter, filterArg, itemProps);
+		
+		assertEquals(false, result);
 	end;
 };
