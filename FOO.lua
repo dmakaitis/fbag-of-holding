@@ -20,9 +20,9 @@ function FBoH_GetVersion()
 	return FBoH_Version;
 end
 
-FBoH_SetVersion("$Revision: 11 $");
+FBoH_SetVersion("$Revision: 1 $");
 
--- The rest of this is for FOO propert
+-- The rest of this is for FOO proper
 
 FOO = {};
 
