@@ -66,6 +66,8 @@ function FBoH:Debug(message)
 	if self.db.profile.debugMessages then self:Print(message) end;
 end
 
+FBoH._SafeCall = _SafeCall;
+
 --*****************************************************************************
 -- Private Methods
 --*****************************************************************************
@@ -103,8 +105,70 @@ function _DewdropMenuPoint(frame)
 end
 	
 local
+function _DoUpdateBagsGuild(self)
+	_SafeCall(function()
+		for k, v in pairs(self.bagViews) do
+			v:UpdateBag("gbank");
+		end
+		self.guildBagUpdateQueued = nil;
+	end);
+end
+
+local
+function _GetItemCounts(self, itemLink)
+	local itemKey = self.items:GetItemKey(itemLink);
+	local realm = GetRealmName();
+	
+	local f = {
+		{
+			filter = self:GetFilter("Item Key").filter;
+			arg = itemKey;
+		},
+		{
+			filter = self:GetFilter("Character").filter;
+			arg = realm .. ".*"
+		}
+	};
+	
+	local results = self.items:FindItems(self:GetFilter("And").filter, f);
+	
+	local rVal = {};
+	
+	local counters = {};
+	local resultCount = 0;
+	local totalCount = 0;
+	for _, data in ipairs(results) do
+		counters[data.character] = counters[data.character] or {};
+		counters[data.character][data.bagType] = counters[data.character][data.bagType] or 0;
+		counters[data.character][data.bagType] = counters[data.character][data.bagType] + data.itemCount;
+	end
+
+	for cName, cData in pairs(counters) do
+		local str = cName .. ":";
+		local subCounters = {};
+		for bType, cnt in pairs(cData) do
+			table.insert(subCounters, " [" .. bType .. ": " .. cnt .. "]");
+			resultCount = resultCount + 1;
+			totalCount = totalCount + cnt;
+		end
+		table.sort(subCounters);
+		for _, v in ipairs(subCounters) do
+			str = str .. v;
+		end
+		table.insert(rVal, str);
+	end
+
+	if resultCount > 1 then
+		table.sort(rVal);
+		table.insert(rVal, "Total: " .. totalCount);
+	end
+	
+	return rVal;
+end
+
+local
 function _ProcessTooltip(tooltip, name, link)
-	local output = FBoH:GetItemCounts(link);
+	local output = _GetItemCounts(FBoH, link);
 	
 	if output then
 		for _, v in pairs(output) do
@@ -115,51 +179,16 @@ function _ProcessTooltip(tooltip, name, link)
 	tooltip:Show();
 end
 
+local
+function _RenumberViewIDs(self)
+	for i, v in ipairs(self.bagViews) do
+		v.viewIndex = i;
+	end
+end
+
 --*****************************************************************************
 -- Events
 --*****************************************************************************
-
-function FBoH:BANKFRAME_CLOSED()
-	_SafeCall(function()
-		self.bankIsOpen = false;
-		self:UpdateBags();
-	end);
-end
-
-function FBoH:BANKFRAME_OPENED()
-	_SafeCall(function()
-		self.bankIsOpen = true;
-		self:ScanContainer();
-	end);
-end
-
-function FBoH:GUILDBANKFRAME_OPENED()
-	_SafeCall(function()
-		self.guildBankIsOpen = true;
-
-		local numTabs = GetNumGuildBankTabs();
-		for tab = 1, numTabs do
-			if IsTabViewable(tab) then
-				QueryGuildBankTab(tab);
-			end
-		end
-	end);
-end
-
-function FBoH:GUILDBANKFRAME_CLOSED()
-	_SafeCall(function()
-		self.guildBankIsOpen = false;
-		self:UpdateBagsGuild();
-	end);
-end
-
-function FBoH:GUILDBANKBAGSLOTS_CHANGED()
-	_SafeCall(function()
-		if self.guildBankIsOpen then
-			self:ScanGuildBank();
-		end
-	end);
-end
 
 function FBoH:OnInitialize()
 	_SafeCall(function()
@@ -287,7 +316,7 @@ function FBoH:OnProfileChanged()
 				FBoH_TabModel.defaultTab.filterCache = nil;
 			end
 		end
-		self:RenumberViewIDs();
+		_RenumberViewIDs(self);
 	end);
 end
 
@@ -304,78 +333,6 @@ function FBoH:CanViewAsList()
 end
 
 --*****************************************************************************
--- Commands
---*****************************************************************************
-
-function FBoH:IsDebugEnabled()
-	return self.db.profile.debugMessages;
-end
-
-function FBoH:SetDebugEnabled(value)
-	self.db.profile.debugMessages = value;
-end
-
-function FBoH:CmdPurge()
-	self.items:Purge();
-	self:ScanContainer();
-end
-
-function FBoH:CmdScan()
-	self:ScanContainer();
-end
---[[
-function FBoH:CmdShowBags()
-	for k, v in pairs(self.bagViews) do
-		self:Print(L["Bag View"] .. ": " .. k);
-		for i, t in ipairs(v.viewDef.tabs) do
-			self:Print("   Tab: " .. t.name);
-			local items = v.tabData[i]:GetItems();
-			for _, j in pairs(items) do
-				self:Print("      " .. j.character .. " (" .. j.realm .. ") " .. L[j.bagType] .. " [" .. j.bagIndex .. ", " .. j.slotIndex .. "] " .. j.itemLink);
-			end
-		end
-	end	
-end
-]]
---[[
-function FBoH:CmdDock()
-	if #(self.bagViews) < 1 then
-		self:Print("No views available for docking");
-	end
-	
-	local sourceView = 2;
-	local targetView = 1;
-	local targetTab = 1;
-	
-	self:Dock(sourceView, targetView, targetTab);
-end
-
-function FBoH:CmdUndock()
-	local tabCount = #(self.bagViews[1].viewDef.tabs);
-	if tabCount <= 1 then
-		self:Print("No tabs available for undocking");
-		return
-	end
-	
-	local sourceBag = 1;
-	local sourceTab = 2;
-
-	self:UndockView(sourceBag, sourceTab);
-end
-]]
-function FBoH:GetGridScale()
-	return self.db.profile.gridScale;
-end
-
-function FBoH:SetGridScale(scale)
-	self.db.profile.gridScale = scale;
-	
-	for _, v in pairs(self.bagViews) do
-		v.view:SetGridScale(scale);
-	end
-end
-
---*****************************************************************************
 -- FuBar Functions
 --*****************************************************************************
 
@@ -387,104 +344,110 @@ function ShowView(bagIndex, tabIndex)
 end
 
 function FBoH:OnFuBarClick()
-	GameTooltip:Hide();
-	
-	local fubarFrame = self:GetFrame();
-	if self:IsFuBarMinimapAttached() then
-		fubarFrame = Minimap;
-	end
-	
-	Dewdrop:Open(fubarFrame,
-		'children', function()
-			Dewdrop:AddLine(
-				'text', L["Feithar's Bag of Holding"],
-				'textR', 1, 'textG', 1, 'textB', 0,
-				'notClickable', true,
-				'notCheckable', true
-			);
-			Dewdrop:AddSeparator();
-			
-			for vi, v in ipairs(self.bagViews) do
-				for ti, t in ipairs(v.viewDef.tabs) do
-					Dewdrop:AddLine(
-						'text', t.name,
-						'func', ShowView,
-						'arg1', vi, 'arg2', ti,
-						'closeWhenClicked', true
-					);
-				end
+	_SafeCall(function()
+		GameTooltip:Hide();
+		
+		local fubarFrame = self:GetFrame();
+		if self:IsFuBarMinimapAttached() then
+			fubarFrame = Minimap;
+		end
+		
+		Dewdrop:Open(fubarFrame,
+			'children', function()
+				Dewdrop:AddLine(
+					'text', L["Feithar's Bag of Holding"],
+					'textR', 1, 'textG', 1, 'textB', 0,
+					'notClickable', true,
+					'notCheckable', true
+				);
 				Dewdrop:AddSeparator();
-			end
-			
-			Dewdrop:AddLine(
-				'text', L["Open All Views"],
-				'func', function()
-					for _, v in ipairs(FBoH.bagViews) do
-						v:Show();
+				
+				for vi, v in ipairs(self.bagViews) do
+					for ti, t in ipairs(v.viewDef.tabs) do
+						Dewdrop:AddLine(
+							'text', t.name,
+							'func', ShowView,
+							'arg1', vi, 'arg2', ti,
+							'closeWhenClicked', true
+						);
 					end
+					Dewdrop:AddSeparator();
 				end
-			);
-			Dewdrop:AddSeparator();
-			
-			Dewdrop:AddLine(
-				'text', L["Create New View"],
-				'textR', 1, 'textG', 0.8, 'textB', 0.2,
-				'func', function()
-					FBoH:CreateNewView();
-				end
-			);
-		end,
-		'point', _DewdropMenuPoint
-	);
+				
+				Dewdrop:AddLine(
+					'text', L["Open All Views"],
+					'func', function()
+						for _, v in ipairs(FBoH.bagViews) do
+							v:Show();
+						end
+					end
+				);
+				Dewdrop:AddSeparator();
+				
+				Dewdrop:AddLine(
+					'text', L["Create New View"],
+					'textR', 1, 'textG', 0.8, 'textB', 0.2,
+					'func', function()
+						FBoH:CreateNewView();
+					end
+				);
+			end,
+			'point', _DewdropMenuPoint
+		);
+	end);
 end
 
 function FBoH:OnUpdateFuBarText()
-	local total, free = self.items:GetBagUsage("Bags");
+	_SafeCall(function()
+		local total, free = self.items:GetBagUsage("Bags");
 	
-	local used = total - free;
-	
-	local text = used .. "/" .. total;
-	local c = Crayon:GetThresholdHexColor(free / total);
-	
-	self:SetFuBarText("|cff" .. c .. used .. " |cffffffff/ |cff" .. c .. total);
+		local used = total - free;
+		
+		local text = used .. "/" .. total;
+		local c = Crayon:GetThresholdHexColor(free / total);
+		
+		self:SetFuBarText("|cff" .. c .. used .. " |cffffffff/ |cff" .. c .. total);
+	end);
 end
 
 function FBoH:OnUpdateFuBarTooltip()
-	local igtotal, igfree, itotal, ifree = self.items:GetBagUsage("Bags");
-	local bgtotal, bgfree, btotal, bfree = self.items:GetBagUsage("Bank");
-	
-	local iused = itotal - ifree;
-	local bused = btotal - bfree;
-	local igused = igtotal - igfree;
-	local bgused = bgtotal - bgfree;
+	_SafeCall(function()
+		local igtotal, igfree, itotal, ifree = self.items:GetBagUsage("Bags");
+		local bgtotal, bgfree, btotal, bfree = self.items:GetBagUsage("Bank");
+		
+		local iused = itotal - ifree;
+		local bused = btotal - bfree;
+		local igused = igtotal - igfree;
+		local bgused = bgtotal - bgfree;
 
-	GameTooltip:AddLine(L["Feithar's Bag of Holding"]);
-	GameTooltip:AddLine("r" .. FBoH_GetVersion(), 0, 1, 1);
-	GameTooltip:AddLine(" ");
-	
-	local numbers;
-	if itotal ~= igtotal then
-		numbers = igused .. "/" .. igtotal .. " (" .. iused .. "/" .. itotal .. ")"
-	else
-		numbers = igused .. "/" .. igtotal
-	end
-	local r,g,b = Crayon:GetThresholdColor(ifree / itotal);
-	GameTooltip:AddDoubleLine(L["Bags"] .. ": ", numbers, 1, 1, 1, r, g, b);
-	
-	if btotal ~= bgtotal then
-		numbers = bgused .. "/" .. bgtotal .. " (" .. bused .. "/" .. btotal .. ")";
-	else
-		numbers = bgused .. "/" .. bgtotal
-	end
-	local r,g,b = Crayon:GetThresholdColor(bfree / btotal);
-	GameTooltip:AddDoubleLine(L["Bank"] .. ": ", numbers, 1, 1, 1, r, g, b);
-	
-	GameTooltip:AddLine(" ");
-	
-	GameTooltip:AddLine(L["FuBar Hint"], 0, 1, 0, 1);
-	
-    -- tablet:SetHint(L["Hint"])
-    -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
+		GameTooltip:AddLine(L["Feithar's Bag of Holding"]);
+		GameTooltip:AddLine("r" .. FBoH_GetVersion(), 0, 1, 1);
+		GameTooltip:AddLine(" ");
+		
+		local numbers;
+		if itotal ~= igtotal then
+			numbers = igused .. "/" .. igtotal .. " (" .. iused .. "/" .. itotal .. ")"
+		else
+			numbers = igused .. "/" .. igtotal
+		end
+		local r,g,b = Crayon:GetThresholdColor(ifree / itotal);
+		GameTooltip:AddDoubleLine(L["Bags"] .. ": ", numbers, 1, 1, 1, r, g, b);
+		
+		if btotal ~= bgtotal then
+			numbers = bgused .. "/" .. bgtotal .. " (" .. bused .. "/" .. btotal .. ")";
+		else
+			numbers = bgused .. "/" .. bgtotal
+		end
+		local r,g,b = Crayon:GetThresholdColor(bfree / btotal);
+		GameTooltip:AddDoubleLine(L["Bank"] .. ": ", numbers, 1, 1, 1, r, g, b);
+		
+		GameTooltip:AddLine(" ");
+		
+		GameTooltip:AddLine(L["FuBar Hint"], 0, 1, 0, 1);
+		
+	    -- tablet:SetHint(L["Hint"])
+	    -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
+	end);
 end
 
 --*****************************************************************************
@@ -510,7 +473,7 @@ function FBoH:CreateNewView()
 		FBoH_TabModel.defaultTab.filterCache = nil;
 	end
 
-	self:RenumberViewIDs();	
+	_RenumberViewIDs(self);	
 
 	local view = self.bagViews[#(self.bagViews)];
 	
@@ -560,74 +523,33 @@ function FBoH:DeleteViewTab(tabModel)
 		delView:SelectTab(1);
 	end
 
-	self:RenumberViewIDs();
-end
-
-function FBoH:IsOpenAllBagsHooked()
-	return self.db.profile.hookOpenAllBags;
-end
-
-function FBoH:SetOpenAllBagsHooked(v)
-	self.db.profile.hookOpenAllBags = v;
-end
-
-function FBoH:IsOpenBackpackHooked()
-	return self.db.profile.hookToggleBackpack;
-end
-
-function FBoH:SetOpenBackpackHooked(v)
-	self.db.profile.hookToggleBackpack = v;
-end
-
-function FBoH:GetBagHook(bagID)
-	return self.db.profile.hookToggleBags[bagID] or "blizzard";
-end
-
-function FBoH:SetBagHook(bagID, value)
---	if value == "blizzard" then value = nil end;
-	self.db.profile.hookToggleBags[bagID] = value
-end
-
-function FBoH:GetBagHookChoices()
-	rVal = {};
-	
-	rVal["blizzard"] = L["- Blizzard Default -"];
-	
-	for _, v in ipairs(self.db.profile.viewDefs) do
-		for _, t in ipairs(v.tabs) do
-			if t.filter ~= "default" then
-				rVal[tostring(t.id)] = t.name;
-			end
-		end
-	end
-
-	rVal["default"] = L["- FBoH Main Bag -"];
-	
-	return rVal;
+	_RenumberViewIDs(self);
 end
 
 function FBoH:OpenAllBags()
-	if self.db.profile.hookOpenAllBags then
-		local showBags = false;
-		for _, v in ipairs(self.bagViews) do
-			if not v:IsShown() then
-				showBags = true;
+	_SafeCall(function()
+		if self.db.profile.hookOpenAllBags then
+			local showBags = false;
+			for _, v in ipairs(self.bagViews) do
+				if not v:IsShown() then
+					showBags = true;
+				end
 			end
+			
+			for _, v in ipairs(self.bagViews) do
+				if showBags then
+					v:Show();
+				else
+					v:Hide();
+				end
+			end	
+		else
+			local close, back, toggle = self.db.profile.hookCloseAllBags, self.db.profile.hookToggleBackpack, self.db.profile.hookToggleBags;
+			self.db.profile.hookCloseAllBags, self.db.profile.hookToggleBackpack, self.db.profile.hookToggleBags = false, false, {};
+			self.hooks.OpenAllBags()
+			self.db.profile.hookCloseAllBags, self.db.profile.hookToggleBackpack, self.db.profile.hookToggleBags = close, back, toggle;
 		end
-		
-		for _, v in ipairs(self.bagViews) do
-			if showBags then
-				v:Show();
-			else
-				v:Hide();
-			end
-		end	
-	else
-		local close, back, toggle = self.db.profile.hookCloseAllBags, self.db.profile.hookToggleBackpack, self.db.profile.hookToggleBags;
-		self.db.profile.hookCloseAllBags, self.db.profile.hookToggleBackpack, self.db.profile.hookToggleBags = false, false, {};
-		self.hooks.OpenAllBags()
-		self.db.profile.hookCloseAllBags, self.db.profile.hookToggleBackpack, self.db.profile.hookToggleBags = close, back, toggle;
-	end
+	end);
 end
 
 function FBoH:CloseAllBags()
@@ -699,12 +621,6 @@ end
 --*****************************************************************************
 -- View Docking
 --*****************************************************************************
-
-function FBoH:RenumberViewIDs()
-	for i, v in ipairs(self.bagViews) do
-		v.viewIndex = i;
-	end
-end
 
 function FBoH:DockView(sourceView, targetView, targetTab)
 	if sourceView == targetView then
@@ -800,7 +716,7 @@ function FBoH:UndockView(sourceView, sourceTab)
 		newBagView:Hide();
 	end
 	
-	self:RenumberViewIDs();
+	_RenumberViewIDs(self);
 	
 	return newBagView;
 end
@@ -832,82 +748,9 @@ function FBoH:GetItemBagAndSlotIDs(item)
 	return self:GetBagID(item.bagType, item.bagIndex), item.slotIndex;
 end
 
-function FBoH:GetItemCounts(itemLink)
-	local itemKey = self.items:GetItemKey(itemLink);
-	local realm = GetRealmName();
-	
-	local f = {
-		{
-			filter = self:GetFilter("Item Key").filter;
-			arg = itemKey;
-		},
-		{
-			filter = self:GetFilter("Character").filter;
-			arg = realm .. ".*"
-		}
-	};
-	
-	local results = self.items:FindItems(self:GetFilter("And").filter, f);
-	
-	local rVal = {};
-	
-	local counters = {};
-	local resultCount = 0;
-	local totalCount = 0;
-	for _, data in ipairs(results) do
-		counters[data.character] = counters[data.character] or {};
-		counters[data.character][data.bagType] = counters[data.character][data.bagType] or 0;
-		counters[data.character][data.bagType] = counters[data.character][data.bagType] + data.itemCount;
-	end
-
-	for cName, cData in pairs(counters) do
-		local str = cName .. ":";
-		local subCounters = {};
-		for bType, cnt in pairs(cData) do
-			table.insert(subCounters, " [" .. bType .. ": " .. cnt .. "]");
-			resultCount = resultCount + 1;
-			totalCount = totalCount + cnt;
-		end
-		table.sort(subCounters);
-		for _, v in ipairs(subCounters) do
-			str = str .. v;
-		end
-		table.insert(rVal, str);
-	end
-
-	if resultCount > 1 then
-		table.sort(rVal);
-		table.insert(rVal, "Total: " .. totalCount);
-	end
-	
-	return rVal;
-end
-
 --*****************************************************************************
 -- Bag Scanning
 --*****************************************************************************
-
-function FBoH:GetBagKeys(bagID)
-	if (bagID >= 0) and (bagID <= NUM_BAG_SLOTS) then
-		return "Bags", bagID + 1;
-	end
-	
-	if bagID == BANK_CONTAINER then
-		return "Bank", 1;
-	end
-	
-	if (bagID > NUM_BAG_SLOTS) and (bagID <= NUM_BAG_SLOTS + NUM_BANKBAGSLOTS) then
-		return "Bank", (bagID - NUM_BAG_SLOTS) + 1;
-	end
-	
-	if bagID == -2 then
-		return "Keyring", 1;
-	end
-end
-
-function FBoH:GetBagUsage(...)
-	return self.items:GetBagUsage(...);
-end
 
 function FBoH:GetEmptySlots(...)
 	return self.items:GetEmptySlots(...);
@@ -930,183 +773,9 @@ function FBoH:GetBagID(bagType, bagIndex)
 	return nil;
 end
 
-function FBoH:ScanGuildBank()
-	local numTabs = GetNumGuildBankTabs();
-	for tab = 1, numTabs do
-		if IsTabViewable(tab) then
-			for slot = 1, MAX_GUILDBANK_SLOTS_PER_TAB do
-				local link = GetGuildBankItemLink(tab, slot);
-				if link then
-					local _, count = GetGuildBankItemInfo(tab, slot);
-					self.items:SetGuildItem(tab, slot, link, count);
-				else
-					self.items:SetGuildItem(tab, slot, nil, 0);
-				end
-			end
-		end
-	end
-	self:UpdateBagsGuild();
-end
-
-function FBoH:ScanBag(bagID)
-	if (bagID >= NUM_BAG_SLOTS + 1) or (bagID == BANK_CONTAINER) then
-		if self:IsBankOpen() == false then
-			return;
-		end
-	end
-	
-	local bType, bID = self:GetBagKeys(bagID);		
-	local size = GetContainerNumSlots(bagID);
-
-	for slotID = 1, size do
-		local i = nil;
-		
-		local itemLink = GetContainerItemLink(bagID, slotID);
-		local _, itemCount = GetContainerItemInfo(bagID, slotID);
-
-		FBoH_ItemTooltip:ClearLines();
-		FBoH_ItemTooltip:SetBagItem(bagID, slotID)
-		local soulbound = nil;
-		for i=1,FBoH_ItemTooltip:NumLines() do
-			local text = _G["FBoH_ItemTooltipTextLeft" .. i]:GetText();
-			if text == L["Soulbound"] or text == L["Quest Item"] then
-				soulbound = true;
-			end
-		end
-		
-		self.items:SetItem(bType, bID, slotID, itemLink, itemCount, soulbound);
-	end
-
-	self.items:UpdateBagUsage(bType, bID);
-	
-	self.scanQueues[bagID] = nil;
-end
-
-function FBoH:DoScanContainer(bagID, arg)
-	_SafeCall(function()
-		if type(bagID) == "string" then
-			bagID = arg;
-		end
-		
-		if bagID then
-			if self.scanQueues.all == true then
-				return
-			end
-			
-			self:ScanBag(bagID);
-		else
-			self:ScanBag(0);
-			
-			for bag = 1, NUM_BAG_SLOTS do
-				self:ScanBag(bag);
-			end
-			
-			if self:IsBankOpen() then
-				self:ScanBag(BANK_CONTAINER);
-			
-				for bag = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
-					self:ScanBag(bag);
-				end
-			end
-			
-			self.scanQueues = {};
-		end
-		
-		self:UpdateFuBarPlugin();
-		self:UpdateBags();
-	end);
-end
-
-function FBoH:ScanAllContainers()
-	_SafeCall(function()
-		self:ScanContainer();
-	end);
-end
-
-function FBoH:ScanContainer(bagID)
-	_SafeCall(function()
-		if self.scanQueues.all == true then
-			return;
-		end
-		
-		if bagID == nil then
-			self.scanQueues.all = true;
-		else
-			if self.scanQueues[bagID] == true then
-				return;
-			end
-			self.scanQueues[bagID] = true;
-		end
-		
-		self:ScheduleTimer(function() FBoH:DoScanContainer(bagID); end, 0);
-	end);
-end
-
 --*****************************************************************************
 -- Inventory Scanning
 --*****************************************************************************
-
-function FBoH:DoScanInventory()
-	_SafeCall(function()
-		for id, _ in pairs(self.inventorySlots) do
-			local iLink = GetInventoryItemLink("player", id);
---[[
-			FBoH_ItemTooltip:ClearLines();
-			FBoH_ItemTooltip:SetInventoryItem("player", BankButtonIDToInvSlotID(id, nil))
-			local soulbound = nil;
-			for i=1,FBoH_ItemTooltip:NumLines() do
-				local text = _G["FBoH_ItemTooltipTextLeft" .. i]:GetText();
-				if text == L["Soulbound"] or text == L["Quest Item"] then
-					soulbound = true;
-				end
-			end
-]]		
-			self.items:SetItem("Wearing", 1, id, iLink, 1, soulbound);
-		end
-		
-		self.scanInventoryQueued = nil;
-	end);
-end
-
-function FBoH:ScanInventory()
-	_SafeCall(function()
-		if self.scanInventoryQueued == true then return end;
-		self.scanInventoryQueued = true;
-		self:ScheduleTimer(function() FBoH:DoScanInventory(); end, 0);
-	end);
-end
-
-function FBoH:UpdateBags()
-	if self.bagUpdateQueued then return end;
-	
-	self.bagUpdateQueued = true;
-	self:ScheduleTimer(function() FBoH:DoUpdateBags(); end, 0);
-end
-
-function FBoH:DoUpdateBags()
-	_SafeCall(function()
-		for k, v in pairs(self.bagViews) do
-			v:UpdateBag();
-		end
-		self.bagUpdateQueued = nil;
-	end);
-end
-
-function FBoH:UpdateBagsGuild()
-	if self.guildBagUpdateQueued then return end;
---	self:Print("Queing guild bank update");
-	self.guildBagUpdateQueued = true;
-	self:ScheduleTimer(function() FBoH:DoUpdateBagsGuild(); end, 0);
-end
-
-function FBoH:DoUpdateBagsGuild()
-	_SafeCall(function()
-		for k, v in pairs(self.bagViews) do
-			v:UpdateBag("gbank");
-		end
-		self.guildBagUpdateQueued = nil;
-	end);
-end
 
 function FBoH:IsBankOpen()
 	return self.bankIsOpen;

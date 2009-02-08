@@ -2,6 +2,95 @@ local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
 FBoH_SetVersion("$Revision$");
 
+--*****************************************************************************
+-- Command implementation
+--*****************************************************************************
+
+--[[
+function FBoH:CmdPurge()
+	self.items:Purge();
+	self:ScanContainer();
+end
+
+function FBoH:CmdScan()
+	self:ScanContainer();
+end
+]]
+function FBoH:IsDebugEnabled()
+	return self.db.profile.debugMessages;
+end
+
+function FBoH:SetDebugEnabled(value)
+	self.db.profile.debugMessages = value;
+end
+
+local
+function _GetGridScale(self)
+	return self.db.profile.gridScale;
+end
+
+local
+function _SetGridScale(self, scale)
+	self.db.profile.gridScale = scale;
+	
+	for _, v in pairs(self.bagViews) do
+		v.view:SetGridScale(scale);
+	end
+end
+
+local
+function _IsOpenAllBagsHooked(self)
+	return self.db.profile.hookOpenAllBags;
+end
+
+local
+function _SetOpenAllBagsHooked(self, v)
+	self.db.profile.hookOpenAllBags = v;
+end
+
+local
+function _IsOpenBackpackHooked(self)
+	return self.db.profile.hookToggleBackpack;
+end
+
+local
+function _SetOpenBackpackHooked(self, v)
+	self.db.profile.hookToggleBackpack = v;
+end
+
+local
+function _GetBagHook(self, bagID)
+	return self.db.profile.hookToggleBags[bagID] or "blizzard";
+end
+
+local
+function _SetBagHook(self, bagID, value)
+	self.db.profile.hookToggleBags[bagID] = value
+end
+
+local
+function _GetBagHookChoices(self)
+	rVal = {};
+	
+	rVal["blizzard"] = L["- Blizzard Default -"];
+	
+	for _, v in ipairs(self.db.profile.viewDefs) do
+		for _, t in ipairs(v.tabs) do
+			if t.filter ~= "default" then
+				rVal[tostring(t.id)] = t.name;
+			end
+		end
+	end
+
+	rVal["default"] = L["- FBoH Main Bag -"];
+	
+	return rVal;
+end
+
+--*****************************************************************************
+-- Configuration setup
+--*****************************************************************************
+
 local function GetFuBarMinimapAttachedStatus(info)
 	return FBoH:IsFuBarMinimapAttached() -- or Omen.Options["FuBar.HideMinimapButton"]
 end
@@ -56,23 +145,8 @@ local options = {
 					end,
 					set = function(info, v)
 						FBoH:ToggleFuBarMinimapAttached()
---						FBoH.Options["FuBar.AttachMinimap"] = FBoH:IsFuBarMinimapAttached()
 					end
 				},
---				hideIcon = {
---					type = "toggle",
---					name = L["Hide minimap/FuBar icon"],
---					desc = L["Hide minimap/FuBar icon"],
---					get = function(info) return Omen.Options["FuBar.HideMinimapButton"] end,
---					set = function(info, v)
---						Omen.Options["FuBar.HideMinimapButton"] = v
---						if v then
---							FBoH:Hide()
---						else
---							FBoH:Show()
---						end
---					end
---				},
 				showIcon = {
 					type = "toggle",
 					name = L["Show icon"],
@@ -113,8 +187,8 @@ local options = {
 					type = "range",
 					name = L["Grid Scale"],
 					desc = L["Grid Scale Desc"],
-					get = function() return FBoH:GetGridScale() end,
-					set = function(info, value) FBoH:SetGridScale(value) end,
+					get = function() return _GetGridScale(FBoH) end,
+					set = function(info, value) _SetGridScale(FBoH, value) end,
 					step = 0.01,
 					bigStep = 0.05,
 					min = 0.5,
@@ -123,8 +197,8 @@ local options = {
 				},
 				debugOutput = {
 					type = "toggle",
-					name = L["Toggle debug"],
-					desc = L["Toggle printing of debug messages to the chat window."],
+					name = L["Enable debug"],
+					desc = L["Enable printing of debug messages to the chat window."],
 					get = function(info) return FBoH:IsDebugEnabled() end,
 					set = function(info, v) FBoH:SetDebugEnabled(v) end,
 				},
@@ -139,51 +213,51 @@ local options = {
 					type = "toggle",
 					name = L["Hook Open All Bags"],
 					desc = L["Opening all bags will open FBoH bags instead."],
-					get = function(info) return FBoH:IsOpenAllBagsHooked() end,
-					set = function(info, v) FBoH:SetOpenAllBagsHooked(v) end,
+					get = function(info) return _IsOpenAllBagsHooked(FBoH) end,
+					set = function(info, v) _SetOpenAllBagsHooked(FBoH, v) end,
 				},
 				hookBackpack = {
 					type = "toggle",
 					name = L["Hook Open Backpack"],
 					desc = L["Opening the backpack will open the FBoH main view instead."],
-					get = function(info) return FBoH:IsOpenBackpackHooked() end,
-					set = function(info, v) FBoH:SetOpenBackpackHooked(v) end,
+					get = function(info) return _IsOpenBackpackHooked(FBoH) end,
+					set = function(info, v) _SetOpenBackpackHooked(FBoH, v) end,
 				},
 				hookBag1 = {
 					type = "select",
 					name = L["Hook Bag 1"],
 					desc = L["Opening bag 1 will open the selected bag instead."],
-					get = function(info) return FBoH:GetBagHook(1) end,
-					set = function(info, v) FBoH:SetBagHook(1, v) end,
+					get = function(info) return _GetBagHook(FBoH, 1) end,
+					set = function(info, v) _SetBagHook(FBoH, 1, v) end,
 					style = "dropdown",
-					values = function(info) return FBoH:GetBagHookChoices() end,
+					values = function(info) return _GetBagHookChoices(FBoH) end,
 				},
 				hookBag2 = {
 					type = "select",
 					name = L["Hook Bag 2"],
 					desc = L["Opening bag 2 will open the selected bag instead."],
-					get = function(info) return FBoH:GetBagHook(2) end,
-					set = function(info, v) FBoH:SetBagHook(2, v) end,
+					get = function(info) return _GetBagHook(FBoH, 2) end,
+					set = function(info, v) _SetBagHook(FBoH, 2, v) end,
 					style = "dropdown",
-					values = function(info) return FBoH:GetBagHookChoices() end,
+					values = function(info) return _GetBagHookChoices(FBoH) end,
 				},
 				hookBag3 = {
 					type = "select",
 					name = L["Hook Bag 3"],
 					desc = L["Opening bag 3 will open the selected bag instead."],
-					get = function(info) return FBoH:GetBagHook(3) end,
-					set = function(info, v) FBoH:SetBagHook(3, v) end,
+					get = function(info) return _GetBagHook(FBoH, 3) end,
+					set = function(info, v) _SetBagHook(FBoH, 3, v) end,
 					style = "dropdown",
-					values = function(info) return FBoH:GetBagHookChoices() end,
+					values = function(info) return _GetBagHookChoices(FBoH) end,
 				},
 				hookBag4 = {
 					type = "select",
 					name = L["Hook Bag 4"],
 					desc = L["Opening bag 4 will open the selected bag instead."],
-					get = function(info) return FBoH:GetBagHook(4) end,
-					set = function(info, v) FBoH:SetBagHook(4, v) end,
+					get = function(info) return _GetBagHook(FBoH, 4) end,
+					set = function(info, v) _SetBagHook(FBoH, 4, v) end,
 					style = "dropdown",
-					values = function(info) return FBoH:GetBagHookChoices() end,
+					values = function(info) return _GetBagHookChoices(FBoH) end,
 				},
 			},
 		},

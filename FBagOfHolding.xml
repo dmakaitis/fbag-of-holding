@@ -8,6 +8,9 @@
 <Script file="ViewModel.lua"/>
 
 <Script file="FBagOfHolding.lua"/>
+<Script file="FBoH_Docking.lua"/>
+<Script file="FBoH_Scanning.lua"/>
+
 <Script file="Commands.lua"/>
 
 <Script file="StandardFilters.lua"/>
