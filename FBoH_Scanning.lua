@@ -133,6 +133,16 @@ function _DoScanInventory(self)
 end
 
 local
+function _DoUpdateBagsGuild(self)
+	_SafeCall(function()
+		for k, v in pairs(self.bagViews) do
+			v:UpdateBag("gbank");
+		end
+		self.guildBagUpdateQueued = nil;
+	end);
+end
+
+local
 function _UpdateBagsGuild(self)
 	_SafeCall(function()
 		if self.guildBagUpdateQueued then return end;

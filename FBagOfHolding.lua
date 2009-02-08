@@ -107,16 +107,6 @@ function _DewdropMenuPoint(frame)
 end
 	
 local
-function _DoUpdateBagsGuild(self)
-	_SafeCall(function()
-		for k, v in pairs(self.bagViews) do
-			v:UpdateBag("gbank");
-		end
-		self.guildBagUpdateQueued = nil;
-	end);
-end
-
-local
 function _GetItemCounts(self, itemLink)
 	local itemKey = self.items:GetItemKey(itemLink);
 	local realm = GetRealmName();
