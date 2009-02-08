@@ -7,7 +7,6 @@ FBoH_SetVersion = nil;
 FBOH_CONFIG_TITLE = L["Configure Bag View"];
 FBOH_CONFIG_FILTERS = L["Filters"];
 FBOH_CONFIG_SORTING = L["Sorting"];
-
 FBOH_CONFIG_NAMELABEL = L["Name:"];
 
 function FBoH_ConfigureTabTemplate_DoClick(self)
