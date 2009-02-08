@@ -11,6 +11,8 @@ local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
 FBoH_SetVersion("$Revision$");
 
+local FBOH_VERSION = "0.9.2";
+
 local defaults = {
 	profile = {
 		gridScale = 1.0,
@@ -421,7 +423,7 @@ function FBoH:OnUpdateFuBarTooltip()
 		local bgused = bgtotal - bgfree;
 
 		GameTooltip:AddLine(L["Feithar's Bag of Holding"]);
-		GameTooltip:AddLine("r" .. FBoH_GetVersion(), 0, 1, 1);
+		GameTooltip:AddLine(FBOH_VERSION .. "." .. FBoH_GetVersion(), 0, 1, 1);
 		GameTooltip:AddLine(" ");
 		
 		local numbers;
