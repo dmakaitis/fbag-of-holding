@@ -47,7 +47,7 @@ local function AddSetToOptions(options, set)
 					name = k;
 					value = {
 						{
-							name = "- All " .. k .. " -";
+							name = string.format(L["- All %s -"], k);
 							value = keySoFar;
 						}
 					};
@@ -76,7 +76,7 @@ function periodicTable.filter(itemProps, set)
 	return false;
 end
 function periodicTable.getOptions()
-	if periodicTable.optionsCache and periodicTable.optionsCache[1].value == "No Values" then
+	if periodicTable.optionsCache and periodicTable.optionsCache[1].value == L["No Values"] then
 		periodicTable.optionsCache = nil;
 	end
 	if not periodicTable.optionsCache then
@@ -95,7 +95,7 @@ function periodicTable.getOptions()
 		if #(periodicTable.optionsCache) == 0 then
 			periodicTable.optionsCache = {
 				{
-					value = "No Values",
+					value = L["No Values"],
 				},
 			};
 		end
