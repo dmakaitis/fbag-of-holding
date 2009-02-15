@@ -171,13 +171,6 @@ function _ProcessTooltip(tooltip, name, link)
 	tooltip:Show();
 end
 
-local
-function _RenumberViewIDs(self)
-	for i, v in ipairs(self.bagViews) do
-		v.viewIndex = i;
-	end
-end
-
 --*****************************************************************************
 -- Events
 --*****************************************************************************
@@ -283,32 +276,6 @@ function FBoH:OnDisable()
 	_SafeCall(function()
 		self:UnhookAll();
 		TipHooker:Unhook(_ProcessTooltip, "item")
-	end);
-end
-
-function FBoH:OnProfileChanged()
-	_SafeCall(function()
-		-- First, if we have existing bag views, hide them all
-		if self.bagViews then
-			for _, v in pairs(self.bagViews) do
-				v:Hide();
-			end
-		end
-		
-		FBoH_Configure:Hide();
-		
-		self.db.profile.viewDefs = self.db.profile.viewDefs or _CopyTable(defaultViewDefinitions);
---		self.db.profile.viewDefs = defaultViewDefinitions;
-		self.bagViews = {};
-		
-		local viewDefs = self.db.profile.viewDefs;
-		for k, v in pairs(viewDefs) do
-			self.bagViews[k] = FBoH_ViewModel(v);
-			if FBoH_TabModel.defaultTab then
-				FBoH_TabModel.defaultTab.filterCache = nil;
-			end
-		end
-		_RenumberViewIDs(self);
 	end);
 end
 
@@ -446,78 +413,6 @@ end
 -- Creating/Deleting Views
 --*****************************************************************************
 
-function FBoH:CreateNewView()
-	local newView = {
-		tabs = {
-			{
-				name = "New View",
-				filter = {
-					name = "Character",
-				},
-			},
-		},
-	};
-	
-	table.insert(self.db.profile.viewDefs, newView);
-	table.insert(self.bagViews, FBoH_ViewModel(newView));
-
-	if FBoH_TabModel.defaultTab then
-		FBoH_TabModel.defaultTab.filterCache = nil;
-	end
-
-	_RenumberViewIDs(self);	
-
-	local view = self.bagViews[#(self.bagViews)];
-	
-	view:Show();
-
-	FBoH_Configure:SetModel(view);
-	FBoH_Configure:Show();
-end
-
-function FBoH:DeleteViewTab(tabModel)
-	if tabModel.tabDef.filter == "default" then
-		FBoH:Print("Can not delete the default view!");
-		return;
-	end
-	
---	FBoH:Print("Deleting tab: " .. tabModel.tabDef.name);
-	
-	tabModel.tabDef.DELETE_THIS_TAB = true;
-	
-	local delViewID, delTabID, delTabCount = nil, nil;
-	local delView = nil;
-	
-	for vi, view in ipairs(self.bagViews) do
-		for ti, tab in ipairs(view.tabData) do
-			if tab.tabDef.DELETE_THIS_TAB then
-				delView = view;
-				delViewID = vi;
-				delTabID = ti;
-				delTabCount = #(view.tabData);
-				tab.tabDef.DELETE_THIS_TAB = nil;
-			end
-		end
-	end
-	
---	FBoH:Print("   Tab " .. delTabID .. " from view " .. delViewID .. " (with " .. delTabCount .. " tabs)");
-	
-	if delTabCount == 1 then
-		table.remove(self.bagViews, delViewID);
-		table.remove(self.db.profile.viewDefs, delViewID);
-		
-		delView:Hide();
-		delView.viewDef = nil;
-		delView.tabDef = nil;
-	else
-		table.remove(delView.viewDef.tabs, delTabID);
-		table.remove(delView.tabData, delTabID):Hide();
-		delView:SelectTab(1);
-	end
-
-	_RenumberViewIDs(self);
-end
-
 function FBoH:OpenAllBags()
 	_SafeCall(function()
 		if self.db.profile.hookOpenAllBags then
@@ -610,139 +505,9 @@ function FBoH:ToggleBag(id, force)
 	end
 end
 
---*****************************************************************************
--- View Docking
---*****************************************************************************
-
-function FBoH:DockView(sourceView, targetView, targetTab)
-	if sourceView == targetView then
---		self:Print("Can not dock view " .. sourceView .. " into itself!");
-		return;
-	end
-	
---	self:Print("Docking view " .. sourceView .. " into view " .. targetView .. " after tab " .. targetTab);
-	
-	FBoH_Configure:Hide();
-	
-	-- remove the view and definition
-	local oldView = table.remove(self.bagViews, sourceView);
-	table.remove(self.db.profile.viewDefs, sourceView);
-	local wasShown = oldView:IsShown();
-	oldView:Hide();
-	
-	local newView = self.bagViews[targetView];
-	
-	local newTabs = {};
-	local newTabData = {};
-	local tabCount = 1;
-	
-	for i = 1, targetTab do
-		table.insert(newTabs, newView.viewDef.tabs[i]);
-		table.insert(newTabData, newView.tabData[i]);
---		self:Print("Added tab " .. tabCount .. " from target view");
-		tabCount = tabCount + 1;
-	end
-	
-	for i, t in ipairs(oldView.viewDef.tabs) do
-		table.insert(newTabs, t);
-		table.insert(newTabData, oldView.tabData[i]);
---		self:Print("Added tab " .. tabCount .. " from source view");
-		tabCount = tabCount + 1;
-	end
-	
-	for i = targetTab + 1, #(newView.viewDef.tabs) do
-		table.insert(newTabs, newView.viewDef.tabs[i]);
-		table.insert(newTabData, newView.tabData[i]);
---		self:Print("Added tab " .. tabCount .. " from target view");
-		tabCount = tabCount + 1;
-	end
-	
-	oldView.viewDef = nil;
-	oldView.tabData = nil;
-	
-	newView.viewDef.tabs = newTabs;
-	newView.tabData = newTabData;
-	
-	newView:SelectTab(targetTab + 1);
-	if wasShown then
-		newView:Show();
-	else
-		newView:Hide();
-	end
-end
-
-function FBoH:UndockView(sourceView, sourceTab)
---	self:Print("Undocking tab " .. sourceTab .. " from the view " .. sourceView);
-
-	FBoH_Configure:Hide();
-	
-	-- Remove the tab from the main bag, and update it.
-	local tabDef = table.remove(self.bagViews[sourceView].viewDef.tabs, sourceTab);
-	local tabData = table.remove(self.bagViews[sourceView].tabData, sourceTab);
-	self.bagViews[sourceView]:SelectTab(1);
-	
---	self:Print(#(self.db.profile.viewDefs[sourceView].tabs) .. " tabs remaining in source view");
-	
-	-- Create a new bag
-	local newViewDef = {
-		activeTab = 1;
-		tabs = {
-			tabDef
-		}
-	};
-	local newTabData = {
-		tabData;
-	};
-	
-	local newBagView = FBoH_ViewModel(newViewDef, newTabData);
-	table.insert(self.bagViews, newBagView);
-	table.insert(self.db.profile.viewDefs, newViewDef);
-
-	if FBoH_TabModel.defaultTab then
-		FBoH_TabModel.defaultTab.filterCache = nil;
-	end
-	
-	if self.bagViews[sourceView]:IsShown() then
-		newBagView:Show();
-	else
-		newBagView:Hide();
-	end
-	
-	_RenumberViewIDs(self);
-	
-	return newBagView;
-end
-
-function FBoH:GetUniqueTabID()
-	local rVal = time();
-	local unique = false;
-	
-	while unique == false do
-		unique = true;
-		for _, v in ipairs(self.db.profile.viewDefs) do
-			for _, t in ipairs(v.tabs) do
-				if t.id == rVal then
-					unique = false;
-					rVal = rVal + 1;
-				end
-			end
-		end
-	end
-	
-	return rVal;
-end
-
---*****************************************************************************
--- Item Count Data Access
---*****************************************************************************
-
 function FBoH:GetItemBagAndSlotIDs(item)
 	return self:GetBagID(item.bagType, item.bagIndex), item.slotIndex;
 end
-
---*****************************************************************************
--- Bag Scanning
---*****************************************************************************
 
 function FBoH:GetEmptySlots(...)
 	return self.items:GetEmptySlots(...);
@@ -765,21 +530,8 @@ function FBoH:GetBagID(bagType, bagIndex)
 	return nil;
 end
 
---*****************************************************************************
--- Inventory Scanning
---*****************************************************************************
-
 function FBoH:IsBankOpen()
 	return self.bankIsOpen;
-end
-
-function FBoH:GetBagViewByID(bagViewID)
-	for k, v in pairs(self.bagViews) do
-		if v.bagDef.id == bagViewID then
-			return v;
-		end
-	end
-	return nil;
 end
 
 --*****************************************************************************

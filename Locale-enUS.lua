@@ -46,6 +46,7 @@ L["Legendary"] = true;
 L["Artifact"] = true;
 
 L["Item Type"] = true;
+L["- All %s -"] = true;
 -- The following values need to match the values returned by Blizzard's GetItemType function:
 	L["Armor"] = true;
 	L["Consumable"] = true;
@@ -61,6 +62,8 @@ L["Item Type"] = true;
 	L["Trade Goods"] = true;
 	L["Weapon"] = true;
 	
+L["Item Subtype"] = true;
+
 L["Equip Slot"] = true;
 L["Not Equipable"] = true;
 

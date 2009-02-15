@@ -2,7 +2,7 @@
 ## Author: Feithar
 ## Title: Feithar's Bag of Holding
 ## Version: 0.9
-## SavedVariables: FBoH_Items, FBoH_DB
+## SavedVariables: FBoH_Items, FBoH_DB, FBoH_ItemTypes
 ## SavedVariablesPerCharacter: FBoH_DBPC
 ## X-Category: Inventory
 ## OptionalDeps: Ace2, DewdropLib, Ace3, FuBar, LibCrayon-3.0, WoWUnit
@@ -20,5 +20,8 @@ Locale-deDE.lua
 
 FBagOfHolding.xml
 
-FBoH_Templates.xml
-FBoH_Configure.xml
+UI\FBoH_ItemTooltip.xml
+UI\FBoH_ItemButtons.xml
+UI\FBoH_Templates.xml
+
+UI\FBoH_Configure.xml

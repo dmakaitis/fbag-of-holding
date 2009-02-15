@@ -294,6 +294,23 @@ FBoH:RegisterProperty(soulbound);
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
+local itemSubType = {};
+
+itemSubType.name = "Item Subtype";
+itemSubType.desc = L["Item Subtype"];
+function itemSubType.sortCompare(a, b)
+	if a.detail and b.detail then
+		if (a.detail.subtype or "") < (b.detail.subtype or "") then return true else return false end;
+	end
+	if a.detail then return true end;
+	return false;
+end
+FBoH:RegisterProperty(itemSubType);
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
 local itemType = {};
 
 itemType.name = "Item Type";
@@ -306,51 +323,55 @@ function itemType.sortCompare(a, b)
 	return false;
 end
 function itemType.filter(itemProps, itemType)
+	local parts = { strsplit("|", itemType) };
+	local iType = parts[1];
+	local sType = parts[2];
+	
 	if not itemProps.detail then return false end;
-	if itemType == itemProps.detail.type then return true else return false end;
+	
+	if iType ~= itemProps.detail.type then return false end;
+	if sType == nil then return true end;
+	if sType == itemProps.detail.subtype then return true else return false end;
 end
 function itemType.getOptions()
-	return {
-		{
-			value = L["Armor"];
-		},
-		{
-			value = L["Consumable"];
-		},
-		{
-			value = L["Container"];
-		},
-		{
-			value = L["Gem"];
-		},
-		{
-			value = L["Key"];
-		},
-		{
-			value = L["Miscellaneous"];
-		},
-		{
-			value = L["Reagent"];
-		},
-		{
-			value = L["Recipe"];
-		},
-		{
-			value = L["Projectile"];
-		},
-		{
-			value = L["Quest"];
-		},
-		{
-			value = L["Quiver"];
-		},
-		{
-			value = L["Trade Goods"];
-		},
-		{
-			value = L["Weapon"];
-		},
-	};
+	local options = {};
+	for k, v in pairs(FBoH_ItemTypes) do
+		table.insert(options, k);
+	end;
+	table.sort(options);
+	
+	local rVal = {}
+	for k, v in ipairs(options) do
+		local option = {};
+		option.name = v;
+		local values = {};
+		option.value = values;
+		
+		local suboptions = {};
+		for s, _ in pairs(FBoH_ItemTypes[v]) do
+			table.insert(suboptions, s);
+		end;
+		if getn(suboptions) > 1 then
+			table.sort(suboptions);
+			
+			local suboption = {};
+			suboption.name = string.format(L["- All %s -"], v);
+			suboption.value = v;
+			table.insert(values, suboption);
+			
+			for _, s in ipairs(suboptions) do
+				local suboption = {};
+				suboption.name = s;
+				suboption.value = v .. "|" .. s;
+				table.insert(values, suboption);
+			end
+		else
+			option.value = v;
+		end
+		
+		table.insert(rVal, option);
+	end;
+	return rVal;
 end
 FBoH:RegisterProperty(itemType);
 

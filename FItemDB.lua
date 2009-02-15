@@ -4,6 +4,7 @@ FBoH_SetVersion("$Revision$");
 
 FBoH_Items = FBoH_Items or {};
 FBoH_ItemDB = {};
+FBoH_ItemTypes = FBoH_ItemTypes or {};
 
 --[[
 
@@ -151,6 +152,9 @@ local
 function _CleanDatabase(self)
 	local details = self.items.details;
 	for k, v in pairs(details) do
+		FBoH_ItemTypes[v.type] = FBoH_ItemTypes[v.type] or {};
+		FBoH_ItemTypes[v.type][v.subtype] = 1;
+		
 		local used = false;
 		if self.items.realms then
 			for _, r in pairs(self.items.realms) do
@@ -234,6 +238,8 @@ function _UpdateItemDetail(self, itemLink)
 	d.lastUpdate = time();
 	if d.name then
 		self.items.details[self:GetItemKey(d.link)] = d;
+		FBoH_ItemTypes[d.type] = FBoH_ItemTypes[d.type] or {};
+		FBoH_ItemTypes[d.type][d.subtype] = 1;
 	end
 	
 	return d;

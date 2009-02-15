@@ -1,0 +1,139 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+	<Script file="FBoH_ItemButtons.lua">
+	</Script>
+
+	<Button name="FBoH_GridItemButton" virtual="true">
+		<Size>
+			<AbsDimension x="37" y="37"/>
+		</Size>
+		<Scripts>
+			<OnLoad>
+				self.SetItem = FBoH_GridItemButton_SetItem;
+				self.HideChildren = FBoH_GridItemButton_HideChildren;
+				self.GetGuildBankItemFrame = FBoH_GridItemButton_GetGuildBankItemFrame;
+				self.GetContainerItemFrame = FBoH_GridItemButton_GetContainerItemFrame;
+				self.GetEmptyItemFrame = FBoH_GridItemButton_GetEmptyItemFrame;
+			</OnLoad>
+		</Scripts>
+	</Button>
+	
+	<Button name="FBoH_BankItemButton" inherits="ItemButtonTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self.DoEnter = FBoH_BankItemButton_DoEnter;
+				self.DoClick = FBoH_BankItemButton_DoClick;
+				self.DoModifiedClick = FBoH_BankItemButton_DoModifiedClick;
+				self.SplitStack = function(button, split)
+					SplitContainerItem(button.containerID, button.slotID, split);
+				end
+
+				self:RegisterForDrag("LeftButton");
+				self:RegisterForClicks("LeftButtonUp","RightButtonUp");
+			</OnLoad>
+			<OnEnter>
+				self:DoEnter();
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+				ResetCursor();
+			</OnLeave>
+			<OnClick>
+				if ( IsModifiedClick() ) then
+					self:DoModifiedClick(arg1);
+				else
+					self:DoClick(arg1);
+				end
+			</OnClick>
+            <OnDragStart>
+				self:DoClick("LeftButton");
+            </OnDragStart>
+            <OnReceiveDrag>
+				self:DoClick("LeftButton");
+            </OnReceiveDrag>
+		</Scripts>		
+	</Button>
+	
+	<Button name="FBoH_GuildBankItemButton" inherits="ItemButtonTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self.DoEnter = FBoH_GuildBankItemButton_DoEnter;
+--				self.DoClick = FBoH_GuildBankItemButton_DoClick;
+				self.DoModifiedClick = FBoH_GuildBankItemButton_DoModifiedClick;
+--				self.SplitStack = function(button, split)
+--					SplitContainerItem(button.containerID, button.slotID, split);
+--				end
+
+--				self:RegisterForDrag("LeftButton");
+--				self:RegisterForClicks("LeftButtonUp","RightButtonUp");
+			</OnLoad>
+			<OnEnter>
+				self:DoEnter();
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+				ResetCursor();
+			</OnLeave>
+			<OnClick>
+				if ( IsModifiedClick() ) then
+					self:DoModifiedClick(arg1);
+				else
+--					self:DoClick(arg1);
+				end
+			</OnClick>
+            <OnDragStart>
+--				self:DoClick("LeftButton");
+            </OnDragStart>
+            <OnReceiveDrag>
+--				self:DoClick("LeftButton");
+            </OnReceiveDrag>
+		</Scripts>		
+	</Button>
+	
+	<Button name="FBoH_AltItemButton" inherits="ItemButtonTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self.DoEnter = FBoH_AltItemButton_DoEnter;
+				self.DoModifiedClick = FBoH_BankItemButton_DoModifiedClick;
+
+				self:RegisterForClicks("LeftButtonUp","RightButtonUp");
+			</OnLoad>
+			<OnEnter>
+				self:DoEnter();
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+				ResetCursor();
+			</OnLeave>
+			<OnClick>
+				if ( IsModifiedClick() ) then
+					self:DoModifiedClick(arg1);
+				end
+			</OnClick>
+		</Scripts>		
+	</Button>
+	
+	<Button name="FBoH_EmptyItemButton" inherits="ItemButtonTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self.DoEnter = FBoH_EmptyItemButton_DoEnter;
+				self.DoClick = FBoH_EmptyItemButton_DoClick;
+
+				self:RegisterForClicks("LeftButtonUp");
+			</OnLoad>
+			<OnEnter>
+				self:DoEnter();
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+				ResetCursor();
+			</OnLeave>
+			<OnClick>
+				self:DoClick(arg1);
+			</OnClick>
+            <OnReceiveDrag>
+				self:DoClick("LeftButton");
+            </OnReceiveDrag>
+		</Scripts>		
+	</Button>
+	
+</Ui>
