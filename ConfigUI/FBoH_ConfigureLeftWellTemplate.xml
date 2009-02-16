@@ -1,0 +1,146 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+	<Script file="FBoH_ConfigureLeftWellTemplate.lua">
+	</Script>
+
+	<Frame name="FBoH_ConfigureLeftWellTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="150" y="256"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-TopLeft">
+					<Size>
+						<AbsDimension x="79" y="132"/>
+					</Size>
+					<TexCoords top="0" left="0" bottom="0.515625" right="0.30859375"/>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="-4" y="4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-TopRight">
+					<Size>
+						<AbsDimension x="79" y="132"/>
+					</Size>
+					<TexCoords top="0" left="0.69140625" bottom="0.515625" right="1"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="4" y="4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-BotLeft">
+					<Size>
+						<AbsDimension x="79" y="132"/>
+					</Size>
+					<TexCoords top="0.484375" left="0" bottom="1" right="0.30859375"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="-4" y="-4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-BotRight">
+					<Size>
+						<AbsDimension x="79" y="132"/>
+					</Size>
+					<TexCoords top="0.484375" left="0.69140625" bottom="1" right="1"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="4" y="-4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<ScrollFrame name="$parent_Scroll" inherits="FBoH_ScrollFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						ScrollFrame_OnLoad(self);
+						
+						self.DoVerticalScroll = FBoH_ConfigureLeftWellTemplate_DoVerticalScroll;
+
+						self.rowHeight = 32;
+					</OnLoad>
+					<OnVerticalScroll>
+						FBOH_SCROLL_FRAME = self;
+						FauxScrollFrame_OnVerticalScroll(self, offset, self.rowHeight, FBoH_Configure_OnVerticalScroll);
+						FBOH_SCROLL_FRAME = nil;
+					</OnVerticalScroll>
+				</Scripts>
+			</ScrollFrame>
+			<Button name="$parent_Button1" inherits="FBoH_PropertyButton" id="1">
+				<Anchors>
+					<Anchor point="TOPLEFT"/>
+					<Anchor point="TOPRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button2" inherits="FBoH_PropertyButton" id="2">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button1" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button1" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button3" inherits="FBoH_PropertyButton" id="3">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button2" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button2" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button4" inherits="FBoH_PropertyButton" id="4">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button3" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button3" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button5" inherits="FBoH_PropertyButton" id="5">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button4" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button4" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button6" inherits="FBoH_PropertyButton" id="6">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button5" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button5" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button7" inherits="FBoH_PropertyButton" id="7">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button6" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button6" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button8" inherits="FBoH_PropertyButton" id="8">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button7" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button7" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.SetChoices = FBoH_ConfigureLeftWellTemplate_SetChoices;
+
+				self.scrollFrame = _G[self:GetName() .. "_Scroll"];
+				
+				self.choices = {};
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+</Ui>

@@ -1,0 +1,192 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+	<Script file="FBoH_FilterButton.lua">
+	</Script>
+
+	<Button name="FBoH_FilterButton" virtual="true" hidden="false">
+		<Size>
+			<AbsDimension x="150" y="32"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parent_Background" file="Interface\Buttons\UI-ListBox-Highlight2">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-4"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString name="$parent_Text" inherits="GameFontNormal" justifyH="LEFT" text="Filter Button">
+					<Size>
+						<AbsDimension x="0" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="8" y="0"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="RIGHT" relativeTo="$parent_NotButton">
+							<Offset>
+								<AbsDimension x="-8" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<EditBox name="$parent_ArgEdit" autoFocus="false" inherits="InputBoxTemplate">
+				<Size>
+					<AbsDimension x="150" y="16"/>
+				</Size>
+				<Anchors>
+					<Anchor point="RIGHT">
+						<Offset>
+							<AbsDimension x="-8" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<FontString inherits="ChatFontNormal" bytes="64"/>
+				<Scripts>
+					<OnEscapePressed>
+						this:ClearFocus();
+					</OnEscapePressed>
+					<OnEditFocusLost>
+						this:HighlightText(0, 0);
+					</OnEditFocusLost>
+					<OnEditFocusGained>
+						this:HighlightText();
+					</OnEditFocusGained>
+					<OnTextChanged>
+						if self:IsShown() then
+							local parent = self:GetParent();
+							local text = self:GetText();
+							if text == "" then text = nil end;
+							parent.filter.arg = text;
+							parent:UpdateView();
+							parent:SetFilter();
+						end
+					</OnTextChanged>
+				</Scripts>
+			</EditBox>
+			<Button name="$parent_ArgBtn" inherits="UIPanelButtonTemplate" text="btn">
+				<Size>
+					<AbsDimension x="158" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="RIGHT">
+						<Offset>
+							<AbsDimension x="-8" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self:DoClick();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parent_NotButton" inherits="UIPanelButtonTemplate" text="Not">
+				<Size>
+					<AbsDimension x="40" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$parent_ArgEdit">
+						<Offset>
+							<AbsDimension x="-8" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						local parent = self:GetParent();
+						if parent.filter.isNot then
+							parent.filter.isNot = nil;
+						else
+							parent.filter.isNot = true;
+						end
+						parent:UpdateView();
+						parent:SetFilter();
+					</OnClick>
+					<OnLoad>
+						self:SetScale(0.9);
+					</OnLoad>
+				</Scripts>
+			</Button>
+			<Frame name="$parent_InsertTop" inherits="FBoH_HorizontalInsertTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="TOPLEFT"/>
+					<Anchor point="RIGHT" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Frame>
+			<Frame name="$parent_InsertBottom" inherits="FBoH_HorizontalInsertTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="RIGHT" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Frame>
+			<Frame name="$parent_InsertGroup" inherits="FBoH_InsertGroupTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.fontString = _G[self:GetName() .. "_Text"];
+				self.argEdit = _G[self:GetName() .. "_ArgEdit"];
+				self.argButton = _G[self:GetName() .. "_ArgBtn"];
+				self.notButton = _G[self:GetName() .. "_NotButton"];
+				self.insertTop = _G[self:GetName() .. "_InsertTop"];
+				self.insertBottom = _G[self:GetName() .. "_InsertBottom"];
+				self.insertGroup = _G[self:GetName() .. "_InsertGroup"];
+				self.backgroundTexture = _G[self:GetName() .. "_Background"];
+				
+				self.SetFilter = FBoH_FilterButton_SetFilter;
+				self.UpdateView = FBoH_FilterButton_UpdateView;
+				self.DoUpdate = FBoH_FilterButton_DoUpdate;
+				self.ReceiveDrag = FBoH_FilterButton_ReceiveDrag;
+
+				self.argButton.DoClick = FBoH_FilterButtonArgBtn_DoClick;
+				
+				self.backgroundTexture:SetVertexColor(0.5, 0.8, 1.0, 0.6);
+
+				self.type = "filter";
+				self:RegisterForDrag("LeftButton");
+			</OnLoad>
+			<OnUpdate>
+				self:DoUpdate();
+			</OnUpdate>
+			<OnDragStart>
+				self.backgroundTexture:SetVertexColor(0.5, 0.8, 1.0, 0.2);
+				self.isBeingDragged = true;
+				FBoH_ConfigureDrag:SetText(self.fontString:GetText());
+				FBoH_ConfigureDrag:Show();
+				FBoH_Configure.dragData = {
+					source=self;
+				}
+			</OnDragStart>
+			<OnDragStop>
+				self.backgroundTexture:SetVertexColor(0.5, 0.8, 1.0, 0.6);
+				FBoH_ConfigureDrag:Hide();
+				if not FBoH_Configure:ExecuteDrag() then
+--					FBoH:Debug("Drag was not received by a target: deleting...");
+					self:GetParent():DeleteFilter(self.parentID, self.parentIndex);
+				end
+				self.isBeingDragged = nil;
+				FBoH_Configure.dragData = nil;
+			</OnDragStop>
+		</Scripts>
+	</Button>
+	
+</Ui>

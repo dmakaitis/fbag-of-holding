@@ -116,7 +116,7 @@ end
 function itemName.filter(itemProps, name)
 	local _, _, itemName = string.find(itemProps.itemLink, "%[(.+)%]");
 	if not itemName then
-		FBoH:Print("Failed to get item info for " .. itemProps.itemLink);
+		FBoH:Debug("Failed to get item info for " .. itemProps.itemLink);
 		return false;
 	end
 	

@@ -1,0 +1,88 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+
+	<Frame name="FBoH_InsertGroupTemplate" virtual="true" hidden="false">
+		<Size>
+			<AbsDimension x="100" y="32"/>
+		</Size>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture file="Interface\Addons\FBagOfHolding\Images\GroupBars">
+					<Size>
+						<AbsDimension x="8" y="8"/>
+					</Size>
+					<TexCoords top="0" left="0" bottom="0.25" right="1"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativePoint="LEFT">
+							<Offset>
+								<AbsDimension x="4" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\Addons\FBagOfHolding\Images\GroupBars">
+					<Size>
+						<AbsDimension x="8" y="8"/>
+					</Size>
+					<TexCoords top="0.25" left="0" bottom="0.5" right="1"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="LEFT">
+							<Offset>
+								<AbsDimension x="4" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture name="$parent_GroupTop" file="Interface\Buttons\UI-ListBox-Highlight2">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="16" y="-6"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="-4" y="1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture name="$parent_GroupBottom" file="Interface\Buttons\UI-ListBox-Highlight2">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="16" y="6"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="TOPRIGHT" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="-4" y="-1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.groupTop = _G[self:GetName() .. "_GroupTop"];
+				self.groupBottom = _G[self:GetName() .. "_GroupBottom"];
+				
+				self.SetInsertTop = function(btn, top)
+					local active, inactive = nil, nil;
+					if top then
+						active = self.groupTop;
+						inactive = self.groupBottom;
+					else
+						active = self.groupBottom;
+						inactive = self.groupTop;
+					end
+					active:SetVertexColor(1, 1, 1, 0.9);
+					inactive:SetVertexColor(0.3, 0.3, 0.3, 0.8);
+				end
+				
+				self:SetInsertTop(true);
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+</Ui>

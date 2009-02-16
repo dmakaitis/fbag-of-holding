@@ -1,0 +1,83 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+
+	<Button name="FBoH_PropertyButton" virtual="true" hidden="false">
+		<Size>
+			<AbsDimension x="150" y="32"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parent_Background" file="Interface\Buttons\UI-ListBox-Highlight2">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="0" y="-4"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString name="$parent_Text" inherits="GameFontNormal" text="Property Button">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.type = "property";
+				
+				self.fontString = _G[self:GetName() .. "_Text"];
+				self.SetProperty = function(btn, label, property)
+					label = label or "";
+					self.property = property;
+					btn.fontString:SetText(label);
+				end
+				self.SetText = function(btn, label)
+					label = label or "";
+					self.property = nil;
+					btn.fontString:SetText(label);
+				end
+				
+				tex = _G[self:GetName() .. "_Background"];
+				tex:SetVertexColor(0.5, 0.8, 1.0, 0.6);
+
+				self:SetProperty();
+				self:RegisterForDrag("LeftButton");
+			</OnLoad>
+			<OnDragStart>
+				FBoH_ConfigureDrag:SetText(self.fontString:GetText());
+				FBoH_ConfigureDrag:Show();
+				FBoH_Configure.dragData = {
+					source=self;
+				}
+			</OnDragStart>
+			<OnDragStop>
+				FBoH_ConfigureDrag:Hide();
+				FBoH_Configure:ExecuteDrag();
+				FBoH_Configure.dragData = nil;
+			</OnDragStop>
+		</Scripts>
+	</Button>
+	
+	<Button name="FBoH_ConfigureDrag" inherits="FBoH_PropertyButton" frameStrata="TOOLTIP" hidden="true" parent="UIParent">
+		<Anchors>
+			<Anchor point="TOPLEFT"/>
+		</Anchors>
+		<Scripts>
+			<OnUpdate>
+				local x, y = GetCursorPosition();
+				x = x / UIParent:GetEffectiveScale();
+				y = y / UIParent:GetEffectiveScale();
+				self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x, y);
+			</OnUpdate>
+		</Scripts>
+	</Button>
+	
+</Ui>

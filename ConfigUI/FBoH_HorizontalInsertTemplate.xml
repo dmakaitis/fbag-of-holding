@@ -1,0 +1,41 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+
+	<Frame name="FBoH_HorizontalInsertTemplate" virtual="true" hidden="false">
+		<Size>
+			<AbsDimension x="0" y="8"/>
+		</Size>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parent_Left" file="Interface\Addons\FBagOfHolding\Images\Horizontal-Insert">
+					<Size>
+						<AbsDimension x="28" y="8"/>
+					</Size>
+					<TexCoords top="0" left="0" bottom="0.25" right="0.109375"/>
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parent_Right" file="Interface\Addons\FBagOfHolding\Images\Horizontal-Insert">
+					<Size>
+						<AbsDimension x="28" y="8"/>
+					</Size>
+					<TexCoords top="0.25" left="0" bottom="0.5" right="0.109375"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT"/>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\Addons\FBagOfHolding\Images\Horizontal-Insert">
+					<Size>
+						<AbsDimension x="0" y="8"/>
+					</Size>
+					<TexCoords top="0" left="0.109375" bottom="0.25" right="1"/>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parent_Left" relativePoint="RIGHT"/>
+						<Anchor point="RIGHT" relativeTo="$parent_Right" relativePoint="LEFT"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+	</Frame>
+	
+</Ui>

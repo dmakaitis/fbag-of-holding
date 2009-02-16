@@ -20,8 +20,17 @@ Locale-deDE.lua
 
 FBagOfHolding.xml
 
-UI\FBoH_ItemTooltip.xml
-UI\FBoH_ItemButtons.xml
-UI\FBoH_Templates.xml
+BagsUI\FBoH_ItemTooltip.xml
+BagsUI\FBoH_ItemButtons.xml
+BagsUI\FBoH_Templates.xml
 
-UI\FBoH_Configure.xml
+ConfigUI\FBoH_HorizontalInsertTemplate.xml
+ConfigUI\FBoH_InsertGroupTemplate.xml
+ConfigUI\FBoH_PropertyButton.xml
+ConfigUI\FBoH_FilterButton.xml
+ConfigUI\FBoH_SorterButton.xml
+ConfigUI\FBoH_GroupTemplate.xml
+ConfigUI\FBoH_ScrollFrameTemplate.xml
+ConfigUI\FBoH_ConfigureLeftWellTemplate.xml
+ConfigUI\FBoH_ConfigureFiltersWellTemplate.xml
+ConfigUI\FBoH_Configure.xml

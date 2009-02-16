@@ -1,0 +1,133 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+	<Script file="FBoH_GroupTemplate.lua">
+	</Script>
+
+	<Frame name="FBoH_GroupTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="46" y="32"/>
+		</Size>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parent_Top" file="Interface\Addons\FBagOfHolding\Images\GroupBars">
+					<Size>
+						<AbsDimension x="8" y="8"/>
+					</Size>
+					<TexCoords top="0" left="0" bottom="0.25" right="1"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parent_Bottom" file="Interface\Addons\FBagOfHolding\Images\GroupBars">
+					<Size>
+						<AbsDimension x="8" y="8"/>
+					</Size>
+					<TexCoords top="0.25" left="0" bottom="0.5" right="1"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT"/>
+					</Anchors>
+				</Texture>
+				<Texture name="$parent_Middle" file="Interface\Addons\FBagOfHolding\Images\GroupBars">
+					<TexCoords top="0.125" left="0" bottom="0.375" right="1"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parent_Top" relativePoint="BOTTOMLEFT"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parent_Bottom" relativePoint="TOPRIGHT"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parent_TypeButton" inherits="UIPanelButtonTemplate" text="And" >
+				<Size>
+					<AbsDimension x="40" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						local parent = self:GetParent();
+						if parent.filter.name == "And" then
+							parent.filter.name = "Or";
+						else
+							parent.filter.name = "And";
+						end
+						parent:UpdateView();
+						parent:SetFilter();
+					</OnClick>
+					<OnLoad>
+						self:SetScale(0.9);
+					</OnLoad>
+				</Scripts>
+			</Button>
+			<Button name="$parent_NotButton" inherits="UIPanelButtonTemplate" text="Not" >
+				<Size>
+					<AbsDimension x="40" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						local parent = self:GetParent();
+						if parent.filter.isNot then
+							parent.filter.isNot = nil;
+						else
+							parent.filter.isNot = true;
+						end
+						parent:UpdateView();
+						parent:SetFilter();
+					</OnClick>
+					<OnLoad>
+						self:SetScale(0.9);
+					</OnLoad>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.topTex = _G[self:GetName() .. "_Top"];
+				self.bottomTex = _G[self:GetName() .. "_Bottom"];
+				self.typeButton = _G[self:GetName() .. "_TypeButton"];
+				self.notButton = _G[self:GetName() .. "_NotButton"];
+
+				self.SetFilter = FBoH_GroupTemplate_SetFilter;
+				self.UpdateView = FBoH_GroupTemplate_UpdateView;
+				
+				self.SetTopClosed = function(frame, closed)
+					local top, bottom = 0, 0;
+					if closed then
+						top = 0;
+						bottom = 0.25;
+					else
+						top = 0.5;
+						bottom = 0.75;
+					end
+					
+					frame.topTex:SetTexCoord(0, 1, top, bottom);
+				end
+				
+				self.SetBottomClosed = function(frame, closed)
+					local top, bottom = 0, 0;
+					if closed then
+						top = 0.25;
+						bottom = 0.5;
+					else
+						top = 0.75;
+						bottom = 1;
+					end
+					
+					frame.bottomTex:SetTexCoord(0, 1, top, bottom);
+				end				
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	
+</Ui>

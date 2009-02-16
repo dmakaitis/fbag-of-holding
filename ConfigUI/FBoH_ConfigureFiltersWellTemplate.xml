@@ -1,0 +1,194 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+	<Script file="FBoH_ConfigureFiltersWellTemplate.lua">
+	</Script>
+
+	<Frame name="FBoH_ConfigureFiltersWellTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="500" y="256"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-TopLeft">
+					<Size>
+						<AbsDimension x="256" y="132"/>
+					</Size>
+					<TexCoords top="0" left="0" bottom="0.515625" right="1"/>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="-4" y="4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-TopRight">
+					<Size>
+						<AbsDimension x="256" y="132"/>
+					</Size>
+					<TexCoords top="0" left="0" bottom="0.515625" right="1"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="4" y="4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-BotLeft">
+					<Size>
+						<AbsDimension x="256" y="132"/>
+					</Size>
+					<TexCoords top="0.484375" left="0" bottom="1" right="1"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="-4" y="-4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\AddOns\FBagOfHolding\Images\WellFrame-BotRight">
+					<Size>
+						<AbsDimension x="256" y="132"/>
+					</Size>
+					<TexCoords top="0.484375" left="0" bottom="1" right="1"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="4" y="-4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString name="$parent_DefaultOutput" inherits="GameFontNormal" text="">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="50" y="0"/>
+							</Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="-50" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>				
+			</Layer>
+		</Layers>
+		<Frames>
+			<ScrollFrame name="$parent_Scroll" inherits="FBoH_ScrollFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						ScrollFrame_OnLoad(self);
+						
+						self.DoVerticalScroll = FBoH_ConfigureFiltersWellTemplate_DoVerticalScroll;
+
+						self.rowHeight = 32;
+					</OnLoad>
+					<OnVerticalScroll>
+						FBOH_SCROLL_FRAME = self;
+						FauxScrollFrame_OnVerticalScroll(self, offset, self.rowHeight, FBoH_Configure_OnVerticalScroll);
+						FBOH_SCROLL_FRAME = nil;
+					</OnVerticalScroll>
+				</Scripts>
+			</ScrollFrame>
+			<Button name="$parent_Button1" inherits="FBoH_FilterButton" id="1">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="5" y="0"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-5" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button2" inherits="FBoH_FilterButton" id="2">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button1" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button1" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button3" inherits="FBoH_FilterButton" id="3">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button2" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button2" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button4" inherits="FBoH_FilterButton" id="4">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button3" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button3" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button5" inherits="FBoH_FilterButton" id="5">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button4" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button4" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button6" inherits="FBoH_FilterButton" id="6">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button5" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button5" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button7" inherits="FBoH_FilterButton" id="7">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button6" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button6" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button name="$parent_Button8" inherits="FBoH_FilterButton" id="8">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parent_Button7" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeTo="$parent_Button7" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.SetFilters = FBoH_ConfigureFiltersWellTemplate_SetFilters;
+				self.GetGroupFrame = FBoH_ConfigureFiltersWellTemplate_GetGroupFrame;
+				self.ReceiveDrag = FBoH_ConfigureFiltersWellTemplate_ReceiveDrag;
+				self.DeleteFilter = FBoH_ConfigureFiltersWellTemplate_DeleteFilter;
+				self.InsertFilter = FBoH_ConfigureFiltersWellTemplate_InsertFilter;
+				self.InsertGroup = FBoH_ConfigureFiltersWellTemplate_InsertGroup;
+				self.UpdateView = FBoH_ConfigureFiltersWellTemplate_UpdateView;
+				
+				self.scrollFrame = _G[self:GetName() .. "_Scroll"];
+				self.defaultString = _G[self:GetName() .. "_DefaultOutput"];
+				
+				self.filterSettings = {};
+				self.groupFrames = {};
+			</OnLoad>
+			<OnUpdate>
+				local dragData = FBoH_Configure.dragData;
+				if dragData and MouseIsOver(self) then
+					local top = self:GetTop();
+					if self.lastRowButton then
+						top = self.lastRowButton:GetBottom();
+					end
+
+					local _, cursorY = GetCursorPosition();
+					cursorY = cursorY / UIParent:GetEffectiveScale();
+					
+					if top > cursorY then
+						dragData.target = self;
+					end
+				end
+			</OnUpdate>
+		</Scripts>
+	</Frame>
+	
+</Ui>
