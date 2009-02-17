@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("FBoH", "zhTW", true)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("FBoH", "zhTW")
 if not L then return end;
 
 L["Feithar's Bag of Holding"] = true;	-- Full Title
