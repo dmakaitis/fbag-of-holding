@@ -17,6 +17,7 @@ Libs\LibFuBarPlugin-Mod-3.0\lib.xml
 
 Locale-enUS.lua
 Locale-deDE.lua
+Locale-zhTW.lua
 
 FBagOfHolding.xml
 
