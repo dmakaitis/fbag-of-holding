@@ -15,9 +15,9 @@ embeds.xml
 Libs\LibTipHooker-3.0\LibTipHooker-3.0.lua
 Libs\LibFuBarPlugin-Mod-3.0\lib.xml
 
-Locale-enUS.lua
-Locale-deDE.lua
-Locale-zhTW.lua
+Localization\Locale-enUS.lua
+Localization\Locale-deDE.lua
+Localization\Locale-zhTW.lua
 
 FBagOfHolding.xml
 

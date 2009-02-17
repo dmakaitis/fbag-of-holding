@@ -1,4 +1,6 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("FBoH", "zhTW")
+﻿-- Translation by romelden, on the Curse forums.
+
+local L = LibStub("AceLocale-3.0"):NewLocale("FBoH", "zhTW")
 if not L then return end;
 
 L["Feithar's Bag of Holding"] = true;	-- Full Title
