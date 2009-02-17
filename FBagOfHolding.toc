@@ -7,7 +7,7 @@
 ## X-Category: Inventory
 ## OptionalDeps: Ace2, DewdropLib, Ace3, FuBar, LibCrayon-3.0, WoWUnit
 ## X-Embeds: Ace2, DewdropLib, Ace3, LibCrayon-3.0
-## X-Credits: Inspired by Antiarc's SanityBags. Code for LibTipHooker and LibFuBarPlugin-Mod borrowed from Whitetooth's RatingBuster and Antiarc's Omen, respectively. Translations: zhltr (German)
+## X-Credits: Inspired by Antiarc's SanityBags. Code for LibTipHooker and LibFuBarPlugin-Mod borrowed from Whitetooth's RatingBuster and Antiarc's Omen, respectively. Translations: zhltr (German), romelden (Chinese)
 ## X-AceForum: 13670
 ## Notes: Inventory and bank organizer.
   
