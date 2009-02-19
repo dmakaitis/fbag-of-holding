@@ -9,7 +9,7 @@ local Dewdrop = AceLibrary("Dewdrop-2.0");
 
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
- FBoH_SetVersion("$Revision$");
+FBoH_SetVersion("$Revision$");
 
 local FBOH_VERSION = "0.9";
 

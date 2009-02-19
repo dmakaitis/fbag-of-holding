@@ -1,6 +1,5 @@
 local _SafeCall = FBoH._SafeCall;
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
-local Dewdrop = AceLibrary("Dewdrop-2.0");
 
 FBoH_SetVersion("$Revision: 96 $");
 FBoH_SetVersion = nil;

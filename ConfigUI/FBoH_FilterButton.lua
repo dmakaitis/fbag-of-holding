@@ -1,5 +1,6 @@
 local _SafeCall = FBoH._SafeCall;
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
+local Dewdrop = AceLibrary("Dewdrop-2.0");
 
 FBoH_SetVersion("$Revision: 96 $");
 
@@ -18,7 +19,7 @@ function P:BuildDewdropMenuTable(options)
 			
 			if type(v.value) == "table" then
 				newEntry.hasArrow = true;
-				newEntry.subMenu = self:BuildDewdropMenuTable(v.value);
+				newEntry.subMenu = P.BuildDewdropMenuTable(self, v.value);
 			else
 				newEntry.func = FBoH_FilterButtonArgBtn_SetValue;
 				newEntry.arg1 = self;
