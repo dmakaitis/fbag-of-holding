@@ -2,6 +2,8 @@ local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
 FBoH_SetVersion("$Revision$");
 
+local _SafeCall = FBoH._SafeCall;
+
 --*****************************************************************************
 -- Command implementation
 --*****************************************************************************
@@ -74,14 +76,16 @@ function _GetBagHookChoices(self)
 	
 	rVal["blizzard"] = L["- Blizzard Default -"];
 	
-	for _, v in ipairs(self.db.profile.viewDefs) do
-		for _, t in ipairs(v.tabs) do
-			if t.filter ~= "default" then
-				rVal[tostring(t.id)] = t.name;
+	_SafeCall(function()
+		for _, v in ipairs(self.db.profile.viewDefs) do
+			for _, t in ipairs(v.tabs) do
+				if t.filter ~= "default" then
+					rVal[tostring(t.id)] = t.name;
+				end
 			end
 		end
-	end
-
+	end);
+	
 	rVal["default"] = L["- FBoH Main Bag -"];
 	
 	return rVal;

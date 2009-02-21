@@ -16,25 +16,13 @@ local FBOH_VERSION = "0.9";
 local defaults = {
 	profile = {
 		gridScale = 1.0,
-		hookOpenAllBags = true;
-		hookToggleBackpack = true;
+		hookOpenAllBags = true,
+		hookToggleBackpack = true,
 		hookToggleBags = {
 			"default",
 			"default",
 			"default",
 			"default",
-		},
-	},
-};
-
-local defaultViewDefinitions = {
-	{
-		activeTab = 1,
-		tabs = {
-			{
-				name = L["Main Bag"],
-				filter = "default"
-			},
 		},
 	},
 };
@@ -73,22 +61,6 @@ FBoH._SafeCall = _SafeCall;
 --*****************************************************************************
 -- Private Methods
 --*****************************************************************************
-
--- Simple shallow copy for copying defaults
-local
-function _CopyTable(src, dest)
-	if type(dest) ~= "table" then dest = {} end
-	if type(src) == "table" then
-		for k,v in pairs(src) do
-			if type(v) == "table" then
-				-- try to index the key first so that the metatable creates the defaults, if set, and use that table
-				v = _CopyTable(v, dest[k])
-			end
-			dest[k] = v
-		end
-	end
-	return dest
-end
 
 local
 function _DewdropMenuPoint(frame)

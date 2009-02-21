@@ -1,121 +1,10 @@
-FBOH_ITEMS_DB_VERSION = "0.03.01";
+FBOH_ITEMS_DB_VERSION = "0.03.02";
 
 FBoH_SetVersion("$Revision$");
 
 FBoH_Items = FBoH_Items or {};
 FBoH_ItemDB = {};
-FBoH_ItemTypes = FBoH_ItemTypes or {
-	["Quiver"] = {
-		["Quiver"] = 1,
-	},
-	["Container"] = {
-		["Soul Bag"] = 1,
-		["Bag"] = 1,
-		["Leatherworking Bag"] = 1,
-		["Inscription Bag"] = 1,
-	},
-	["Glyph"] = {
-		["Warrior"] = 1,
-		["Druid"] = 1,
-		["Shaman"] = 1,
-		["Rogue"] = 1,
-		["Mage"] = 1,
-		["Priest"] = 1,
-		["Warlock"] = 1,
-	},
-	["Trade Goods"] = {
-		["Other"] = 1,
-		["Elemental"] = 1,
-		["Parts"] = 1,
-		["Jewelcrafting"] = 1,
-		["Meat"] = 1,
-		["Explosives"] = 1,
-		["Devices"] = 1,
-		["Leather"] = 1,
-		["Armor Enchantment"] = 1,
-		["Materials"] = 1,
-		["Herb"] = 1,
-		["Cloth"] = 1,
-		["Weapon Enchantment"] = 1,
-		["Metal & Stone"] = 1,
-		["Enchanting"] = 1,
-	},
-	["Miscellaneous"] = {
-		["Other"] = 1,
-		["Reagent"] = 1,
-		["Junk"] = 1,
-		["Holiday"] = 1,
-		["Pet"] = 1,
-	},
-	["Recipe"] = {
-		["Tailoring"] = 1,
-		["Blacksmithing"] = 1,
-		["Jewelcrafting"] = 1,
-		["First Aid"] = 1,
-		["Book"] = 1,
-		["Cooking"] = 1,
-		["Engineering"] = 1,
-		["Leatherworking"] = 1,
-		["Alchemy"] = 1,
-		["Enchanting"] = 1,
-	},
-	["Consumable"] = {
-		["Other"] = 1,
-		["Bandage"] = 1,
-		["Scroll"] = 1,
-		["Flask"] = 1,
-		["Consumable"] = 1,
-		["Potion"] = 1,
-		["Elixir"] = 1,
-		["Food & Drink"] = 1,
-		["Item Enhancement"] = 1,
-	},
-	["Key"] = {
-		["Key"] = 1,
-	},
-	["Armor"] = {
-		["Leather"] = 1,
-		["Idols"] = 1,
-		["Shields"] = 1,
-		["Mail"] = 1,
-		["Cloth"] = 1,
-		["Plate"] = 1,
-		["Sigils"] = 1,
-		["Miscellaneous"] = 1,
-	},
-	["Projectile"] = {
-		["Arrow"] = 1,
-	},
-	["Gem"] = {
-		["Simple"] = 1,
-		["Purple"] = 1,
-		["Blue"] = 1,
-		["Green"] = 1,
-		["Prismatic"] = 1,
-		["Yellow"] = 1,
-		["Orange"] = 1,
-		["Red"] = 1,
-	},
-	["Quest"] = {
-		["Quest"] = 1,
-	},
-	["Weapon"] = {
-		["One-Handed Axes"] = 1,
-		["Two-Handed Maces"] = 1,
-		["Fishing Poles"] = 1,
-		["Daggers"] = 1,
-		["Two-Handed Swords"] = 1,
-		["Miscellaneous"] = 1,
-		["Polearms"] = 1,
-		["Staves"] = 1,
-		["Guns"] = 1,
-		["One-Handed Swords"] = 1,
-		["Bows"] = 1,
-		["Wands"] = 1,
-		["One-Handed Maces"] = 1,
-		["Two-Handed Axes"] = 1,
-	},
-};
+FBoH_ItemTypes = FBoH_ItemTypes or {};
 
 --[[
 
@@ -260,6 +149,12 @@ function _UpgradeFrom0_03_00(self)
 end
 
 local
+function _UpgradeFrom0_03_01(self)
+	FBoH_ItemTypes = {};
+	self.items.version = "0.03.02";
+end
+
+local
 function _CleanDatabase(self)
 	local details = self.items.details;
 	for k, v in pairs(details) do
@@ -398,6 +293,9 @@ function FBoH_ItemDB:CheckVersion()
 		end
 		if self.items.version == "0.03.00" then
 			_UpgradeFrom0_03_00(self);
+		end
+		if self.items.version == "0.03.01" then
+			_UpgradeFrom0_03_01(self);
 		end
 	end
 	

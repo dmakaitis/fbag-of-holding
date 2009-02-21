@@ -1,3 +1,5 @@
+local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
+
 FBoH_SetVersion("$Revision: 94 $");
 
 local _SafeCall = FBoH._SafeCall;
@@ -5,6 +7,34 @@ local _SafeCall = FBoH._SafeCall;
 --*****************************************************************************
 -- Private Methods
 --*****************************************************************************
+
+local defaultViewDefinitions = {
+	{
+		activeTab = 1,
+		tabs = {
+			{
+				name = L["Main Bag"],
+				filter = "default"
+			},
+		},
+	},
+};
+
+-- Simple shallow copy for copying defaults
+local
+function _CopyTable(src, dest)
+	if type(dest) ~= "table" then dest = {} end
+	if type(src) == "table" then
+		for k,v in pairs(src) do
+			if type(v) == "table" then
+				-- try to index the key first so that the metatable creates the defaults, if set, and use that table
+				v = _CopyTable(v, dest[k])
+			end
+			dest[k] = v
+		end
+	end
+	return dest
+end
 
 local
 function _RenumberViewIDs(self)
@@ -124,11 +154,11 @@ end
 function FBoH:DockView(sourceView, targetView, targetTab)
 	_SafeCall(function()
 		if sourceView == targetView then
---		self:Print("Can not dock view " .. sourceView .. " into itself!");
+			self:Debug("Can not dock view " .. sourceView .. " into itself!");
 			return;
 		end
 		
---	self:Print("Docking view " .. sourceView .. " into view " .. targetView .. " after tab " .. targetTab);
+		self:Debug("Docking view " .. sourceView .. " into view " .. targetView .. " after tab " .. targetTab);
 		
 		FBoH_Configure:Hide();
 		
@@ -147,21 +177,21 @@ function FBoH:DockView(sourceView, targetView, targetTab)
 		for i = 1, targetTab do
 			table.insert(newTabs, newView.viewDef.tabs[i]);
 			table.insert(newTabData, newView.tabData[i]);
---		self:Print("Added tab " .. tabCount .. " from target view");
+			self:Debug("Added tab " .. tabCount .. " from target view");
 			tabCount = tabCount + 1;
 		end
 		
 		for i, t in ipairs(oldView.viewDef.tabs) do
 			table.insert(newTabs, t);
 			table.insert(newTabData, oldView.tabData[i]);
---		self:Print("Added tab " .. tabCount .. " from source view");
+			self:Debug("Added tab " .. tabCount .. " from source view");
 			tabCount = tabCount + 1;
 		end
 		
 		for i = targetTab + 1, #(newView.viewDef.tabs) do
 			table.insert(newTabs, newView.viewDef.tabs[i]);
 			table.insert(newTabData, newView.tabData[i]);
---		self:Print("Added tab " .. tabCount .. " from target view");
+			self:Debug("Added tab " .. tabCount .. " from target view");
 			tabCount = tabCount + 1;
 		end
 		
@@ -181,7 +211,7 @@ function FBoH:DockView(sourceView, targetView, targetTab)
 end
 
 function FBoH:UndockView(sourceView, sourceTab)
---	self:Print("Undocking tab " .. sourceTab .. " from the view " .. sourceView);
+	self:Debug("Undocking tab " .. sourceTab .. " from the view " .. sourceView);
 
 	FBoH_Configure:Hide();
 	
@@ -190,7 +220,7 @@ function FBoH:UndockView(sourceView, sourceTab)
 	local tabData = table.remove(self.bagViews[sourceView].tabData, sourceTab);
 	self.bagViews[sourceView]:SelectTab(1);
 	
---	self:Print(#(self.db.profile.viewDefs[sourceView].tabs) .. " tabs remaining in source view");
+	self:Debug(#(self.db.profile.viewDefs[sourceView].tabs) .. " tabs remaining in source view");
 	
 	-- Create a new bag
 	local newViewDef = {
