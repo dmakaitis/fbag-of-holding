@@ -1,9 +1,10 @@
 local _SafeCall = FBoH._SafeCall;
 
+
 local Dewdrop = AceLibrary("Dewdrop-2.0");
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
-FBoH_SetVersion("$Revision: 77 $");
+FBoH_SetVersion("$Revision$");
 
 function FBoH_ViewTabTemplate_OpenMenu(self)
 	_SafeCall(function()

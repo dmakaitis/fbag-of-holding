@@ -1,7 +1,7 @@
 local _SafeCall = FBoH._SafeCall;
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
-FBoH_SetVersion("$Revision: 96 $");
+FBoH_SetVersion("$Revision$");
 
 local FBOH_GROUP_FRAME_ID = 1;
 

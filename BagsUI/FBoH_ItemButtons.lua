@@ -2,7 +2,7 @@ local _SafeCall = FBoH._SafeCall;
 
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
-FBoH_SetVersion("$Revision: 77 $");
+FBoH_SetVersion("$Revision$");
 
 ---------------------------------------------------------------------
 -- Local functions and fields

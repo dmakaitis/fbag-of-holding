@@ -1,7 +1,7 @@
 local _SafeCall = FBoH._SafeCall;
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
-FBoH_SetVersion("$Revision: 96 $");
+FBoH_SetVersion("$Revision$");
 FBoH_SetVersion = nil;
 
 FBOH_CONFIG_TITLE = L["Configure Bag View"];

@@ -20,7 +20,7 @@ function FBoH_GetVersion()
 	return FBoH_Version;
 end
 
-FBoH_SetVersion("$Revision: 1 $");
+FBoH_SetVersion("$Revision$");
 
 -- The rest of this is for FOO proper
 

@@ -1,6 +1,6 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
-FBoH_SetVersion("$Revision: 94 $");
+FBoH_SetVersion("$Revision$");
 
 local _SafeCall = FBoH._SafeCall;
 
