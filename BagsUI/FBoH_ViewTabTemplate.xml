@@ -1,0 +1,262 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+	<Script file="FBoH_ViewTabTemplate.lua">
+	</Script>
+
+	<Frame name="FBoH_DockRegionTemplate" virtual="true" hidden="true">
+		<Size>
+			<AbsDimension x="0" y="32"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parent_Highlight" file="Interface\ChatFrame\UI-ChatFrame-DockHighlight" alphaMode="ADD">
+					<Size>
+						<AbsDimension x="32" y="32"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="-15" y="-6"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<Color r="1.0" g="0" b="0"/> 
+				</Texture>
+			</Layer>
+		</Layers>
+	</Frame>
+
+	<Button name="FBoH_ViewTabTemplate" virtual="true" hidden="true" toplevel="true" frameStrata="HIGH" enableMouse="true" clampedToScreen="false">
+		<Size>
+			<AbsDimension x="96" y="32"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentLeft" file="Interface\HelpFrame\HelpFrameTab-Active">
+					<Size>
+						<AbsDimension x="16" y="32"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+					<TexCoords left="0.0" right="0.25" top="0.0" bottom="1.0"/>
+				</Texture>
+				<Texture name="$parentRight" file="Interface\HelpFrame\HelpFrameTab-Active">
+					<Size>
+						<AbsDimension x="16" y="32"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPRIGHT"/>
+					</Anchors>
+					<TexCoords left="0.75" right="1.0" top="0.0" bottom="1.0"/>
+				</Texture>
+				<Texture name="$parentMiddle" file="Interface\HelpFrame\HelpFrameTab-Active">
+					<Size>
+						<AbsDimension x="76" y="32"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
+						<Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"/>
+					</Anchors>
+					<TexCoords left="0.25" right="0.75" top="0.0" bottom="1.0"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Frame name="$parentFlash" hidden="true">
+				<Size>
+					<AbsDimension x="5" y="32"/>
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentLeft">
+						<Offset>
+							<AbsDimension x="0" y="-7"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="RIGHT" relativeTo="$parentRight">
+						<Offset>
+							<AbsDimension x="0" y="-7"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD" setAllPoints="true"/>
+					</Layer>
+				</Layers>
+			</Frame>
+			<Frame name="$parentDropDown" inherits="UIDropDownMenuTemplate" id="2" hidden="true">
+				<Anchors>
+					<Anchor point="TOP">
+						<Offset>
+							<AbsDimension x="-80" y="-35"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+--						FCFOptionsDropDown_OnLoad();
+					</OnLoad>
+					<OnShow>
+--						FCFOptionsDropDown_OnLoad();
+					</OnShow>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentDockRegion" inherits="FBoH_DockRegionTemplate" id="1">
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="0" y="-16"/>
+						</Offset>
+					</Anchor>
+				</Anchors>				
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.UpdateTabModel = FBoH_ViewTabTemplate_UpdateTabModel;
+				self.OpenMenu = FBoH_ViewTabTemplate_OpenMenu;
+				
+				self.dockRegion = FBoH_GetChildObjectByID(self, 1);
+				
+				self:RegisterForClicks("LeftButtonDown", "LeftButtonUp", "RightButtonUp");
+				self:RegisterForDrag("LeftButton");
+			</OnLoad>
+			<OnClick>
+				PlaySound("UChatScrollButton");
+				self.tabModel.viewModel:SelectTab(self.tabModel.tabIndex);
+				if arg1 == "RightButton" then
+					self:OpenMenu()
+				end
+			</OnClick>
+			<OnEnter>
+				GameTooltip_AddNewbieTip(self, "Bag View Options", 1.0, 1.0, 1.0, NEWBIE_TOOLTIP_CHATOPTIONS, 1);
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
+			<OnDragStart>
+				if self.tabModel == nil then
+					FBoH:Print("ERROR: No bag model to move for tab: " .. self:GetName());
+					return;
+				end;
+				
+				local x = self:GetLeft() - 2;
+				local y = self:GetBottom();
+				local viewFrame = nil;
+				
+				if self.tabModel.tabIndex == 1 then
+					viewFrame = self.tabModel.viewModel.view;
+				else
+					local tabIndex = self.tabModel.tabIndex;
+					local viewIndex = self.tabModel.viewModel.viewIndex;
+					
+					local newViewModel = FBoH:UndockView(viewIndex, tabIndex);
+					viewFrame = newViewModel.view;
+				end
+				
+				if viewFrame then
+					-- Reposition and display the frame in case it is currently docked and hidden:
+					viewFrame:ClearAllPoints();				
+					viewFrame:SetPoint("TOPLEFT", nil, "BOTTOMLEFT", x, y);
+					viewFrame:Show();
+					
+					viewFrame.isMoving = true;
+					viewFrame:StartMoving();
+					
+					FBoH_MOVING_BAG_VIEW = viewFrame;
+				end
+			</OnDragStart>
+			<OnDragStop>
+				if self.tabModel == nil then
+					return;
+				end;
+				
+				local viewFrame = self.tabModel.viewModel.view;
+				if viewFrame.isMoving then
+					viewFrame:StopMovingOrSizing();
+					viewFrame.isMoving = false;
+					self.tabModel.viewModel:SaveFramePosition();
+					FBoH_MOVING_BAG_VIEW = nil;
+					
+					if FBoH_DOCK_TO_VIEW and MouseIsOver(FBoH_DOCK_TO_VIEW.dockRegion) then
+						local viewIndex = viewFrame.viewModel.viewIndex;						
+						FBoH:DockView(viewIndex, FBoH_DOCK_TO_VIEW.viewIndex, FBoH_DOCK_TO_VIEW.tabIndex);
+					end
+					FBoH_DOCK_TO_VIEW = nil;
+				end
+			</OnDragStop>
+			<OnUpdate>
+				-- This is necessary because if we break off a tab, 
+				-- WoW won't send us an OnDragStop event
+				
+				local viewFrame = self.tabModel.viewModel.view;			
+				if viewFrame.isMoving then
+					if IsMouseButtonDown("LeftButton") ~= 1 then
+						viewFrame:StopMovingOrSizing();
+						viewFrame.isMoving = false;
+						self.tabModel.viewModel:SaveFramePosition();
+						FBoH_MOVING_BAG_VIEW = nil;
+					
+						if FBoH_DOCK_TO_VIEW and MouseIsOver(FBoH_DOCK_TO_VIEW.dockRegion) then
+							local viewIndex = viewFrame.viewModel.viewIndex;						
+							FBoH:DockView(viewIndex, FBoH_DOCK_TO_VIEW.viewIndex, FBoH_DOCK_TO_VIEW.tabIndex);
+						end
+						FBoH_DOCK_TO_VIEW = nil;
+					end
+				end
+				
+				if MouseIsOver(self.dockRegion) and FBoH_MOVING_BAG_VIEW then
+					-- Make sure we're not somehow over ourselves (can be caused
+					-- by video/ui lag)
+					if FBoH_MOVING_BAG_VIEW.viewModel.viewIndex ~= self.tabModel.viewModel.viewIndex then
+						FBoH_DOCK_TO_VIEW = FBoH_DOCK_TO_VIEW or {};
+						FBoH_DOCK_TO_VIEW.viewIndex = self.tabModel.viewModel.viewIndex;
+						FBoH_DOCK_TO_VIEW.tabIndex = self.tabModel.tabIndex;
+						FBoH_DOCK_TO_VIEW.dockRegion = self.dockRegion;
+					
+						self.dockRegion:Show();
+					else
+						self.dockRegion:Hide();
+					end
+				else
+					self.dockRegion:Hide();
+				end
+			</OnUpdate>
+		</Scripts>
+		<ButtonText name="$parentText">
+			<Size>
+				<AbsDimension x="50" y="8"/>
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT">
+					<Offset>
+						<AbsDimension x="0" y="-5"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT">
+					<Offset>
+						<AbsDimension x="0" y="-5"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontNormalSmall"/>
+		<HighlightFont style="GameFontHighlightSmall"/>
+		<DisabledFont style="GameFontHighlightSmall"/>
+		<HighlightTexture file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="LEFT" relativeTo="$parentLeft">
+					<Offset>
+						<AbsDimension x="0" y="-7"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="RIGHT" relativeTo="$parentRight">
+					<Offset>
+						<AbsDimension x="0" y="-7"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+	</Button>
+	
+</Ui>

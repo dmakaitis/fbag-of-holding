@@ -23,6 +23,7 @@ FBagOfHolding.xml
 
 BagsUI\FBoH_ItemTooltip.xml
 BagsUI\FBoH_ItemButtons.xml
+BagsUI\FBoH_ViewTabTemplate.xml
 BagsUI\FBoH_Templates.xml
 
 ConfigUI\FBoH_HorizontalInsertTemplate.xml
