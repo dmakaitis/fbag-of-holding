@@ -11,7 +11,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
 FBoH_SetVersion("$Revision$");
 
-local FBOH_VERSION = "0.9";
+local FBOH_VERSION = "1.0";
 
 local defaults = {
 	profile = {

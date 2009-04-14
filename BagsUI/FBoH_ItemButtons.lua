@@ -156,9 +156,9 @@ function _FBoH_GridItemButton_SetAltItem(aFrame, item)
 		aFrame.hasItem = nil;
 		
 		if (quality == nil) or (quality < 0) then quality = 0 end
-		local r = FBoH_QualityColors[quality + 1]
-		
-		aFrame.normal_tex:SetVertexColor(r[1], r[2], r[3])
+		local r, g, b = GetItemQualityColor(quality);
+
+		aFrame.normal_tex:SetVertexColor(r, g, b)
 		aFrame.normal_tex:SetAlpha(0.5)
 		aFrame.tex:SetAlpha(0.5);
 	end);
@@ -230,9 +230,9 @@ function _FBoH_GridItemButton_SetContainerItem(cFrame, item)
 		end
 
 		if (quality == nil) or (quality < 0) then quality = 0 end
-		local r = FBoH_QualityColors[quality + 1]
-		
-		itemFrame.normal_tex:SetVertexColor(r[1], r[2], r[3])
+		local r, g, b = GetItemQualityColor(quality);	
+	
+		itemFrame.normal_tex:SetVertexColor(r, g, b)
 		itemFrame.tex:SetAlpha(1.0)
 
 		itemFrame.readable = readable

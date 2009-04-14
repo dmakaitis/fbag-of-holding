@@ -962,9 +962,9 @@ function FBoH_GridItemButton_SetContainerItem(cFrame, item)
 	end
 
 	if (quality == nil) or (quality < 0) then quality = 0 end
-	local r = FBoH_QualityColors[quality + 1]
+	local r, g, b = GetItemQualityColor(quality);
 	
-	itemFrame.normal_tex:SetVertexColor(r[1], r[2], r[3])
+	itemFrame.normal_tex:SetVertexColor(r, g, b)
 	itemFrame.tex:SetAlpha(1.0)
 
 	itemFrame.readable = readable

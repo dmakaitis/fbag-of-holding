@@ -3,15 +3,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
 FBoH_SetVersion("$Revision$");
 
-FBoH_QualityColors = {
-	{157/255, 157/255, 157/255},
-	{255/255, 255/255, 255/255},
-	{30/255, 255/255, 0/255},
-	{0/255, 112/255, 221/255},
-	{163/255, 53/255, 238/255},
-	{255/255, 128/255, 0/255}
-};
-
 function FBoH_GetChildObjectByID(frame, id)
 	local children = { frame:GetChildren(); };
 	for _, v in ipairs(children) do
