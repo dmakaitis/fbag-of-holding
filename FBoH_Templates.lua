@@ -3,15 +3,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
 
 FBoH_SetVersion("$Revision$");
 
-FBoH_QualityColors = {
-	{157/255, 157/255, 157/255},
-	{255/255, 255/255, 255/255},
-	{30/255, 255/255, 0/255},
-	{0/255, 112/255, 221/255},
-	{163/255, 53/255, 238/255},
-	{255/255, 128/255, 0/255}
-};
-
 function FBoH_GetChildObjectByID(frame, id)
 	local children = { frame:GetChildren(); };
 	for _, v in ipairs(children) do
@@ -865,9 +856,9 @@ function FBoH_GridItemButton_SetAltItem(aFrame, item)
 	aFrame.hasItem = nil;
 	
 	if (quality == nil) or (quality < 0) then quality = 0 end
-	local r = FBoH_QualityColors[quality + 1]
+	local r, g, b = GetItemQualityColor(quality);
 	
-	aFrame.normal_tex:SetVertexColor(r[1], r[2], r[3])
+	aFrame.normal_tex:SetVertexColor(r, g, b)
 	aFrame.normal_tex:SetAlpha(0.5)
 	aFrame.tex:SetAlpha(0.5);
 end

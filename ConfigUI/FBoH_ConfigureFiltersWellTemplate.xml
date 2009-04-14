@@ -184,7 +184,24 @@
 					cursorY = cursorY / UIParent:GetEffectiveScale();
 					
 					if top > cursorY then
+						local btn = self.lastRowButton;
+						
 						dragData.target = self;
+						dragData.target = btn;
+						dragData.insert = "above";
+						
+						btn.insertTop:Show();
+						btn.insertGroup:Hide();
+				
+						btn.fontString:Show();
+						if btn.filterOptions then
+							btn.argEdit:Hide();
+							btn.argButton:Show();
+						else
+							btn.argEdit:Show();
+							btn.argButton:Hide();
+						end
+						btn.notButton:Show();
 					end
 				end
 			</OnUpdate>
