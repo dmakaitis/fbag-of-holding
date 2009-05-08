@@ -222,7 +222,7 @@ end
 --   supers(class)
 --------------------------------------------------------------------------------
 
-local multiple = FOO
+local multiple = {}
 
 fooTable.copy(simple, multiple)
 
@@ -294,12 +294,12 @@ end
 --------------------------------------------------------------------------
 -- OrderedSet
 --------------------------------------------------------------------------
---[[
+
 local FIRST = newproxy()
 local LAST = newproxy()
 
 local OrderedSet = base.class{}
-
+--[[
 local function iterator(self, previous)
 	return self[previous], previous
 end
@@ -307,7 +307,7 @@ end
 function OrderedSet.sequence(self)
 	return iterator, self, FIRST
 end
-
+]]
 function OrderedSet.contains(self, element)
 	return element ~= nil and (self[element] ~= nil or element == self[LAST])
 end
@@ -315,7 +315,7 @@ end
 function OrderedSet.first(self)
 	return self[FIRST]
 end
-
+--[[
 function OrderedSet.last(self)
 	return self[LAST]
 end
@@ -400,9 +400,9 @@ function OrderedSet.popfront(self)
 	end
 	return element
 end
-
+]]
 function OrderedSet.pushback(self, element)
-	if element ~= nil and not contains(self, element) then
+	if element ~= nil and not OrderedSet.contains(self, element) then
 		if self[LAST] ~= nil
 			then self[ self[LAST] ] = element
 			else self[FIRST] = element
@@ -431,7 +431,7 @@ OrderedSet.head = OrderedSet.first
 OrderedSet.tail = OrderedSet.last
 
 OrderedSet.firstkey = FIRST
-]]
+
 --------------------------------------------------------------------------------
 -- CACHED
 --
@@ -448,7 +448,7 @@ OrderedSet.firstkey = FIRST
 --   supers(class)
 --   allmembers(class)
 --------------------------------------------------------------------------------
---[[
+
 local cached = FOO
 
 fooTable.copy(multiple, cached)
@@ -504,7 +504,7 @@ function CachedClass:updatehierarchy(...)
 	local supers = {}
 	for i = 1, select("#", ...) do
 		local super = select(i, ...)
-		local cached = getclass(super)
+		local cached = cached.getclass(super)
 		if cached
 			then caches[#caches + 1] = cached
 			else supers[#supers + 1] = super
@@ -528,7 +528,7 @@ end
 
 function CachedClass:updateinheritance()
 	-- relink all affected classes
-	for sub in subs(self) do
+	for sub in cached.subs(self) do
 		sub:updatemembers()
 		sub:updatesuperclasses()
 	end
@@ -553,29 +553,29 @@ function CachedClass:updatesuperclasses()
 	end
 	-- copy inherited uncached superclasses
 	for _, cached in ipairs(self.supers) do
-		for _, super in base.supers(cached.class) do
+		for _, super in multiple.supers(cached.class) do
 			if not uncached[super] then
 				uncached[super] = true
 				uncached[#uncached + 1] = super
 			end
 		end
 	end
-	base.class(self.class, unpack(uncached))
+	multiple.class(self.class, unpack(uncached))
 end
 
 function CachedClass:updatemembers()
-	local class = table.clear(self.class)
+	local class = fooTable.clear(self.class)
 	for i = #self.supers, 1, -1 do
 		local super = self.supers[i].class
 		-- copy inherited members
-		table.copy(super, class)
+		fooTable.copy(super, class)
 		-- do not copy the default __index value
 		if rawget(class, "__index") == super then
 			rawset(class, "__index", nil)
 		end
 	end
 	-- copy members defined in the class
-	table.copy(self.members, class)
+	fooTable.copy(self.members, class)
 	-- set the default __index value
 	if rawget(class, "__index") == nil then
 		rawset(class, "__index", class)
@@ -618,7 +618,106 @@ function CachedClass:updatefield(name, member)
 	end
 	return old
 end
-]]
+
+function cached.class(class, ...)
+	class = cached.getclass(class) or CachedClass(class)
+	class:updatehierarchy(...)
+	class:updateinheritance()
+	return class.proxy
+end
+
+function cached.rawnew(class, object)
+	local c = cached.getclass(class)
+	if c then class = c.class end
+	return multiple.rawnew(class, object)
+end
+
+function cached.new(class, ...)
+	if class.__init
+		then return class:__init(...)
+		else return cached.rawnew(class, ...)
+	end
+end
+
+function cached.classof(object)
+	local class = multiple.classof(object)
+	return ClassMap[class] or class
+end
+
+function cached.isclass(class)
+	return cached.getclass(class) ~= nil
+end
+
+function cached.superclass(class)
+	local supers = {}
+	local c = cached.getclass(class)
+	if c then
+		for index, super in ipairs(c.supers) do
+			supers[index] = super.proxy
+		end
+		class = c.class
+	end
+	for _, super in multiple.supers(class) do
+		supers[#supers + 1] = super
+	end
+	return unpack(supers)
+end
+
+local function icached(cached, index)
+	local super
+	local supers = cached.supers
+	index = index + 1
+	-- check if index points to a cached superclass
+	super = supers[index]
+	if super then return index, super.proxy end
+	-- check if index points to an uncached superclass
+	super = cached.uncached[index - #supers]
+	if super then return index, super end
+end
+function cached.supers(class)
+	local cached = cached.getclass(class)
+	if cached
+		then return icached, cached, 0
+		else return multiple.supers(class)
+	end
+end
+
+function cached.subclassof(class, super)
+	if class == super then return true end
+	for _, superclass in cached.supers(class) do
+		if cached.subclassof(superclass, super) then return true end
+	end
+	return false
+end
+
+function cached.instanceof(object, class)
+	return cached.subclassof(cached.classof(object), class)
+end
+
+function cached.memberof(class, name)
+	local c = cached.getclass(class)
+	if c
+		then return c.members[name]
+		else return multiple.member(class, name)
+	end
+end
+--------------------------------------------------------------------------------
+function cached.members(class)
+	local c = getclass(class)
+	if c
+		then return pairs(c.members)
+		else return multiple.members(class)
+	end
+end
+--------------------------------------------------------------------------------
+function cached.allmembers(class)
+	local c = getclass(class)
+	if c
+		then return pairs(c.class)
+		else return multiple.members(class)
+	end
+end
+
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
