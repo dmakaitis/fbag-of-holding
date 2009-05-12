@@ -21,6 +21,10 @@ Localization\Locale-enUS.lua
 Localization\Locale-deDE.lua
 Localization\Locale-zhTW.lua
 
+InitUnitTests.lua
+
+Classes\Classes.xml
+
 FBagOfHolding.xml
 
 BagsUI\FBoH_ItemTooltip.xml
