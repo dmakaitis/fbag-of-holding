@@ -239,23 +239,73 @@ FBoH_UnitTests.SearchCollector = {
 		local bagType = "Type";
 		local bagIndex = 1;
 		
-		local itemCache = {
+		local itemCache = FBoH_Classes.ItemDetailCache{
 			sessionStart = 0;
 			details = {
-			
+				["KeyA"] = {
+					itemLink = "ItemLinkA";
+					sorting = 5;
+				};
+				["KeyB"] = {
+					itemLink = "ItemLinkB";
+					sorting = 2;
+				};
+				["KeyC"] = {
+					itemLink = "ItemLinkC";
+					sorting = 4;
+				};
+				["KeyD"] = {
+					itemLink = "ItemLinkD";
+					sorting = 1;
+				};
+				["KeyE"] = {
+					itemLink = "ItemLinkE";
+					sorting = 3;
+				};
 			};
 		};
-
+		local newSlotIndexA = 4;
+		local newItemA = {
+			itemKey = "KeyA";
+			itemCount = 3;
+			lastUpdate = 12345;
+			soulbound = true;
+		};
+		
+		local expected = {
+			this = {
+				realm = realm;
+				character = character;
+				bagType = bagType;
+				bagIndex = bagIndex;
+				slotIndex = newSlotIndexA;
+				
+				lastUpdate = newItemA.lastUpdate;
+				itemKey = newItemA.itemKey;
+				itemCount = newItemA.itemCount;
+				soulbound = newItemA.soulbound;
+				
+				detail = itemCache.details[newItemA.itemKey];
+				itemLink = itemCache.details[newItemA.itemKey].itemLink;
+			};
+		};
+		
 		local s = SearchCollector{};
 		s:SetRealm(realm);
 		s:SetCharacter(character);
 		s:SetContainerType(bagType);
 		s:SetContainerIndex(bagIndex);
 		
+		s:CheckItem(newSlotIDA, newItemA);
+		
+		assertEquals(expected, s.results);
+		
 		s:SetRealm(nil);
 		s:SetCharacter(nil);
 		s:SetContainerType(nil);
-		s:SetContainerIndex(nil);		
+		s:SetContainerIndex(nil);
+		
+		assertEquals({}, currentItem);
 	end
 	
 };

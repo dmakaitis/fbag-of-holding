@@ -21,7 +21,7 @@ Localization\Locale-enUS.lua
 Localization\Locale-deDE.lua
 Localization\Locale-zhTW.lua
 
-InitUnitTests.lua
+InitAddon.lua
 
 Classes\Classes.xml
 
