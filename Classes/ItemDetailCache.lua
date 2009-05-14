@@ -20,8 +20,16 @@ function _GetItemKey(itemLink)
 end
 
 function ItemDetailCache:GetItemDetail(itemLink)
+	if type(itemLink) ~= "string" then error("GetItemDetail must have an item link as parameter #1", 2) end;
+	
 	local key = _GetItemKey(itemLink);
 	
+	local rVal = self:GetItemDetailWithKey(key);
+	
+	return rVal;
+end
+
+function ItemDetailCache:GetItemDetailWithKey(key)
 	self.sessionStart = self.sessionStart or time();
 	
 	local rVal = self.details[key];
@@ -31,7 +39,7 @@ function ItemDetailCache:GetItemDetail(itemLink)
 
 		local d = {};		
 		d.name, d.link, d.rarity, d.level, d.minlevel, d.type,
-			d.subtype, d.stackcount, d.equiploc, d.texture = self.getItemInfo(itemLink);
+			d.subtype, d.stackcount, d.equiploc, d.texture = self.getItemInfo("item:" .. key .. ":0");
 		
 		if d.name ~= nil then
 			d.lastUpdate = time();
@@ -95,6 +103,7 @@ FBoH_UnitTests.ItemDetailCache = {
 	end;
 	
 	testGetItemDetailUncached = function()
+		local itemString = "item:00000:0:2740:3111:0:0:0:0";
 		local link = "|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:13|h[Imaginary Belt of Blasting]|h|r";
 		local key = "00000:0:2740:3111:0:0:0";
 		local expected = {
@@ -105,7 +114,7 @@ FBoH_UnitTests.ItemDetailCache = {
 			["equiploc"] = "INVTYPE_WAIST",
 			["name"] = "Imaginary Belt of Blasting",
 			["lastUpdate"] = 1234020812,
-			["link"] = "|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:13|h[Imaginary Belt of Blasting]|h|r",
+			["link"] = "|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:0|h[Imaginary Belt of Blasting]|h|r",
 			["level"] = 128,
 			["stackcount"] = 1,
 			["texture"] = "Interface\\Icons\\INV_Belt_13",
@@ -113,13 +122,13 @@ FBoH_UnitTests.ItemDetailCache = {
 		local detailCache = {
 		};
 		local getItemInfo = function(itemLink)
-			if itemLink == link then
+			if itemLink == itemString then
 				return	"Imaginary Belt of Blasting", 
-						"|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:13|h[Imaginary Belt of Blasting]|h|r", 
+						"|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:0|h[Imaginary Belt of Blasting]|h|r", 
 						4, 128, 70, "Armor", "Cloth", 1, "INVTYPE_WAIST",
 						"Interface\\Icons\\INV_Belt_13"
 			else
-				return nil;
+				error("Called with wrong item string: " .. itemLink);
 			end;
 		end;
 		
@@ -132,6 +141,7 @@ FBoH_UnitTests.ItemDetailCache = {
 	end;
 	
 	testGetItemDetailOutdated = function()
+		local itemString = "item:00000:0:2740:3111:0:0:0:0";
 		local link = "|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:13|h[Imaginary Belt of Blasting]|h|r";
 		local key = "00000:0:2740:3111:0:0:0";
 		local expected = {
@@ -142,7 +152,7 @@ FBoH_UnitTests.ItemDetailCache = {
 			["equiploc"] = "INVTYPE_WAIST",
 			["name"] = "Imaginary Belt of Blasting",
 			["lastUpdate"] = 0,
-			["link"] = "|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:13|h[Imaginary Belt of Blasting]|h|r",
+			["link"] = "|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:0|h[Imaginary Belt of Blasting]|h|r",
 			["level"] = 128,
 			["stackcount"] = 1,
 			["texture"] = "Interface\\Icons\\INV_Belt_13",
@@ -151,9 +161,9 @@ FBoH_UnitTests.ItemDetailCache = {
 			[key] = expected;
 		};
 		local getItemInfo = function(itemLink)
-			if itemLink == link then
+			if itemLink == itemString then
 				return	"Imaginary Belt of Blasting", 
-						"|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:13|h[Imaginary Belt of Blasting]|h|r", 
+						"|cffa335ee|Hitem:00000:0:2740:3111:0:0:0:0:0|h[Imaginary Belt of Blasting]|h|r", 
 						4, 128, 70, "Armor", "Cloth", 1, "INVTYPE_WAIST",
 						"Interface\\Icons\\INV_Belt_13"
 			else
