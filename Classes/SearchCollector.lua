@@ -61,12 +61,18 @@ function _AddItem(item, results)
 end
 
 local
+function _DoCompare(sorter, a, b)
+	local pResult, rVal = pcall(sorter, a, b);
+	if pResult then return rVal else return false end;
+end
+
+local
 function _CompareItems(sorters, sorterIndex, a, b)
 	local s = sorters[sorterIndex];
 	if s == nil then return false end;
 	
-	if s(a, b) == true then return true end;
-	if s(b, a) == true then return false end;
+	if _DoCompare(s, a, b) == true then return true end;
+	if _DoCompare(s, a, b) == true then return false end;
 	
 	return _CompareItems(sorters, sorterIndex + 1, a, b);
 end
@@ -148,9 +154,12 @@ function SearchCollector:CheckItem(slotIndex, slotData)
 	self:SetProperty("detail", self.itemCache:GetItemDetailWithKey(slotData.key));
 	self:SetProperty("itemLink", currentItem.detail.link);
 	
-	if self.filter(currentItem, self.filterArg) == true then
-		self.results = self.results or {};
-		_AddToResults(self.sorters, self.results);
+	local pResult, rVal = pcall(self.filter, currentItem, self.filterArg);
+	if pResult == true then
+		if rVal == true then
+			self.results = self.results or {};
+			_AddToResults(self.sorters, self.results);
+		end
 	end
 	
 	self:SetProperty("slotIndex", nil);
@@ -334,6 +343,10 @@ FBoH_UnitTests.SearchCollector = {
 			return true;
 		end
 		
+		rVal.filterSoulbound = function(item, arg)
+			return (item.soulbound or false) == arg;
+		end
+		
 		rVal.sorter = function(a, b)
 			if a.detail.sorting < b.detail.sorting then return true else return false end;
 		end
@@ -346,6 +359,10 @@ FBoH_UnitTests.SearchCollector = {
 			local am = a.detail.sorting % 2;
 			local bm = b.detail.sorting % 2;
 			if am < bm then return true else return false end;
+		end
+		
+		rVal.throwError = function()
+			error("Random error");
 		end
 		
 		return rVal;
@@ -520,4 +537,145 @@ FBoH_UnitTests.SearchCollector = {
 		assertEquals({}, currentItem);
 	end;
 	
+	testCheckWithFilter = function(env)
+		local newSlotIndexA = 4;
+		local newItemA = env.items[newSlotIndexA];
+		local newSlotIndexB = 5;
+		local newItemB = env.items[newSlotIndexB];
+		local newSlotIndexC = 7;
+		local newItemC = env.items[newSlotIndexC];
+		local newSlotIndexD = 9;
+		local newItemD = env.items[newSlotIndexD];
+		local newSlotIndexE = 1;
+		local newItemE = env.items[newSlotIndexE];
+		
+		local expected = {
+			prev = {
+				this = env:BuildResult(newSlotIndexC, newItemC);
+				next = {
+					this = env:BuildResult(newSlotIndexD, newItemD);
+				};
+			};
+			this = env:BuildResult(newSlotIndexA, newItemA);
+		};
+		
+		local s = SearchCollector{
+			itemCache = env.itemCache;
+			filter = env.filterSoulbound;
+			filterArg = true;
+			sorters = env.sorter;
+		};
+		s:Reset();
+		s:SetProperty("realm", env.realm);
+		s:SetProperty("character", env.character);
+		s:SetProperty("bagType", env.bagType);
+		s:SetProperty("bagIndex", env.bagIndex);
+		
+		s:CheckItem(newSlotIndexA, newItemA);
+		s:CheckItem(newSlotIndexB, newItemB);
+		s:CheckItem(newSlotIndexC, newItemC);
+		s:CheckItem(newSlotIndexD, newItemD);
+		s:CheckItem(newSlotIndexE, newItemE);
+		
+		assertEquals(expected, s.results);
+		
+		s:Reset();
+		
+		assertEquals({}, currentItem);
+	end;
+
+	testCheckFiveItemsWithBadFilter = function(env)
+		local newSlotIndexA = 4;
+		local newItemA = env.items[newSlotIndexA];
+		local newSlotIndexB = 5;
+		local newItemB = env.items[newSlotIndexB];
+		local newSlotIndexC = 7;
+		local newItemC = env.items[newSlotIndexC];
+		local newSlotIndexD = 9;
+		local newItemD = env.items[newSlotIndexD];
+		local newSlotIndexE = 1;
+		local newItemE = env.items[newSlotIndexE];
+		
+		local expected = nil;
+		
+		local s = SearchCollector{
+			itemCache = env.itemCache;
+			filter = env.throwError;
+			sorters = env.sorter;
+		};
+		s:Reset();
+		s:SetProperty("realm", env.realm);
+		s:SetProperty("character", env.character);
+		s:SetProperty("bagType", env.bagType);
+		s:SetProperty("bagIndex", env.bagIndex);
+		
+		s:CheckItem(newSlotIndexA, newItemA);
+		s:CheckItem(newSlotIndexB, newItemB);
+		s:CheckItem(newSlotIndexC, newItemC);
+		s:CheckItem(newSlotIndexD, newItemD);
+		s:CheckItem(newSlotIndexE, newItemE);
+		
+		assertEquals(expected, s.results);
+		
+		s:Reset();
+		
+		assertEquals({}, currentItem);
+	end;
+
+	testCheckWithBadSorter = function(env)
+		local newSlotIndexA = 4;
+		local newItemA = env.items[newSlotIndexA];
+		local newSlotIndexB = 5;
+		local newItemB = env.items[newSlotIndexB];
+		local newSlotIndexC = 7;
+		local newItemC = env.items[newSlotIndexC];
+		local newSlotIndexD = 9;
+		local newItemD = env.items[newSlotIndexD];
+		local newSlotIndexE = 1;
+		local newItemE = env.items[newSlotIndexE];
+		
+		local expected = {
+			prev = {
+				prev = {
+					this = env:BuildResult(newSlotIndexC, newItemC);
+				};
+				this = env:BuildResult(newSlotIndexB, newItemB);
+				next = {
+					prev = {
+						this = env:BuildResult(newSlotIndexE, newItemE);
+					};
+					this = env:BuildResult(newSlotIndexD, newItemD);
+				};
+			};
+			this = env:BuildResult(newSlotIndexA, newItemA);
+		};
+		
+		local s = SearchCollector{
+			itemCache = env.itemCache;
+			filter = env.filterAll;
+			sorters = {
+				[1] = env.oddEvenSorter;
+				[2] = env.throwError;
+				[3] = env.sorter;
+			};
+		};
+		s:Reset();
+		s:SetProperty("realm", env.realm);
+		s:SetProperty("character", env.character);
+		s:SetProperty("bagType", env.bagType);
+		s:SetProperty("bagIndex", env.bagIndex);
+		
+		s:CheckItem(newSlotIndexA, newItemA);
+		s:CheckItem(newSlotIndexB, newItemB);
+		s:CheckItem(newSlotIndexC, newItemC);
+		s:CheckItem(newSlotIndexD, newItemD);
+		s:CheckItem(newSlotIndexE, newItemE);
+		
+		assertEquals(expected, s.results);
+		
+		s:Reset();
+		
+		assertEquals({}, currentItem);
+	end;
+
 };
