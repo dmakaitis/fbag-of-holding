@@ -1,0 +1,10 @@
+## Interface: 30100
+## Author: Feithar
+## Title: FBoH - Outfitter 
+## Version: 1.0
+## X-Category: Inventory
+## Dependencies:FBagOfHolding,Outfitter
+## LoadWith: Outfitter
+## Notes: Adds the ability to recognize items that are configured in Outfitter.
+  
+FBoH_Outfitter.lua

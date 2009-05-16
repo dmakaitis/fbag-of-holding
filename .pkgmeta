@@ -35,3 +35,4 @@ move-folders:
     FBagOfHolding/Modules/ItemRack: FBoH_ItemRack
     FBagOfHolding/Modules/PeriodicTable: FBoH_PeriodicTable
     FBagOfHolding/Modules/ClosetGnome: FBoH_ClosetGnome
+    FBagOfHolding/Modules/Outfitter: FBoH_Outfitter
