@@ -3,5 +3,6 @@
 <Script file="ItemDetailCache.lua"/>
 <Script file="ItemContainer.lua"/>
 <Script file="SearchCollector.lua"/>
+<Script file="ItemDBCollection.lua"/>
 
 </Ui>

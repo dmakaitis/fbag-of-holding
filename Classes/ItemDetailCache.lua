@@ -55,6 +55,54 @@ end
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
+-- This is a mock version of the class for testing other classes.
+
+FBoH_Classes.MockItemDetailCache = FOO.class();
+local MockItemDetailCache = FBoH_Classes.MockItemDetailCache;
+
+MockItemDetailCache.details = {
+	["1"] = {
+		name = "Item 1";
+		link = "item:1";
+	},
+	["2"] = {
+		name = "Item 2";
+		link = "item:2";
+	},
+	["3"] = {
+		name = "Item 3";
+		link = "item:3";
+	},
+	["4"] = {
+		name = "Item 4";
+		link = "item:4";
+	},
+	["5"] = {
+		name = "Item 5";
+		link = "item:5";
+	},
+};
+
+function MockItemDetailCache:GetItemDetail(itemLink)
+	if type(itemLink) ~= "string" then error("GetItemDetail must have an item link as parameter #1", 2) end;
+	
+	local rVal = self:GetItemDetailWithKey(itemLink);
+	
+	return rVal;
+end
+
+function MockItemDetailCache:GetItemDetailWithKey(key)
+	self.sessionStart = self.sessionStart or time();
+	
+	local rVal = self.details[key];
+	
+	return rVal;
+end
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
 FBoH_UnitTests.ItemDetailCache = {
 
 	testGetItemKey = function()

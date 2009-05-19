@@ -95,6 +95,18 @@ function _AddToResults(sorters, results)
 	end
 end
 
+function SearchCollector:__init(object)
+	object = FOO.rawnew(self, object);
+	if type(object.filter) ~= "function" then 
+		error("Member filter must be initialized to a function", 3)
+	end;
+	if (type(object.sorters) ~= "table") and (type(object.sorters) ~= "function") then
+		error("Member sorters must be initialized to a function or array of functions", 3)
+	end;
+	object:Reset();
+	return object;
+end;
+
 --[[
 Resets the search by clearing all properties currently assigned, and
 any search results previously found.
@@ -231,7 +243,10 @@ FBoH_UnitTests.SearchCollector = {
 	end;
 	
 	testGetEmptyResults = function()
-		local s = SearchCollector{};
+		local s = SearchCollector{
+			filter = function() return true end;
+			sorters = function() return false end;
+		};
 		local expected = {};
 		
 		local results = s:GetResults();
@@ -241,20 +256,22 @@ FBoH_UnitTests.SearchCollector = {
 	
 	testGetResults = function()
 		local s = SearchCollector{
-			results = {
-				prev = {
-					this = "Donut";
-					next = {
-						this = "Bagel";
-					};
-				};
-				this = "Muffin";
+			filter = function() return true end;
+			sorters = function() return false end;
+		};
+		s.results = {
+			prev = {
+				this = "Donut";
 				next = {
-					prev = {
-						this = "Toast";
-					};
-					this = "Pastry";
+					this = "Bagel";
 				};
+			};
+			this = "Muffin";
+			next = {
+				prev = {
+					this = "Toast";
+				};
+				this = "Pastry";
 			};
 		};
 		local expected = {

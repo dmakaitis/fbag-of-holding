@@ -97,12 +97,76 @@ function ItemContainer:GetUsage()
 	end
 end
 
+function ItemContainer:FindItems(searchCollector)
+	for k, v in pairs(self.content) do
+		searchCollector:CheckItem(k, v);
+	end
+end
+
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 						
 FBoH_UnitTests.ItemContainer = {
 
+	setUp = function()
+		local env = {};
+		
+		env.container = {
+			["content"] = {
+				[1] = {
+					["lastUpdate"] = 1212116014,
+					["count"] = 1,
+					["key"] = "1",
+				}, -- [1]
+				[10] = {
+					["lastUpdate"] = 1234567890,
+					["count"] = 4,
+					["key"] = "2",
+				}, -- [10]
+
+			},
+			["size"] = {
+				["total"] = 32,
+				["general"] = true,
+				["free"] = 30,
+			},
+		};
+
+		env.expected = {
+			["1"] = {
+				slotIndex = 1,
+				lastUpdate = 1212116014,
+				itemCount = 1,
+				itemKey = "1",
+				detail = {
+					name = "Item 1",
+					link = "item:1",
+				},
+				itemLink = "item:1",
+			},
+			["10"] = {
+				slotIndex = 10,
+				lastUpdate = 1234567890,
+				itemCount = 4,
+				itemKey = "2",
+				detail = {
+					name = "Item 2",
+					link = "item:2",
+				},
+				itemLink = "item:2",
+			},
+		};
+		-- Simulates a search collector that returns every item in slot 1 of its container.
+		env.searchCollector = FBoH_Classes.SearchCollector{
+			itemCache = FBoH_Classes.MockItemDetailCache{};
+			filter = function() return true end;
+			sorters = function(a, b) return a.detail.name < b.detail.name end;
+		};
+		
+		return env;
+	end;
+	
 	testSetItem = function()
 		local slot = 3;
 		local itemKey = "abcde";
@@ -183,6 +247,20 @@ FBoH_UnitTests.ItemContainer = {
 		
 		assertEquals(expectedSize, container.size);
 		assertEquals(expectedContent, container.content);
+	end;
+	
+	testFindAllItems = function(env)
+		local container = ItemContainer(env.container);
+		local searchCollector = env.searchCollector;
+		local expected = {
+			env.expected["1"],
+			env.expected["10"],
+		};
+		
+		container:FindItems(searchCollector);
+		local results = searchCollector:GetResults();
+		
+		assertEquals(expected, results);
 	end;
 	
 }
