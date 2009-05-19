@@ -1,4 +1,4 @@
-FBoH_SetVersion("$Revision: 137 $");
+FBoH_SetVersion("$Revision$");
 
 FBoH_Classes = FBoH_Classes or {};
 
