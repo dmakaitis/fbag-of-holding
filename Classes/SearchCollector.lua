@@ -156,15 +156,15 @@ Parameters:
 					lastUpdate - the timestamp when the item was placed in the slot
 				}
 ]]
-function SearchCollector:CheckItem(slotIndex, slotData)
-	self:SetProperty("slotIndex", slotIndex);
-	self:SetProperty("itemKey", slotData.key);
-	self:SetProperty("itemCount", slotData.count);
-	self:SetProperty("soulbound", slotData.soulbound);
-	self:SetProperty("lastUpdate", slotData.lastUpdate);
+function SearchCollector:CheckItem()
+--	self:SetProperty("slotIndex", slotIndex);
+--	self:SetProperty("itemKey", slotData.key);
+--	self:SetProperty("itemCount", slotData.count);
+--	self:SetProperty("soulbound", slotData.soulbound);
+--	self:SetProperty("lastUpdate", slotData.lastUpdate);
 	
-	self:SetProperty("detail", self.itemCache:GetItemDetailWithKey(slotData.key));
-	self:SetProperty("itemLink", currentItem.detail.link);
+--	self:SetProperty("detail", self.itemCache:GetItemDetailWithKey(slotData.key));
+--	self:SetProperty("itemLink", currentItem.detail.link);
 	
 	local pResult, rVal = pcall(self.filter, currentItem, self.filterArg);
 	if pResult == true then
@@ -174,14 +174,14 @@ function SearchCollector:CheckItem(slotIndex, slotData)
 		end
 	end
 	
-	self:SetProperty("slotIndex", nil);
-	self:SetProperty("itemKey", nil);
-	self:SetProperty("itemCount", nil);
-	self:SetProperty("soulbound", nil);
-	self:SetProperty("lastUpdate", nil);
+--	self:SetProperty("slotIndex", nil);
+--	self:SetProperty("itemKey", nil);
+--	self:SetProperty("itemCount", nil);
+--	self:SetProperty("soulbound", nil);
+--	self:SetProperty("lastUpdate", nil);
 	
-	self:SetProperty("detail", nil);
-	self:SetProperty("itemLink", nil);
+--	self:SetProperty("detail", nil);
+--	self:SetProperty("itemLink", nil);
 end
 
 --[[
@@ -202,90 +202,9 @@ end
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
+if WoWUnit then
+
 FBoH_UnitTests.SearchCollector = {
-	
-	testSetProperty = function(env)
-		local property = "realm";
-		local value = "Test";
-		local expected = { [property] = value };
-		
-		local s = SearchCollector{
-			filter = env.filterAll;
-			sorters = env.sorter;
-		};
-		s:Reset();
-		s:SetProperty(property, value);
-		
-		assertEquals(expected, currentItem);
-		
-		s:Reset();
-		
-		assertEquals({}, currentItem);
-	end;
-	
-	testSetNumberProperty = function(env)
-		local property = "bagIndex";
-		local value = 42;
-		local expected = { [property] = value };
-		
-		local s = SearchCollector{
-			filter = env.filterAll;
-			sorters = env.sorter;
-		};
-		s:Reset();
-		s:SetProperty(property, value);
-		
-		assertEquals(expected, currentItem);
-		
-		s:Reset();
-		
-		assertEquals({}, currentItem);
-	end;
-	
-	testGetEmptyResults = function()
-		local s = SearchCollector{
-			filter = function() return true end;
-			sorters = function() return false end;
-		};
-		local expected = {};
-		
-		local results = s:GetResults();
-		
-		assertEquals(expected, results);
-	end;
-	
-	testGetResults = function()
-		local s = SearchCollector{
-			filter = function() return true end;
-			sorters = function() return false end;
-		};
-		s.results = {
-			prev = {
-				this = "Donut";
-				next = {
-					this = "Bagel";
-				};
-			};
-			this = "Muffin";
-			next = {
-				prev = {
-					this = "Toast";
-				};
-				this = "Pastry";
-			};
-		};
-		local expected = {
-			"Donut",
-			"Bagel",
-			"Muffin",
-			"Toast",
-			"Pastry",
-		};
-		
-		local results = s:GetResults();
-		
-		assertEquals(expected, results);
-	end;
 	
 	setUp = function()
 		local rVal = {
@@ -382,7 +301,112 @@ FBoH_UnitTests.SearchCollector = {
 			error("Random error");
 		end
 		
+		rVal.doCheckItem = function(self, collector, slotIndex, slotData)
+			collector:SetProperty("slotIndex", slotIndex);
+			collector:SetProperty("itemKey", slotData.key);
+			collector:SetProperty("itemCount", slotData.count);
+			collector:SetProperty("soulbound", slotData.soulbound);
+			collector:SetProperty("lastUpdate", slotData.lastUpdate);
+			
+			collector:SetProperty("detail", self.itemCache:GetItemDetailWithKey(slotData.key));
+			collector:SetProperty("itemLink", currentItem.detail.link);
+			
+			collector:CheckItem();
+			
+			collector:SetProperty("slotIndex", nil);
+			collector:SetProperty("itemKey", nil);
+			collector:SetProperty("itemCount", nil);
+			collector:SetProperty("soulbound", nil);
+			collector:SetProperty("lastUpdate", nil);
+			
+			collector:SetProperty("detail", nil);
+			collector:SetProperty("itemLink", nil);			
+		end
+
 		return rVal;
+	end;
+	
+	testSetProperty = function(env)
+		local property = "realm";
+		local value = "Test";
+		local expected = { [property] = value };
+		
+		local s = SearchCollector{
+			filter = env.filterAll;
+			sorters = env.sorter;
+		};
+		s:Reset();
+		s:SetProperty(property, value);
+		
+		assertEquals(expected, currentItem);
+		
+		s:Reset();
+		
+		assertEquals({}, currentItem);
+	end;
+	
+	testSetNumberProperty = function(env)
+		local property = "bagIndex";
+		local value = 42;
+		local expected = { [property] = value };
+		
+		local s = SearchCollector{
+			filter = env.filterAll;
+			sorters = env.sorter;
+		};
+		s:Reset();
+		s:SetProperty(property, value);
+		
+		assertEquals(expected, currentItem);
+		
+		s:Reset();
+		
+		assertEquals({}, currentItem);
+	end;
+	
+	testGetEmptyResults = function()
+		local s = SearchCollector{
+			filter = function() return true end;
+			sorters = function() return false end;
+		};
+		local expected = {};
+		
+		local results = s:GetResults();
+		
+		assertEquals(expected, results);
+	end;
+	
+	testGetResults = function()
+		local s = SearchCollector{
+			filter = function() return true end;
+			sorters = function() return false end;
+		};
+		s.results = {
+			prev = {
+				this = "Donut";
+				next = {
+					this = "Bagel";
+				};
+			};
+			this = "Muffin";
+			next = {
+				prev = {
+					this = "Toast";
+				};
+				this = "Pastry";
+			};
+		};
+		local expected = {
+			"Donut",
+			"Bagel",
+			"Muffin",
+			"Toast",
+			"Pastry",
+		};
+		
+		local results = s:GetResults();
+		
+		assertEquals(expected, results);
 	end;
 	
 	testCheckItem = function(env)
@@ -404,7 +428,7 @@ FBoH_UnitTests.SearchCollector = {
 		s:SetProperty("bagType", env.bagType);
 		s:SetProperty("bagIndex", env.bagIndex);
 		
-		s:CheckItem(newSlotIndexA, newItemA);
+		env:doCheckItem(s, newSlotIndexA, newItemA);
 		
 		assertEquals(expected, s.results);
 		
@@ -437,8 +461,8 @@ FBoH_UnitTests.SearchCollector = {
 		s:SetProperty("bagType", env.bagType);
 		s:SetProperty("bagIndex", env.bagIndex);
 		
-		s:CheckItem(newSlotIndexA, newItemA);
-		s:CheckItem(newSlotIndexB, newItemB);
+		env:doCheckItem(s, newSlotIndexA, newItemA);
+		env:doCheckItem(s, newSlotIndexB, newItemB);
 		
 		assertEquals(expected, s.results);
 		
@@ -486,11 +510,11 @@ FBoH_UnitTests.SearchCollector = {
 		s:SetProperty("bagType", env.bagType);
 		s:SetProperty("bagIndex", env.bagIndex);
 		
-		s:CheckItem(newSlotIndexA, newItemA);
-		s:CheckItem(newSlotIndexB, newItemB);
-		s:CheckItem(newSlotIndexC, newItemC);
-		s:CheckItem(newSlotIndexD, newItemD);
-		s:CheckItem(newSlotIndexE, newItemE);
+		env:doCheckItem(s, newSlotIndexA, newItemA);
+		env:doCheckItem(s, newSlotIndexB, newItemB);
+		env:doCheckItem(s, newSlotIndexC, newItemC);
+		env:doCheckItem(s, newSlotIndexD, newItemD);
+		env:doCheckItem(s, newSlotIndexE, newItemE);
 		
 		assertEquals(expected, s.results);
 		
@@ -541,11 +565,11 @@ FBoH_UnitTests.SearchCollector = {
 		s:SetProperty("bagType", env.bagType);
 		s:SetProperty("bagIndex", env.bagIndex);
 		
-		s:CheckItem(newSlotIndexA, newItemA);
-		s:CheckItem(newSlotIndexB, newItemB);
-		s:CheckItem(newSlotIndexC, newItemC);
-		s:CheckItem(newSlotIndexD, newItemD);
-		s:CheckItem(newSlotIndexE, newItemE);
+		env:doCheckItem(s, newSlotIndexA, newItemA);
+		env:doCheckItem(s, newSlotIndexB, newItemB);
+		env:doCheckItem(s, newSlotIndexC, newItemC);
+		env:doCheckItem(s, newSlotIndexD, newItemD);
+		env:doCheckItem(s, newSlotIndexE, newItemE);
 		
 		assertEquals(expected, s.results);
 		
@@ -588,11 +612,11 @@ FBoH_UnitTests.SearchCollector = {
 		s:SetProperty("bagType", env.bagType);
 		s:SetProperty("bagIndex", env.bagIndex);
 		
-		s:CheckItem(newSlotIndexA, newItemA);
-		s:CheckItem(newSlotIndexB, newItemB);
-		s:CheckItem(newSlotIndexC, newItemC);
-		s:CheckItem(newSlotIndexD, newItemD);
-		s:CheckItem(newSlotIndexE, newItemE);
+		env:doCheckItem(s, newSlotIndexA, newItemA);
+		env:doCheckItem(s, newSlotIndexB, newItemB);
+		env:doCheckItem(s, newSlotIndexC, newItemC);
+		env:doCheckItem(s, newSlotIndexD, newItemD);
+		env:doCheckItem(s, newSlotIndexE, newItemE);
 		
 		assertEquals(expected, s.results);
 		
@@ -682,11 +706,11 @@ FBoH_UnitTests.SearchCollector = {
 		s:SetProperty("bagType", env.bagType);
 		s:SetProperty("bagIndex", env.bagIndex);
 		
-		s:CheckItem(newSlotIndexA, newItemA);
-		s:CheckItem(newSlotIndexB, newItemB);
-		s:CheckItem(newSlotIndexC, newItemC);
-		s:CheckItem(newSlotIndexD, newItemD);
-		s:CheckItem(newSlotIndexE, newItemE);
+		env:doCheckItem(s, newSlotIndexA, newItemA);
+		env:doCheckItem(s, newSlotIndexB, newItemB);
+		env:doCheckItem(s, newSlotIndexC, newItemC);
+		env:doCheckItem(s, newSlotIndexD, newItemD);
+		env:doCheckItem(s, newSlotIndexE, newItemE);
 		
 		assertEquals(expected, s.results);
 		
@@ -696,3 +720,5 @@ FBoH_UnitTests.SearchCollector = {
 	end;
 
 };
+
+end

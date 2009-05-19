@@ -99,14 +99,35 @@ end
 
 function ItemContainer:FindItems(searchCollector)
 	for k, v in pairs(self.content) do
+		searchCollector:SetProperty("slotIndex", k);
+		searchCollector:SetProperty("itemKey", v.key);
+		searchCollector:SetProperty("itemCount", v.count);
+		searchCollector:SetProperty("soulbound", v.soulbound);
+		searchCollector:SetProperty("lastUpdate", v.lastUpdate);
+	
+		local detail = searchCollector.itemCache:GetItemDetailWithKey(v.key);
+		searchCollector:SetProperty("detail", detail);
+		searchCollector:SetProperty("itemLink", detail.link);
+	
 		searchCollector:CheckItem(k, v);
 	end
+	
+	searchCollector:SetProperty("slotIndex", nil);
+	searchCollector:SetProperty("itemKey", nil);
+	searchCollector:SetProperty("itemCount", nil);
+	searchCollector:SetProperty("soulbound", nil);
+	searchCollector:SetProperty("lastUpdate", nil);
+
+	searchCollector:SetProperty("detail", nil);
+	searchCollector:SetProperty("itemLink", nil);
 end
 
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
-						
+
+if WoWUnit then
+
 FBoH_UnitTests.ItemContainer = {
 
 	setUp = function()
@@ -264,3 +285,5 @@ FBoH_UnitTests.ItemContainer = {
 	end;
 	
 }
+
+end

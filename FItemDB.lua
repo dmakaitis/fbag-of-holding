@@ -707,7 +707,7 @@ function FBoH_ItemDB:UpdateBagUsage(bagType, bagID, character, realm)
 		end
 	end
 end
-
+--[[
 local ItemDB_0_03_01 = {
 	["details"] = {
 		["00000:0:2740:3111:0:0:0"] = {
@@ -1072,7 +1072,7 @@ local ItemDB_0_03_01 = {
 		},
 	},
 };
---[[
+
 FBoH_UnitTests.OldItemDB = {
 	mocks = {
 		FBoH = FBoH;

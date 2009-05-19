@@ -722,13 +722,11 @@ end
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
-LibFOO_UnitTests = {};
-
 if WoWUnit then
 
-WoWUnit:AddTestSuite("LibFOO", LibFOO_UnitTests);
+LibFOO_UnitTests = {};
 
-end
+WoWUnit:AddTestSuite("LibFOO", LibFOO_UnitTests);
 
 function LibFOO_UnitTests.testInterface()
 	local testInterface = "LibFOO_UnitTest_Interface";
@@ -889,3 +887,6 @@ function LibFOO_UnitTests.testMultiple()
 	
 	assertEquals("Hello, I'm a file", Root:search("my_folder/my_file.txt").data)
 end
+
+end
+

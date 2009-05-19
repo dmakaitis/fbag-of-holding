@@ -42,6 +42,8 @@ end;
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
+if WoWUnit then
+
 FBoH_UnitTests.ContainerType = {
 	
 	setUp = function()
@@ -113,3 +115,5 @@ FBoH_UnitTests.ContainerType = {
 	end;
 	
 };
+
+end

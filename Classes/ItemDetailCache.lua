@@ -103,6 +103,8 @@ end
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
+if WoWUnit then
+
 FBoH_UnitTests.ItemDetailCache = {
 
 	testGetItemKey = function()
@@ -261,3 +263,5 @@ FBoH_UnitTests.ItemDetailCache = {
 	end;
 	
 };
+
+end
