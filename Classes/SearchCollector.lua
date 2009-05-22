@@ -95,6 +95,26 @@ function _AddToResults(sorters, results)
 	end
 end
 
+--[[
+Initializes the search collector. Must be initialized with a filter function and
+a sorters function or table, and option filter argument, in the following fields:
+
+filter:
+	The filter function must take as arguments a table with the properties to be
+	checked, and an optional argument that is specific for the filter.
+	
+filterArg:
+	This is an optional field and can be set to any value of any type. It will be
+	passed to the filter function along with the item properties.
+	
+sorters:
+	Can be either a function, or an array of functions. Each function takes two
+	arguments each containing item properties, and should return true if the
+	first argument must be sorted before the second argument, and false if the
+	second item should come first or if they should appear together. Sorters in the
+	array will be utilized in the order they are present until a sorter is found that
+	indicates that one item should be sorted before the other.
+--]]
 function SearchCollector:__init(object)
 	object = FOO.rawnew(self, object);
 	if type(object.filter) ~= "function" then 
@@ -143,18 +163,9 @@ function SearchCollector:SetProperty(property, value)
 end
 
 --[[
-Checks the item in the given slot against the filter to see if it should be
-included in the result set. If so, it will be inserted into the results
-in sorted order.
-
-Parameters:
-	slotIndex - integer indicating which slot the item is in
-	slotData - table	{
-					key - item key
-					count - number of items in the stack
-					soulbound - true if the item is soulbound, nil otherwise
-					lastUpdate - the timestamp when the item was placed in the slot
-				}
+Checks the item against the filter using previously set properties to see
+if it should be included in the result set. If so, it will be inserted into the
+results in the order dictated by the sorters table.
 ]]
 function SearchCollector:CheckItem()
 --	self:SetProperty("slotIndex", slotIndex);
