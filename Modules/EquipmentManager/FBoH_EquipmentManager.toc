@@ -1,12 +1,11 @@
 ## Interface: 30100
 ## Author: Feithar
-## Title: FBoH - ItemRack
+## Title: FBoH - Equipment Manager
 ## Version: 1.0
 ## X-Category: Inventory
-## Dependencies:FBagOfHolding,ItemRack
-## Notes: Adds the ability to recognize items that are configured in ItemRack.
+## Dependencies:FBagOfHolding
+## Notes: Adds the ability to recognize items that are configured in Blizzard's Equipment Manager.
   
 Locale-enUS.lua
 
-FBoH_ItemRack.lua
-FBoH_ItemRack2.lua
+FBoH_EquipmentManager.lua
