@@ -37,3 +37,5 @@ move-folders:
     FBagOfHolding/Modules/ClosetGnome: FBoH_ClosetGnome
     FBagOfHolding/Modules/Outfitter: FBoH_Outfitter
     FBagOfHolding/Modules/EquipmentManager: FBoH_EquipmentManager
+    FBagOfHolding/Modules/FuBar: FuBar_FBoHFu
+    FBagOfHolding/Modules/Broker: Broker_FBoH
