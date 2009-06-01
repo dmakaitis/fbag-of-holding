@@ -136,6 +136,50 @@ FBoH:RegisterProperty(itemName);
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
+local itemTooltip = {};
+
+local tooltip = CreateFrame("GameTooltip", "FBoH_Filter_Tooltip");
+tooltip:SetOwner( WorldFrame, "ANCHOR_NONE" );
+tooltip:AddFontStrings(
+    tooltip:CreateFontString( "$parentTextLeft1", nil, "GameTooltipText" ),
+    tooltip:CreateFontString( "$parentTextRight1", nil, "GameTooltipText" ) );
+
+local
+function DoTooltipCompare(line, side, text)
+	local mytext = getglobal("FBoH_Filter_TooltipText" .. side .. line);
+	if mytext == nil then return false end;
+	
+	mytext = string.lower(mytext:GetText() or "");
+	
+	if string.find(mytext, text) then
+		return true;
+	end
+	
+	return false;
+end
+
+itemTooltip.name = "Tooltip";
+itemTooltip.desc = L["Tooltip"];
+function itemTooltip.filter(itemProps, text)
+	local c = string.lower(text or "");
+
+	tooltip:ClearLines();
+	tooltip:SetHyperlink(itemProps.itemLink);
+
+	for line = 1, tooltip:NumLines() do
+		if DoTooltipCompare(line, "Left", c) then return true end;
+		if DoTooltipCompare(line, "Right", c) then return true end;
+	end
+	
+	return false;
+end
+
+FBoH:RegisterProperty(itemTooltip);
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
 local bagIndex = {};
 
 bagIndex.name = "Bag Index";

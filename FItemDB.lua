@@ -66,7 +66,10 @@ end
 local
 function _TestFilter(filter, filterArg, itemProps)
 	local pResult, rVal = pcall(filter, itemProps, filterArg);
-	if pResult == true then return rVal else return false end;
+	if pResult == true then return rVal else 
+		FBoH:Debug("Failed to execute filter: " .. rVal);
+		return false
+	end;
 end
 
 local

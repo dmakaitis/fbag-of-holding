@@ -33,6 +33,7 @@ L["Bag Index"] = true;
 L["Bag Type"] = true;
 L["Character"] = true;
 L["Item Name"] = true;
+L["Tooltip"] = true;
 L["Quality"] = true;
 
 L["Not Soulbound"] = true;
