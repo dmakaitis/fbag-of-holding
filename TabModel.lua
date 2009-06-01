@@ -347,11 +347,15 @@ function FBoH_TabModel.prototype:IsBagTypeVisible(bagType)
 		if bagType == "Bank" then 
 			if FBoH.db.profile.hideBank then
 				return FBoH:IsBankOpen();
+			else
+				return true;
 			end;
 		end;
 		if bagType == "Guild Bank" then 
 			if FBoH.db.profile.hideGuildBank then
 				return FBoH:IsGuildBankOpen();
+			else
+				return true;
 			end;
 		end;
 	else
