@@ -92,6 +92,11 @@ L["Grid Scale Desc"] = "Scales the size of item icons in the icon view";
 L["Enable debug"] = true;
 L["Enable printing of debug messages to the chat window."] = true;
 
+L["Hide Bank Items"] = true;
+L["Hide bank items when not at the bank."] = true;
+L["Hide Guild Bank Items"] = true;
+L["Hide guild bank items when not at the bank."] = true;
+
 L["General"] = true;
 L["Hook Open All Bags"] = true;
 L["Opening all bags will open FBoH bags instead."] = true;

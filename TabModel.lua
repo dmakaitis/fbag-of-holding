@@ -208,6 +208,14 @@ function FBoH_TabModel.prototype:GetFilter()
 					filter = FBoH:GetFilter("Character").filter;
 				}
 			end
+--[[
+			if FBoH.db.profile.hideBank then
+				FBoH:Debug("Hiding bank");
+			end
+
+			if FBoH.db.profile.hideGuildBank then
+				FBoH:Debug("Hiding guild bank");
+			end]]
 		else
 			f = BuildFilter(self.tabDef.filter);
 		end
@@ -335,8 +343,13 @@ end
 function FBoH_TabModel.prototype:IsBagTypeVisible(bagType)
 	if bagType == "Bags" then return true end;
 	if bagType == "Keyring" then return true end;
-	if bagType == "Bank" then return true end; -- Remember to make visible when at bank
-	if bagType == "Guild Bank" then return true end; -- Remember to make visible when at guild bank
+	if self.tabDef.filter == "default" then
+		if bagType == "Bank" then return (FBoH.db.profile.hideBank  ~= true) end; -- Remember to make visible when at bank
+		if bagType == "Guild Bank" then return (FBoH.db.profile.hideGuildBank ~= true) end; -- Remember to make visible when at guild bank		
+	else
+		if bagType == "Bank" then return true end; -- Remember to make visible when at bank
+		if bagType == "Guild Bank" then return true end; -- Remember to make visible when at guild bank
+	end
 	if bagType == "Wearing" then return true end;
 	return false;
 end

@@ -41,6 +41,34 @@ function _SetGridScale(self, scale)
 end
 
 local
+function _IsGuildBankHidden(self)
+	return self.db.profile.hideGuildBank;
+end
+
+local function _SetGuildBankHidden(self, v)
+	self.db.profile.hideGuildBank = v;
+	if FBoH_TabModel.defaultTab then
+		FBoH_TabModel.defaultTab.filterCache = nil;
+		FBoH_TabModel.defaultTab:Update();
+		FBoH_TabModel.defaultTab.viewModel:UpdateBag();
+	end
+end
+
+local
+function _IsBankHidden(self)
+	return self.db.profile.hideBank;
+end
+
+local function _SetBankHidden(self, v)
+	self.db.profile.hideBank = v;
+	if FBoH_TabModel.defaultTab then
+		FBoH_TabModel.defaultTab.filterCache = nil;
+		FBoH_TabModel.defaultTab:Update();
+		FBoH_TabModel.defaultTab.viewModel:UpdateBag();
+	end
+end
+
+local
 function _IsOpenAllBagsHooked(self)
 	return self.db.profile.hookOpenAllBags;
 end
@@ -205,6 +233,27 @@ local options = {
 					desc = L["Enable printing of debug messages to the chat window."],
 					get = function(info) return FBoH:IsDebugEnabled() end,
 					set = function(info, v) FBoH:SetDebugEnabled(v) end,
+				},
+			},
+		},
+		mainBag = {
+			type = "group",
+			name = L["Main Bag"],
+			desc = L["Main Bag"],
+			args = {
+				hideBank = {
+					type = "toggle",
+					name = L["Hide Bank Items"],
+					desc = L["Hide bank items when not at the bank."],
+					get = function(info) return _IsBankHidden(FBoH) end,
+					set = function(info, v) _SetBankHidden(FBoH, v) end,
+				},
+				hideGuildBank = {
+					type = "toggle",
+					name = L["Hide Guild Bank Items"],
+					desc = L["Hide guild bank items when not at the bank."],
+					get = function(info) return _IsGuildBankHidden(FBoH) end,
+					set = function(info, v) _SetGuildBankHidden(FBoH, v) end,
 				},
 			},
 		},
