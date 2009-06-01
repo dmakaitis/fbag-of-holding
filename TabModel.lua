@@ -344,8 +344,16 @@ function FBoH_TabModel.prototype:IsBagTypeVisible(bagType)
 	if bagType == "Bags" then return true end;
 	if bagType == "Keyring" then return true end;
 	if self.tabDef.filter == "default" then
-		if bagType == "Bank" then return (FBoH.db.profile.hideBank  ~= true) end; -- Remember to make visible when at bank
-		if bagType == "Guild Bank" then return (FBoH.db.profile.hideGuildBank ~= true) end; -- Remember to make visible when at guild bank		
+		if bagType == "Bank" then 
+			if FBoH.db.profile.hideBank then
+				return FBoH:IsBankOpen();
+			end;
+		end;
+		if bagType == "Guild Bank" then 
+			if FBoH.db.profile.hideGuildBank then
+				return FBoH:IsGuildBankOpen();
+			end;
+		end;
 	else
 		if bagType == "Bank" then return true end; -- Remember to make visible when at bank
 		if bagType == "Guild Bank" then return true end; -- Remember to make visible when at guild bank

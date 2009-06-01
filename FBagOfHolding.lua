@@ -506,6 +506,10 @@ function FBoH:IsBankOpen()
 	return self.bankIsOpen;
 end
 
+function FBoH:IsGuildBankOpen()
+	return self.guildBankIsOpen;
+end
+
 --*****************************************************************************
 -- Item Sorting.
 --*****************************************************************************
