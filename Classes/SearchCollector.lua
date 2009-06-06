@@ -168,31 +168,15 @@ if it should be included in the result set. If so, it will be inserted into the
 results in the order dictated by the sorters table.
 ]]
 function SearchCollector:CheckItem()
---	self:SetProperty("slotIndex", slotIndex);
---	self:SetProperty("itemKey", slotData.key);
---	self:SetProperty("itemCount", slotData.count);
---	self:SetProperty("soulbound", slotData.soulbound);
---	self:SetProperty("lastUpdate", slotData.lastUpdate);
-	
---	self:SetProperty("detail", self.itemCache:GetItemDetailWithKey(slotData.key));
---	self:SetProperty("itemLink", currentItem.detail.link);
-	
 	local pResult, rVal = pcall(self.filter, currentItem, self.filterArg);
 	if pResult == true then
 		if rVal == true then
 			self.results = self.results or {};
 			_AddToResults(self.sorters, self.results);
 		end
+	else
+		FBoH:Debug("Error in item filter: " .. rVal);
 	end
-	
---	self:SetProperty("slotIndex", nil);
---	self:SetProperty("itemKey", nil);
---	self:SetProperty("itemCount", nil);
---	self:SetProperty("soulbound", nil);
---	self:SetProperty("lastUpdate", nil);
-	
---	self:SetProperty("detail", nil);
---	self:SetProperty("itemLink", nil);
 end
 
 --[[
@@ -309,7 +293,7 @@ FBoH_UnitTests.SearchCollector = {
 		end
 		
 		rVal.throwError = function()
-			error("Random error");
+			error("Random error (this is supposed to happen)");
 		end
 		
 		rVal.doCheckItem = function(self, collector, slotIndex, slotData)

@@ -48,7 +48,7 @@ local FOO = LibStub:GetLibrary("LibFOO-1.0");
 FBoH_Classes.ItemContainer = FOO.class();
 local ItemContainer = FBoH_Classes.ItemContainer;
 
-function ItemContainer:SetItem(slotID, itemKey, count, soulbound)
+function ItemContainer:SetItem(slotID, itemKey, count, soulbound, lastUpdate)
 	count = count or 1;
 	soulbound = soulbound or nil;
 	
@@ -56,12 +56,16 @@ function ItemContainer:SetItem(slotID, itemKey, count, soulbound)
 	
 	if itemKey == nil then
 		if self.content[slotID] ~= nil then
-			self.size.free = self.size.free + 1;
+			if self.size then
+				self.size.free = self.size.free + 1;
+			end;
 			self.content[slotID] = nil;
 		end
 	else
 		if self.content[slotID] == nil then
-			self.size.free = self.size.free - 1;
+			if self.size then
+				self.size.free = self.size.free - 1;
+			end;
 		end
 		
 		local doUpdate = false;
@@ -81,7 +85,7 @@ function ItemContainer:SetItem(slotID, itemKey, count, soulbound)
 				key = itemKey,
 				count = count,
 				soulbound = soulbound,
-				lastUpdate = time();
+				lastUpdate = lastUpdate or time();
 			};
 		end
 	end	
@@ -98,6 +102,8 @@ function ItemContainer:GetUsage()
 end
 
 function ItemContainer:FindItems(searchCollector)
+	if self.content == nil then return end;
+	
 	for k, v in pairs(self.content) do
 		searchCollector:SetProperty("slotIndex", k);
 		searchCollector:SetProperty("itemKey", v.key);
@@ -109,7 +115,7 @@ function ItemContainer:FindItems(searchCollector)
 		searchCollector:SetProperty("detail", detail);
 		searchCollector:SetProperty("itemLink", detail.link);
 	
-		searchCollector:CheckItem(k, v);
+		searchCollector:CheckItem();
 	end
 	
 	searchCollector:SetProperty("slotIndex", nil);
@@ -120,6 +126,32 @@ function ItemContainer:FindItems(searchCollector)
 
 	searchCollector:SetProperty("detail", nil);
 	searchCollector:SetProperty("itemLink", nil);
+end
+
+function ItemContainer:GetEmptySlots(searchCollector)
+	local firstFree = nil;
+	
+	if self.content then
+		for index = 1, self.size.total do
+			if self.content[index] == nil then
+				firstFree = firstFree or index;
+			end;
+		end;
+	else
+		firstFree = 1;
+	end;
+	
+	if firstFree then
+		searchCollector:SetProperty("firstSlotID", firstFree);
+		searchCollector:SetProperty("restrictionCode", self.size.restrictionCode or 0);
+		searchCollector:SetProperty("slotCount", self.size.free);
+		
+		searchCollector:CheckItem();
+		
+		searchCollector:SetProperty("firstSlotID", nil);
+		searchCollector:SetProperty("restrictionCode", nil);
+		searchCollector:SetProperty("slotCount", nil);
+	end;
 end
 
 --------------------------------------------------------------------------
@@ -177,12 +209,22 @@ FBoH_UnitTests.ItemContainer = {
 				},
 				itemLink = "item:2",
 			},
+			["empty"] = {
+				restrictionCode = 0;
+				slotCount = 30;
+				firstSlotID = 2;
+			},
 		};
 		-- Simulates a search collector that returns every item in slot 1 of its container.
 		env.searchCollector = FBoH_Classes.SearchCollector{
 			itemCache = FBoH_Classes.MockItemDetailCache{};
 			filter = function() return true end;
 			sorters = function(a, b) return a.detail.name < b.detail.name end;
+		};
+		
+		env.emptySearchCollector = FBoH_Classes.SearchCollector{
+			filter = function() return true end;
+			sorters = function(a, b) return false end;
 		};
 		
 		return env;
@@ -193,19 +235,18 @@ FBoH_UnitTests.ItemContainer = {
 		local itemKey = "abcde";
 		local count = 1;
 		local soulbound = true;
+		local lastUpdate = 12345;
 		
 		local expectedSize = { total=16; free=15; general=true };
-		local expectedContent = { [3] = { key=itemKey, count=count, soulbound=soulbound } };
+		local expectedContent = { [3] = { key=itemKey, count=count, soulbound=soulbound, lastUpdate=lastUpdate } };
 		
 		local container = ItemContainer{
 			size={ total=16, free=16, general=true };
 		};
 		
-		container:SetItem(slot, itemKey, count, soulbound);
+		container:SetItem(slot, itemKey, count, soulbound, 12345);
 		
 		assertEquals(expectedSize, container.size);
-		assert(type(container.content[slot].lastUpdate) == "number", "Last update time for slot should be an integer");
-		container.content[slot].lastUpdate = nil;
 		assertEquals(expectedContent, container.content);
 	end;
 	
@@ -282,6 +323,19 @@ FBoH_UnitTests.ItemContainer = {
 		local results = searchCollector:GetResults();
 		
 		assertEquals(expected, results);
+	end;
+	
+	testGetEmptySlots = function(env)
+		local container = ItemContainer(env.container);
+		local searchCollector = env.emptySearchCollector;
+		local expected = {
+			env.expected["empty"],
+		};
+		
+		container:GetEmptySlots(searchCollector);
+		local results = searchCollector:GetResults();
+		
+		assertEquals(expected, results);		
 	end;
 	
 }
