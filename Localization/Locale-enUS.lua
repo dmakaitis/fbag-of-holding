@@ -77,6 +77,7 @@ L["Last 30 Days"] = true;
 
 -- FBoH Configuration
 
+--[[
 L["FuBar options"] = true;
 L["Attach to minimap"] = true;
 L["Show icon"] = true;
@@ -85,7 +86,7 @@ L["Position"] = true;
 L["Left"] = true;
 L["Center"] = true;
 L["Right"] = true;
-
+]]
 L["Display"] = true;
 L["Grid Scale"] = "Icon Scale";
 L["Grid Scale Desc"] = "Scales the size of item icons in the icon view";

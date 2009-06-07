@@ -115,7 +115,7 @@ function _DoScanContainer(self, bagID, arg)
 			self.scanQueues = {};
 		end
 		
-		self:UpdateFuBarPlugin();
+		self:UpdateDataBroker();
 		_UpdateBags(self);
 	end);
 end

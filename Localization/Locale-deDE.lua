@@ -75,6 +75,7 @@ L["Last 30 Days"] = "Letzten 30 Tage";
 
 -- FBoH Configuration
 
+--[[
 L["FuBar options"] = "FuBar Optionen";
 L["Attach to minimap"] = "Befestigen an der Minimap";
 L["Show icon"] = "Icon anzeigen";
@@ -83,7 +84,7 @@ L["Position"] = "Position";
 L["Left"] = "Links";
 L["Center"] = "Mitte";
 L["Right"] = "Rechts";
-
+]]
 L["Display"] = "Display";
 L["Grid Scale"] = "Icon Skalierung";
 L["Grid Scale Desc"] = "Skaliert die Grö?e der Item Icons in den Fenstern";

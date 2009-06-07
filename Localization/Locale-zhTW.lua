@@ -75,6 +75,7 @@ L["Last 30 Days"] = "最近30天";
 
 -- FBoH Configuration
 
+--[[
 L["FuBar options"] = "FuBar選項";
 L["Attach to minimap"] = "貼到小地圖";
 L["Show icon"] = "顯示圖案";
@@ -83,7 +84,7 @@ L["Position"] = "位置";
 L["Left"] = "左";
 L["Center"] = "中";
 L["Right"] = "右";
-
+]]
 L["Display"] = "顯示";
 L["Grid Scale"] = "圖案比例";
 L["Grid Scale Desc"] = "設定圖案顯示的大小比例";

@@ -8,6 +8,7 @@ Description:
 local Dewdrop = AceLibrary("Dewdrop-2.0");
 
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH")
+local LDB = LibStub("LibDataBroker-1.1");
 
 FBoH_SetVersion("$Revision$");
 
@@ -35,8 +36,9 @@ FBoH = LibStub("AceAddon-3.0"):NewAddon("Feithar's Bag of Holding",
 										"AceConsole-3.0",
 										"AceEvent-3.0",
 										"AceHook-3.0",
-										"AceTimer-3.0",
-										"LibFuBarPlugin-Mod-3.0");
+										"AceTimer-3.0");
+										--,
+										--"LibFuBarPlugin-Mod-3.0");
 
 --*****************************************************************************
 -- Error handling and debugging
@@ -159,10 +161,9 @@ function FBoH:OnInitialize()
 		
 		self.configOptions.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 
-		-- Create the FuBarPlugin bits.
-		self:SetFuBarOption("GameTooltip", true);
-		self:SetFuBarOption("iconPath", "Interface\\Buttons\\Button-Backpack-Up");
-
+		-- Register the data broker
+		LDB:NewDataObject("Feithar's Bag of Holding", self.dataBroker);
+		
 		self.sessionStartTime = time() + 10;
 		
 		optFrame = AceConfig:AddToBlizOptions(L["FBoH"], L["FBoH"]);	
@@ -257,14 +258,14 @@ function FBoH:ShowConfig()
 		AceConfig:Open(L["FBoH"], configFrame)
 	end);
 end
-FBoH.OpenMenu = FBoH.ShowConfig -- for FuBar
+--FBoH.OpenMenu = FBoH.ShowConfig -- for FuBar
 
 function FBoH:CanViewAsList()
 	return self.canViewAsList;
 end
 
 --*****************************************************************************
--- FuBar Functions
+-- DataBroker
 --*****************************************************************************
 
 local
@@ -274,86 +275,26 @@ function ShowView(bagIndex, tabIndex)
 	view:SelectTab(tabIndex);
 end
 
-function FBoH:OnFuBarClick()
-	_SafeCall(function()
-		GameTooltip:Hide();
-		
-		local fubarFrame = self:GetFrame();
-		if self:IsFuBarMinimapAttached() then
-			fubarFrame = Minimap;
-		end
-		
-		Dewdrop:Open(fubarFrame,
-			'children', function()
-				Dewdrop:AddLine(
-					'text', L["Feithar's Bag of Holding"],
-					'textR', 1, 'textG', 1, 'textB', 0,
-					'notClickable', true,
-					'notCheckable', true
-				);
-				Dewdrop:AddSeparator();
-				
-				for vi, v in ipairs(self.bagViews) do
-					for ti, t in ipairs(v.viewDef.tabs) do
-						Dewdrop:AddLine(
-							'text', t.name,
-							'func', ShowView,
-							'arg1', vi, 'arg2', ti,
-							'closeWhenClicked', true
-						);
-					end
-					Dewdrop:AddSeparator();
-				end
-				
-				Dewdrop:AddLine(
-					'text', L["Open All Views"],
-					'func', function()
-						for _, v in ipairs(FBoH.bagViews) do
-							v:Show();
-						end
-					end
-				);
-				Dewdrop:AddSeparator();
-				
-				Dewdrop:AddLine(
-					'text', L["Create New View"],
-					'textR', 1, 'textG', 0.8, 'textB', 0.2,
-					'func', function()
-						FBoH:CreateNewView();
-					end
-				);
-			end,
-			'point', _DewdropMenuPoint
-		);
-	end);
-end
+FBoH.dataBroker = {
+	type = "data source";
+	label = "Feithar's Bag of Holding";
+	text = "- / -";
+	icon = "Interface\\Buttons\\Button-Backpack-Up";
+};
 
-function FBoH:OnUpdateFuBarText()
+function FBoH.dataBroker.OnTooltipShow(tooltip)
 	_SafeCall(function()
-		local total, free = self.items:GetBagUsage("Bags");
-	
-		local used = total - free;
-		
-		local text = used .. "/" .. total;
-		local c = Crayon:GetThresholdHexColor(free / total);
-		
-		self:SetFuBarText("|cff" .. c .. used .. " |cffffffff/ |cff" .. c .. total);
-	end);
-end
-
-function FBoH:OnUpdateFuBarTooltip()
-	_SafeCall(function()
-		local igtotal, igfree, itotal, ifree = self.items:GetBagUsage("Bags");
-		local bgtotal, bgfree, btotal, bfree = self.items:GetBagUsage("Bank");
+		local igtotal, igfree, itotal, ifree = FBoH.items:GetBagUsage("Bags");
+		local bgtotal, bgfree, btotal, bfree = FBoH.items:GetBagUsage("Bank");
 		
 		local iused = itotal - ifree;
 		local bused = btotal - bfree;
 		local igused = igtotal - igfree;
 		local bgused = bgtotal - bgfree;
 
-		GameTooltip:AddLine(L["Feithar's Bag of Holding"]);
-		GameTooltip:AddLine(FBOH_VERSION .. "." .. FBoH_GetVersion(), 0, 1, 1);
-		GameTooltip:AddLine(" ");
+		tooltip:AddLine(L["Feithar's Bag of Holding"]);
+		tooltip:AddLine(FBOH_VERSION .. "." .. FBoH_GetVersion(), 0, 1, 1);
+		tooltip:AddLine(" ");
 		
 		local numbers;
 		if itotal ~= igtotal then
@@ -362,7 +303,7 @@ function FBoH:OnUpdateFuBarTooltip()
 			numbers = igused .. "/" .. igtotal
 		end
 		local r,g,b = Crayon:GetThresholdColor(ifree / itotal);
-		GameTooltip:AddDoubleLine(L["Bags"] .. ": ", numbers, 1, 1, 1, r, g, b);
+		tooltip:AddDoubleLine(L["Bags"] .. ": ", numbers, 1, 1, 1, r, g, b);
 		
 		if btotal ~= bgtotal then
 			numbers = bgused .. "/" .. bgtotal .. " (" .. bused .. "/" .. btotal .. ")";
@@ -370,14 +311,84 @@ function FBoH:OnUpdateFuBarTooltip()
 			numbers = bgused .. "/" .. bgtotal
 		end
 		local r,g,b = Crayon:GetThresholdColor(bfree / btotal);
-		GameTooltip:AddDoubleLine(L["Bank"] .. ": ", numbers, 1, 1, 1, r, g, b);
+		tooltip:AddDoubleLine(L["Bank"] .. ": ", numbers, 1, 1, 1, r, g, b);
 		
-		GameTooltip:AddLine(" ");
+		tooltip:AddLine(" ");
 		
-		GameTooltip:AddLine(L["FuBar Hint"], 0, 1, 0, 1);
+		tooltip:AddLine(L["FuBar Hint"], 0, 1, 0, 1);
 		
 	    -- tablet:SetHint(L["Hint"])
 	    -- as a rule, if you have an OnClick or OnDoubleClick or OnMouseUp or OnMouseDown, you should set a hint.
+	end);
+end
+
+function FBoH.dataBroker.OnClick(self, button)
+	_SafeCall(function()
+		if button == "LeftButton" then
+			GameTooltip:Hide();
+			
+			local fubarFrame = self;
+			
+			Dewdrop:Open(fubarFrame,
+				'children', function()
+					Dewdrop:AddLine(
+						'text', L["Feithar's Bag of Holding"],
+						'textR', 1, 'textG', 1, 'textB', 0,
+						'notClickable', true,
+						'notCheckable', true
+					);
+					Dewdrop:AddSeparator();
+					
+					for vi, v in ipairs(FBoH.bagViews) do
+						for ti, t in ipairs(v.viewDef.tabs) do
+							Dewdrop:AddLine(
+								'text', t.name,
+								'func', ShowView,
+								'arg1', vi, 'arg2', ti,
+								'closeWhenClicked', true
+							);
+						end
+						Dewdrop:AddSeparator();
+					end
+					
+					Dewdrop:AddLine(
+						'text', L["Open All Views"],
+						'func', function()
+							for _, v in ipairs(FBoH.bagViews) do
+								v:Show();
+							end
+						end
+					);
+					Dewdrop:AddSeparator();
+					
+					Dewdrop:AddLine(
+						'text', L["Create New View"],
+						'textR', 1, 'textG', 0.8, 'textB', 0.2,
+						'func', function()
+							FBoH:CreateNewView();
+						end
+					);
+				end,
+				'point', _DewdropMenuPoint
+			);
+		end;
+		
+		if button == "RightButton" then
+			FBoH.ShowConfig();
+		end
+	end);
+end
+
+function FBoH:UpdateDataBroker()
+	_SafeCall(function()
+		local total, free = self.items:GetBagUsage("Bags");
+	
+		local used = total - free;
+		
+		local text = used .. "/" .. total;
+		local c = Crayon:GetThresholdHexColor(free / total);
+		
+		self.dataBroker.text = ("|cff" .. c .. used .. "|cffffffff/|cff" .. c .. total);
 	end);
 end
 

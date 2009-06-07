@@ -122,11 +122,11 @@ end
 --*****************************************************************************
 -- Configuration setup
 --*****************************************************************************
-
+--[[
 local function GetFuBarMinimapAttachedStatus(info)
 	return FBoH:IsFuBarMinimapAttached() -- or Omen.Options["FuBar.HideMinimapButton"]
 end
-
+]]
 local options = { 
     name = L["Feithar's Bag of Holding"],
     handler = FBoH,
@@ -162,7 +162,7 @@ local options = {
 				},
 			}
 		},--]]
-		fubar = {
+		--[[fubar = {
 			type = "group",
 			name = L["FuBar options"],
 			desc = L["FuBar options"],
@@ -209,7 +209,7 @@ local options = {
 					disabled = GetFuBarMinimapAttachedStatus
 				}
 			}
-		},
+		},]]
 		display = {
 			type = "group",
 			name = L["Display"],
