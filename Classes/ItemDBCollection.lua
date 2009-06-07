@@ -139,6 +139,49 @@ end;
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
+FBoH_Classes.GuildDB = FOO.class();
+local GuildDB = FBoH_Classes.GuildDB;
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
+function GuildDB:__init(object)
+	object = object or {};
+	for k, v in pairs(object) do
+		object[k] = ContainerType(v);
+	end;
+	return FOO.rawnew(self, object);
+end;
+
+function GuildDB:FindItems(searchCollector)
+	if self.tabs then
+		searchCollector:SetProperty("bagType", "Guild Bank");
+		self.tabs:FindItems(searchCollector);
+		searchCollector:SetProperty("bagType", nil);
+	end;
+end;
+
+function GuildDB:GetBagUsage(tabId)
+	if self.tabs == nil then return 0, 0, 0, 0; end;
+	return self.tabs:GetUsage(tabId);
+end;
+
+function GuildDB:GetEmptySlots(searchCollector, tabId)
+	if self.tabs then
+		self.tabs:GetEmptySlots(searchCollector, tabId);
+	end
+end;
+
+function GuildDB:SetItem(tabId, slotId, itemKey, count, soulbound, lastUpdate)
+	self.tabs = self.tabs or ContainerType();
+	self.tabs:SetItem(tabId, slotId, itemKey, count, soulbound, lastUpdate);
+end;
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+
 FBoH_Classes.CharactersDB = FOO.class();
 local CharactersDB = FBoH_Classes.CharactersDB;
 
