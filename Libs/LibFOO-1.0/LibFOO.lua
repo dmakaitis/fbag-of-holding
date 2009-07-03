@@ -390,7 +390,7 @@ function OrderedSet.pushfront(self, element)
 		return element
 	end
 end
-
+]]
 function OrderedSet.popfront(self)
 	local element = self[FIRST]
 	self[FIRST] = self[element]
@@ -400,7 +400,7 @@ function OrderedSet.popfront(self)
 	end
 	return element
 end
-]]
+
 function OrderedSet.pushback(self, element)
 	if element ~= nil and not OrderedSet.contains(self, element) then
 		if self[LAST] ~= nil
