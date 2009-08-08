@@ -1,11 +1,11 @@
-## Interface: 30100
+## Interface: 30200
 ## Author: Feithar
 ## Title: Feithar's Bag of Holding
 ## Version: 0.9
 ## SavedVariables: FBoH_Items, FBoH_DB, FBoH_ItemTypes
 ## SavedVariablesPerCharacter: FBoH_DBPC
 ## X-Category: Inventory
-## OptionalDeps: Ace2, DewdropLib, Ace3, LibCrayon-3.0, WoWUnit
+## OptionalDeps: Ace2, DewdropLib, Ace3, LibCrayon-3.0, WoWUnit, LibFUI-1.0
 ## X-Embeds: Ace2, DewdropLib, Ace3, LibCrayon-3.0
 ## X-Credits: Inspired by Antiarc's SanityBags. Code for LibTipHooker borrowed from Whitetooth's RatingBuster. Translations: zhltr (German), romelden (Chinese), StingerSoft (Russian)
 ## X-AceForum: 13670
@@ -16,6 +16,7 @@ Libs\LibTipHooker-3.0\LibTipHooker-3.0.lua
 Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
 
 Libs\LibFOO-1.0\LibFOO-1.0.xml
+Libs\LibFUI-1.0\LibFUI-1.0.xml
 
 Localization\Locale-enUS.lua
 Localization\Locale-deDE.lua

@@ -1,4 +1,4 @@
-## Interface: 30100
+## Interface: 30200
 ## Author: Feithar
 ## Title: FBoH - ClosetGnome
 ## Version: 1.0
