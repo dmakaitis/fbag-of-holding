@@ -1,4 +1,4 @@
-## Interface: 30200
+## Interface: 30300
 ## Version: 1.0
 ## Title: FBoH - Periodic Table
 ## Notes: Adds the ability to filter items using LibPeriodicTable-3.1.
