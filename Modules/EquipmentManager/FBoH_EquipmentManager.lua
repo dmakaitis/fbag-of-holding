@@ -2,6 +2,7 @@
 Name: FBoH_EquipmentManager.lua
 Revision: $Revision$
 Author(s): Feithar
+Revides: Brandorf
 -------------------------------------------------------------------------------]]
 
 local L = LibStub("AceLocale-3.0"):GetLocale("FBoH_EquipmentManager")
@@ -19,31 +20,30 @@ equipMgr.name = "FBoH_EquipmentManager";
 equipMgr.desc = L["Equipment Manager"];
 
 local
-function DoCompare(line, side, itemProps)
-	local mytext = getglobal("FBoH_EquipmentManager_TooltipText" .. side .. line)
-	local text = mytext:GetText()
-	if type(text) == "string" then
-		if text == itemProps.detail.name then 
-			return true
-		end;
-	end;
+function DoCompare(item, itemProps)
+	local text, link = GetItemInfo(item);
+	if text == itemProps.detail.name then 
+		return true
+	end
 	return false;
 end
 
 function equipMgr.filter(itemProps, setName)
 	local setCount = GetNumEquipmentSets();
 	local name = nil;
+	FBoH:Debug("Checking  "..itemProps.detail.name .. " against " .. setCount .. " equipment sets");
 	
 	for i = 1, setCount do
 		name = GetEquipmentSetInfo(i);
 		
 		if (name == setName) or (setName == "***ALL***") then
-			tooltip:ClearLines();
-			tooltip:SetEquipmentSet(name);
-			
-			for line = 1, tooltip:NumLines() do
-				if DoCompare(line, "Left", itemProps) then return true end;
-				if DoCompare(line, "Right", itemProps) then return true end;
+			local itemArray = GetEquipmentSetItemIDs(name);
+			local numItems = #itemArray
+			for line = 1, numItems do
+				if DoCompare(itemArray[line], itemProps) then 
+					FBoH:Debug("Match found! "..itemArray[line].." in set "..name);
+					return true 
+				end;
 			end
 		end
 	end
