@@ -252,3 +252,7 @@ function FBoH:ScanInventory()
 		self:ScheduleTimer(function() _DoScanInventory(self); end, 0);
 	end);
 end
+
+function FBoH:UpdateBags()
+	_UpdateBags(self);
+end
