@@ -21,10 +21,10 @@
 		</Size>
 		<Scripts>
 			<OnMouseDown>
-				this:GetParent():StartSizing()
+				self:GetParent():StartSizing()
 			</OnMouseDown>
 			<OnMouseUp>
-				this:GetParent():StopMovingOrSizing();
+				self:GetParent():StopMovingOrSizing();
 			</OnMouseUp>
 		</Scripts>
 		<NormalTexture file="Interface\AddOns\FBagOfHolding\Images\ResizeGrip"/>
@@ -37,7 +37,7 @@
 		</Size>
 		<Scripts>
 			<OnMouseDown>
-				local parent = this:GetParent();
+				local parent = self:GetParent();
 				local pc = {};
 				local numPoints = parent:GetNumPoints();
 
@@ -46,20 +46,20 @@
 					p.point, p.relativeTo, p.relativePoint, p.xOff, p.yOff = parent:GetPoint(i)
 					pc[i] = p;
 				end
-				this.pointCache = pc;
+				self.pointCache = pc;
 				
 				parent:StartSizing()
 			</OnMouseDown>
 			<OnMouseUp>
-				local parent = this:GetParent();
+				local parent = self:GetParent();
 				
 				parent:StopMovingOrSizing();
 				
-				for i, v in pairs(this.pointCache) do
+				for i, v in pairs(self.pointCache) do
 					parent:SetPoint(v.point, v.relativeTo, v.relativePoint, v.xOff, v.yOff);
 					--FBoH:Print("Restored point " .. i .. "...");
 				end
-				this.pointCache = nil;
+				self.pointCache = nil;
 				
 				parent:GetParent():UpdateColumnResizeLimits();
 			</OnMouseUp>
@@ -84,7 +84,7 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				this.SetText = FBoH_ColumnHeaderTemplate_SetText;
+				self.SetText = FBoH_ColumnHeaderTemplate_SetText;
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -105,7 +105,7 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				this.SetText = FBoH_ColumnRowTemplate_SetText;
+				self.SetText = FBoH_ColumnRowTemplate_SetText;
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -130,16 +130,16 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				this.GetHeader = FBoH_ColumnTemplate_GetHeader;
-				this.GetResizeGrip = FBoH_ColumnTemplate_GetResizeGrip;
-				this.GetRow = FBoH_ColumnTemplate_GetRow;
-				this.OnHeightChanged = FBoH_ColumnTemplate_HeightChanged;
-				this.SetColumnAttributes = FBoH_ColumnTemplate_SetColumnAttributes
+				self.GetHeader = FBoH_ColumnTemplate_GetHeader;
+				self.GetResizeGrip = FBoH_ColumnTemplate_GetResizeGrip;
+				self.GetRow = FBoH_ColumnTemplate_GetRow;
+				self.OnHeightChanged = FBoH_ColumnTemplate_HeightChanged;
+				self.SetColumnAttributes = FBoH_ColumnTemplate_SetColumnAttributes
 			</OnLoad>
 			<OnSizeChanged>
 				-- arg1 = new width, arg2 = new height
-				this.currentWidth = arg1;
-				this:OnHeightChanged(arg2);
+				self.currentWidth = arg1;
+				self:OnHeightChanged(arg2);
 			</OnSizeChanged>
 		</Scripts>
 	</Frame>
@@ -296,13 +296,13 @@
 				<FontString inherits="ChatFontNormal" bytes="64"/>
 				<Scripts>
 					<OnEscapePressed>
-						this:ClearFocus();
+						self:ClearFocus();
 					</OnEscapePressed>
 					<OnEditFocusLost>
-						this:HighlightText(0, 0);
+						self:HighlightText(0, 0);
 					</OnEditFocusLost>
 					<OnEditFocusGained>
-						this:HighlightText();
+						self:HighlightText();
 					</OnEditFocusGained>
 					<OnTextChanged>
 						self:GetParent().viewModel:SetSearch(self:GetText());

@@ -261,13 +261,13 @@
 				<FontString inherits="ChatFontNormal" bytes="64"/>
 				<Scripts>
 					<OnEscapePressed>
-						this:ClearFocus();
+						self:ClearFocus();
 					</OnEscapePressed>
 					<OnEditFocusLost>
-						this:HighlightText(0, 0);
+						self:HighlightText(0, 0);
 					</OnEditFocusLost>
 					<OnEditFocusGained>
-						this:HighlightText();
+						self:HighlightText();
 					</OnEditFocusGained>
 					<OnTextChanged>
 						if self:IsShown() then
@@ -1224,10 +1224,10 @@
 				<FontString inherits="ChatFontNormal" bytes="64"/>
 				<Scripts>
 					<OnEscapePressed>
-						this:ClearFocus();
+						self:ClearFocus();
 					</OnEscapePressed>
 					<OnEditFocusLost>
-						this:HighlightText(0, 0);
+						self:HighlightText(0, 0);
 					</OnEditFocusLost>
 					<OnTextChanged>
 						if self:GetParent():GetParent().tabDef.name ~= self:GetText() then

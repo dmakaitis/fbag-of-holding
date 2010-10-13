@@ -5,7 +5,7 @@
 	<GameTooltip name="FBoH_ItemTooltip" frameStrata="LOW" inherits="GameTooltipTemplate">
 		<Scripts>
 			<OnLoad>
-				this:SetOwner(WorldFrame, "ANCHOR_NONE");
+				self:SetOwner(WorldFrame, "ANCHOR_NONE");
 			</OnLoad>
 		</Scripts>
 	</GameTooltip>

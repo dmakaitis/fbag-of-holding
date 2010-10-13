@@ -1,4 +1,4 @@
-## Interface: 30300
+## Interface: 40000
 ## Author: Feithar
 ## Title: Feithar's Bag of Holding
 ## Version: 0.9
