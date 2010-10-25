@@ -124,7 +124,7 @@
 			<OnClick>
 				PlaySound("UChatScrollButton");
 				self.tabModel.viewModel:SelectTab(self.tabModel.tabIndex);
-				if arg1 == "RightButton" then
+				if button == "RightButton" then
 					self:OpenMenu()
 				end
 			</OnClick>

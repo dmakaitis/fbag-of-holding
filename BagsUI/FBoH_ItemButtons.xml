@@ -39,9 +39,9 @@
 			</OnLeave>
 			<OnClick>
 				if ( IsModifiedClick() ) then
-					self:DoModifiedClick(arg1);
+					self:DoModifiedClick(button);
 				else
-					self:DoClick(arg1);
+					self:DoClick(button);
 				end
 			</OnClick>
             <OnDragStart>
@@ -75,9 +75,9 @@
 			</OnLeave>
 			<OnClick>
 				if ( IsModifiedClick() ) then
-					self:DoModifiedClick(arg1);
+					self:DoModifiedClick(button);
 				else
---					self:DoClick(arg1);
+--					self:DoClick(button);
 				end
 			</OnClick>
             <OnDragStart>
@@ -106,7 +106,7 @@
 			</OnLeave>
 			<OnClick>
 				if ( IsModifiedClick() ) then
-					self:DoModifiedClick(arg1);
+					self:DoModifiedClick(button);
 				end
 			</OnClick>
 		</Scripts>		
@@ -128,7 +128,7 @@
 				ResetCursor();
 			</OnLeave>
 			<OnClick>
-				self:DoClick(arg1);
+				self:DoClick(button);
 			</OnClick>
             <OnReceiveDrag>
 				self:DoClick("LeftButton");

@@ -138,8 +138,8 @@
 			</OnLoad>
 			<OnSizeChanged>
 				-- arg1 = new width, arg2 = new height
-				self.currentWidth = arg1;
-				self:OnHeightChanged(arg2);
+				self.currentWidth = width;
+				self:OnHeightChanged(height);
 			</OnSizeChanged>
 		</Scripts>
 	</Frame>
