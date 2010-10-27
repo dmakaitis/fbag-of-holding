@@ -321,7 +321,18 @@ end
 
 function FBoH_BankItemButton_DoModifiedClick(self, button)
 	_SafeCall(function()
-		HandleModifiedItemClick(self.item.itemLink);
+		if FBoH:IsBankOpen() == false then return end;
+
+		if(HandleModifiedItemClick(GetContainerItemLink(self.containerID, self.slotID))) then
+			return;
+		end
+		if(IsModifiedClick("SPLITSTACK")) then
+			local texture, itemCount, locked = GetContainerItemInfo(self.containerID, self.slotID);
+			if not locked then
+				OpenStackSplitFrame(itemCount, self, "BOTTOMLEFT", "TOPLEFT");
+			end
+			return;
+		end
 	end);
 end
 --[[
